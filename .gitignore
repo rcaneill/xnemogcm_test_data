@@ -7,3 +7,6 @@
 
 # Logs
 *.log
+
+# builds
+bld/
