@@ -1,0 +1,25 @@
+name: CI-build
+
+# Controls when the workflow will run
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup apptainer
+        uses: eWaterCycle/setup-apptainer@v2.0.0
+        
+      - name: build containers
+        run: make bld/containers/{3.6,4.0,4.2.0}/apptainer-nemo.sif
+
+      - name: run nemo and create test data
+        run: make all
