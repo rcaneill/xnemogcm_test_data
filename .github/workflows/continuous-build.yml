@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  build:
+  build_and_run:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
@@ -23,3 +23,18 @@ jobs:
 
       - name: run nemo and create test data
         run: make all
+
+        
+  build:
+    name: build-${{ matrix.version }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        version: ["3.6", "4.0", "4.2.0"]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup apptainer
+        uses: eWaterCycle/setup-apptainer@v2.0.0
+        
+      - name: build containers
+        run: make bld/containers/${{ matrix.version }}/apptainer-nemo.sif
