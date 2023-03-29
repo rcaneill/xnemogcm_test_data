@@ -25,9 +25,11 @@ jobs:
       - name: build containers
         run: make bld/containers/${{ matrix.version }}/apptainer-nemo.sif
       - uses: actions/cache@v3
+        env:
+          _PATH_container: bld/containers/${{ matrix.version }}/apptainer-nemo.sif
         with:
-          path: bld/containers/${{ matrix.version }}/apptainer-nemo.sif
-          key: build-${{ hashFiles(bld/containers/*/apptainer-nemo.sif) }}
+          path: ${{ env._PATH_container }}
+          key: build-${{ hashFiles(env._PATH_container) }}
   
   run:
     needs: build-${{ matrix.version }}
