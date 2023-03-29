@@ -107,3 +107,9 @@ $(foreach f,mesh_mask_1_file mesh_mask_multi_files domcfg_mesh_mask nemo surface
 )
 	echo $^
 
+
+.PHONY: all
+all/% :\
+$(foreach f,mesh_mask_1_file mesh_mask_multi_files domcfg_mesh_mask nemo surface_fields open_and_merge nemo_no_grid_in_filename,bld/data/%/$(f))
+	echo $^
+
