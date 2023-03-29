@@ -29,7 +29,7 @@ jobs:
       - uses: actions/cache@v3
         with:
           path: bld/containers/${{ matrix.version }}/apptainer-nemo.sif
-          key: build-${{ matrix.version }}-${{ hashFiles(bld/containers/$v/apptainer-nemo.sif) }}
+          key: build-$v-${{ hashFiles(bld/containers/$v/apptainer-nemo.sif) }}
   
   run:
     needs: build-${{ matrix.version }}
