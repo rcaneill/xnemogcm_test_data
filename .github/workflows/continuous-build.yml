@@ -29,10 +29,10 @@ jobs:
           _PATH_container: bld/containers/${{ matrix.version }}/apptainer-nemo.sif
         with:
           path: ${{ env._PATH_container }}
-          key: build-${{ hashFiles(env._PATH_container) }}
+          key: build-${{ matrix.version }}-${{ hashFiles(env._PATH_container) }}
   
   run:
-    needs: build-${{ matrix.version }}
+    needs: build
     name: run-${{ matrix.version }}
     runs-on: ubuntu-latest
     strategy:
@@ -43,8 +43,10 @@ jobs:
       - name: Setup apptainer
         uses: eWaterCycle/setup-apptainer@v2.0.0
       - uses: actions/cache@v3
+        env:
+          _PATH_container: bld/containers/${{ matrix.version }}/apptainer-nemo.sif
         with:
-          path: bld/containers/${{ matrix.version }}/apptainer-nemo.sif
-          key: build-${{ matrix.version }}-${{ hashFiles(bld/containers/*/apptainer-nemo.sif) }}
+          path: ${{ env._PATH_container }}
+          key: build-${{ matrix.version }}-${{ hashFiles(env._PATH_container) }}
       - name: run nemo and create test data
         run: make all/${{ matrix.version }}
