@@ -1,0 +1,161 @@
+BootStrap: docker
+From: debian:bullseye-20230320-slim
+
+%files
+    arch_xios /nemo/config/arch_xios
+    arch_nemo /nemo/config/arch_nemo
+
+%post
+    # install what is needed
+    apt -y update
+    apt -y install openmpi-bin libmpich-dev libopenmpi-dev gcc g++ gfortran subversion libcurl4-openssl-dev wget make m4 git liburi-perl libxml2-dev
+    # Create some environment variables
+    # directories
+    export WORKDIR=/nemo/sources
+    export INSTDIR=/nemo/installs
+    mkdir -p $WORKDIR
+    mkdir -p $INSTDIR
+    # compilers
+    export CC=/usr/bin/mpicc
+    export CXX=/usr/bin/mpicxx
+    export FC=/usr/bin/mpif90
+    export F77=/usr/bin/mpif77
+    # compiler flags (except for libraries)
+    export CFLAGS="-O3 -fPIC"
+    export CXXFLAGS="-O3 -fPIC"
+    export F90FLAGS="-O3 -fPIC"
+    export FCFLAGS="-O3 -fPIC"
+    export FFLAGS="-O3 -fPIC"
+    export LDFLAGS="-O3 -fPIC "
+    # FLAGS FOR F90  TEST-EXAMPLES
+    export FCFLAGS_f90="-O3 -fPIC "
+    
+%post
+    # Install zlib
+    cd $WORKDIR
+    mkdir -p ZLIB
+    cd ZLIB
+    LIB_VERSION="zlib-1.2.13"
+    LIB_FILE="${LIB_VERSION}.tar.gz"
+    wget https://www.zlib.net/${LIB_FILE}
+    tar xvfz $LIB_FILE
+    cd $LIB_VERSION
+    ./configure --prefix=$INSTDIR
+    make -j1
+    #make check
+    make install
+
+%post
+    # Install hdf5
+    cd $WORKDIR
+    mkdir -p HDF5
+    cd HDF5
+    LIB_VERSION="hdf5-1.10.5"
+    LIB_FILE="${LIB_VERSION}.tar.gz"
+    wget http://www.hdfgroup.org/ftp/HDF5/current/src/${LIB_FILE}
+    tar xvfz $LIB_FILE
+    cd $LIB_VERSION
+    export HDF5_Make_Ignore=yes
+    # Configure
+    ./configure --prefix=$INSTDIR \
+       	    --enable-fortran  --enable-parallel --enable-hl --enable-shared  \
+            --with-zlib=$INSTDIR
+    # Make and install
+    make -j1
+    #make check
+    make install
+
+%post
+    # install netcdf-c
+    cd $WORKDIR
+    mkdir -p NetCDF-c
+    cd NetCDF-c
+    LIB_VERSION="4.9.2"
+    LIB_FILE="v${LIB_VERSION}.tar.gz"
+    wget https://github.com/Unidata/netcdf-c/archive/${LIB_FILE}
+    tar xvfz $LIB_FILE
+    cd netcdf-c-${LIB_VERSION}
+    export CPPFLAGS="-I$INSTDIR/include -DpgiFortran"
+    export LDFLAGS="-Wl,-rpath,$INSTDIR/lib -L$INSTDIR/lib -lhdf5_hl -lhdf5"
+    export LIBS="-lmpi"
+    ./configure --prefix=$INSTDIR --enable-netcdf-4 --enable-shared \
+                --enable-parallel-tests
+    make -j1
+    #make check
+    make install
+
+%post
+    # Install netcdf-fortran
+    cd $WORKDIR
+    mkdir -p NetCDF-fortran
+    cd NetCDF-fortran
+    LIB_VERSION="4.6.0"
+    LIB_FILE="v${LIB_VERSION}.tar.gz"
+    wget https://github.com/Unidata/netcdf-fortran/archive/${LIB_FILE}
+    tar xvfz $LIB_FILE
+    cd netcdf-fortran-${LIB_VERSION}
+    export LD_LIBRARY_PATH=${NCDIR}/lib:${LD_LIBRARY_PATH}
+    export CPPFLAGS="-I$INSTDIR/include -DpgiFortran"
+    export LDFLAGS="-Wl,-rpath,$INSTDIR/lib -L$INSTDIR/lib -lnetcdf -lhdf5_hl -lhdf5 -lz -lcurl"
+    export LIBS="-lmpi"
+    ./configure --prefix=$INSTDIR \
+                --enable-shared --enable-parallel-tests \
+                --enable-parallel
+    make -j1
+    #make check
+    make install
+
+%post
+    # Install xios
+    cd $WORKDIR
+    mkdir -p XIOS
+    cd XIOS
+    svn co -r 2481 http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5 xios-2.5
+    cd xios-2.5
+    # arch files
+    cp /nemo/config/arch_xios/arch-GCC_LINUX_local.env arch/arch-GCC_LINUX.env
+    cp /nemo/config/arch_xios/arch-GCC_LINUX_local.path arch/arch-GCC_LINUX.path
+    cp /nemo/config/arch_xios/arch-GCC_LINUX_local.fcm arch/arch-GCC_LINUX.fcm
+    ./make_xios --arch GCC_LINUX --job 1
+    cd ..
+    ln -s xios-2.5 xios
+
+%post
+    # Install nemo
+    cd $WORKDIR
+    mkdir -p NEMO
+    cd NEMO
+    svn co https://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/release-4.0 NEMOGCM
+    cd NEMOGCM
+    cp /nemo/config/arch_nemo/arch-local.fcm arch/arch-local.fcm
+    # Create GYRE config
+    cd cfgs
+    cp -r GYRE_PISCES/ GYRE
+    echo "GYRE                 OCE" >> ref_cfgs.txt
+    cd GYRE
+    rm *.fcm
+    echo "bld::tool::fppkeys   key_mpp_mpi key_iomput" >> cpp_GYRE.fcm
+    cd EXPREF
+    rm namelist_top* namelist_pisces* field_def_nemo-pisces.xml
+    cd ../../..
+    # Compile
+    ./makenemo -m local -r GYRE -n GYRE_xnemogcm -j 1
+
+%runscript
+    # This is where we can run nemo
+    # The container will need to be ran with bind option
+    # --bind /path/where/you/want/to/get/output:/nemo/output
+    # --bind /path/where/there/are/the/input:/nemo/input
+    # The input files found in /nemo/input will be copied into the EXP00 folder
+    # prepare and run
+    for NPROC in 1 4
+    do
+        cd /nemo/output
+        cp -rL ../sources/NEMO/NEMOGCM/cfgs/GYRE_xnemogcm/EXP00 EXP_${NPROC}_proc
+        cd EXP_${NPROC}_proc
+        cp /nemo/sources/XIOS/xios/bin/xios_server.exe .
+        # Replace input files given by user
+        cp /nemo/input/* .
+        # Run nemo
+        mpirun -n ${NPROC} ./nemo : -n 1 ./xios_server.exe
+    done

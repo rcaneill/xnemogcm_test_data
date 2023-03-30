@@ -1,0 +1,12 @@
+# emacs files
+\#*\#
+*~
+
+# Apptainer container files
+*.sif
+
+# Logs
+*.log
+
+# builds
+bld/
