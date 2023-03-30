@@ -2,6 +2,19 @@ SHELL := /bin/bash
 # Necessary otherwise make removes intermediates files
 .SECONDARY:
 
+.PHONY: all
+all : $(foreach v,3.6 4.0 4.2.0,\
+$(foreach f,mesh_mask_1_file mesh_mask_multi_files domcfg_mesh_mask nemo surface_fields open_and_merge nemo_no_grid_in_filename,bld/data/$(v)/$(f))\
+)
+	echo $^
+
+
+all/% :\
+$(foreach f,mesh_mask_1_file mesh_mask_multi_files domcfg_mesh_mask nemo surface_fields open_and_merge nemo_no_grid_in_filename,bld/data/%/$(f))
+	echo $^
+
+
+
 # Build container
 bld/containers/%/apptainer-nemo.sif : src/%/apptainer-nemo.def src/%/arch_xios src/%/arch_nemo
 	mkdir -p $(@D)
@@ -100,16 +113,4 @@ $(foreach point,T U V W,bld/data/%/runs/EXP_1_proc/GYRE_1y_00010101_00011230_gri
 	ln -sr $$f $@/$${f: -4} ; \
 	done
 
-
-.PHONY: all
-all : $(foreach v,3.6 4.0 4.2.0,\
-$(foreach f,mesh_mask_1_file mesh_mask_multi_files domcfg_mesh_mask nemo surface_fields open_and_merge nemo_no_grid_in_filename,bld/data/$(v)/$(f))\
-)
-	echo $^
-
-
-.PHONY: all
-all/% :\
-$(foreach f,mesh_mask_1_file mesh_mask_multi_files domcfg_mesh_mask nemo surface_fields open_and_merge nemo_no_grid_in_filename,bld/data/%/$(f))
-	echo $^
 
