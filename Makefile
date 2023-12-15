@@ -3,7 +3,7 @@ SHELL := /bin/bash
 .SECONDARY:
 
 .PHONY: all
-all : $(foreach v,3.6 4.0 4.2.0,\
+all : $(foreach v,3.6 4.0 4.2.0 4.2.2,\
 $(foreach f,mesh_mask_1_file mesh_mask_multi_files domcfg_mesh_mask nemo surface_fields open_and_merge nemo_no_grid_in_filename,bld/data/$(v)/$(f))\
 )
 	echo $^
