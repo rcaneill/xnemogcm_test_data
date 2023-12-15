@@ -37,7 +37,7 @@ From: debian:bullseye-20230320-slim
     cd ZLIB
     LIB_VERSION="zlib-1.2.13"
     LIB_FILE="${LIB_VERSION}.tar.gz"
-    wget https://www.zlib.net/${LIB_FILE}
+    wget https://www.zlib.net/fossils/${LIB_FILE}
     tar xvfz $LIB_FILE
     cd $LIB_VERSION
     ./configure --prefix=$INSTDIR
