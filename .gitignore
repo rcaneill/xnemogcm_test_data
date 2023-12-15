@@ -9,4 +9,4 @@
 *.log
 
 # builds
-bld/
+bld*
