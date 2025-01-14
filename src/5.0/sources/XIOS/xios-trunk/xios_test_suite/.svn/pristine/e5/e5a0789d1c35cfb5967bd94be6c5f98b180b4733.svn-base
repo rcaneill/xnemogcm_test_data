@@ -1,0 +1,3 @@
+#!/bin/bash
+
+copy_to_thredds generate_compile_table.js  generate_test_table.js  graph.html  xios_report.html  xios-style.css

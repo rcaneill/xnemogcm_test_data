@@ -1,0 +1,11 @@
+NETCDF_INCDIR="-I${NETCDF_C_ROOT}/include -I${NETCDF_FORTRAN_ROOT}/include"
+NETCDF_LIBDIR="-L${NETCDF_C_ROOT}/lib     -L${NETCDF_FORTRAN_ROOT}/lib"
+NETCDF_LIB="-lnetcdf -lnetcdff"
+
+MPI_INCDIR=""
+MPI_LIBDIR=""
+MPI_LIB=""
+
+HDF5_INCDIR="-I${HDF5_ROOT}/include"
+HDF5_LIBDIR="-L${HDF5_ROOT}/lib"
+HDF5_LIB="-L${HDF5_ROOT}/lib -lhdf5_hl -lhdf5 -lz -lcurl"

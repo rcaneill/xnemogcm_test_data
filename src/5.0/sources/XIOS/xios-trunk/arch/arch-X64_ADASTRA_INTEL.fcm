@@ -1,0 +1,27 @@
+################################################################################
+###################                Projet XIOS               ###################
+################################################################################
+
+%CCOMPILER      mpicc
+%FCOMPILER      mpif90
+#%LINKER         mpif90 -nofor-main
+%LINKER         mpicc
+
+%BASE_CFLAGS    -std=c++11 -D__XIOS_EXCEPTION
+%PROD_CFLAGS    -O3 -D BOOST_DISABLE_ASSERTS
+%DEV_CFLAGS     -g -traceback
+%DEBUG_CFLAGS   -DBZ_DEBUG -g -fbacktrace -fno-inline
+
+%BASE_FFLAGS    -D__NONE_
+#%BASE_FFLAGS    -D__NONE_ -fpscomp logical
+%PROD_FFLAGS    -O3
+%DEV_FFLAGS     -g -O2 -traceback
+%DEBUG_FFLAGS   -g
+
+%BASE_INC       -D__NONE__
+#%BASE_LD        -lstdc++
+%BASE_LD 	 -L/lus/home/softs/intel/oneapi/compiler/2022.1.0/linux/compiler/lib/intel64 -lifcoremt_pic -lintlc -lifcore -lsvml -limf -ldl -lpthread  -L/opt/cray/pe/mpich/8.1.26/ofi/intel/2022.1/lib -lmpi -lmpifort -lifport
+
+%CPP            mpicc -EP
+%FPP            cpp -P
+%MAKE           gmake

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+source ./load_env_local
+mkdir -p BUILD
+(cd COMPILE && ./compile_${xios_machine_name}_local)

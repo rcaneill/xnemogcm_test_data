@@ -1,0 +1,199 @@
+body
+{
+    font-family: Helvetica, sans-serif;
+}
+
+nav
+{
+    width:300px;
+    vertical-align: top;
+}
+
+section
+{
+    clear: both;
+    margin-top:50px;
+    vertical-align: top;
+}
+
+a
+{
+    display:block;
+}
+
+caption
+{
+    font-size: 1.4em;
+    font-weight: bold;
+    caption-side: top;
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+
+footer
+{
+    background-color: rgb(189, 184, 184);
+    border-width: medium;
+    border-style: dashed;
+    border-radius: 10px;
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+}
+
+
+h1, h2
+{
+    text-align: left;
+}
+
+.dropbtn {
+    background-color:transparent;
+    border: none; 
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+  
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: white;
+    min-width: 320px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+    font-size: 1em;
+}
+  
+.dropdown-content a {
+    color: black;
+    padding: 5px 5px;
+    text-decoration: none;
+    display: block;
+}
+  
+.dropdown-content a:hover 
+{
+    background-color: #2e86c1;
+}
+    
+.dropdown:hover .dropbtn 
+{
+    background-color:#2e86c1;
+}
+
+.showit 
+{
+    display: block;
+}
+
+.compile_table
+{
+    margin-left: 60px;
+    margin-bottom: 30px;
+    margin-top: 30px;
+    /* border-collapse: collapse; */
+    /* border: solid 1px black; */
+}
+
+.compile_table td
+{
+    margin-left: 20px;
+    margin-bottom: 10px;
+    border: solid 2px white;
+    min-width: 150px;
+    text-align: center;
+}
+
+.compile_sub_table td
+{
+    border: solid 1px white;
+}
+
+.compile_sub_table
+{
+    border-collapse: collapse;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+
+}
+
+.test_table
+{
+    margin-left: 60px;
+    margin-bottom: 30px;
+    margin-top: 30px;
+    /* border-collapse: collapse; */
+}
+
+.test_table td
+{
+    margin-left: 20px;
+    margin-bottom: 10px;
+    border: solid 2px white;
+    text-align: center;
+}
+
+
+.test_sub_table
+{
+    border-collapse: collapse;
+    margin-bottom: 10px;
+    margin-top: 10px;
+    margin-left: 10px;
+    margin-right: 10px;
+}
+
+.test_sub_table td
+{
+    border: solid 1px white;
+    text-align: left;
+}
+
+.test_sub_table .build_level
+{
+    background-color: #96cdff;
+}
+
+
+.test_sub_table .algo_level
+{
+    background-color: #a1d3ff;
+}
+
+.test_sub_table .config_level
+{
+    background-color: #b3dafd;
+}
+
+.test_sub_table .file_level
+{
+    background-color: #c2e1fd;
+}
+
+
+  
+.compile_table_row.hide
+{
+    display: none;
+}
+
+.compile_table_row.show
+{
+    display: "table-row";
+}
+
+.test_table_row.hide
+{
+    display: none;
+}
+
+.test_table_row.show
+{
+    display: "table-row";
+}

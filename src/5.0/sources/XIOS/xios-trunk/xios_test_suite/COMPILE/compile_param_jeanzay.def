@@ -1,0 +1,9 @@
+arch = X64_JEANZAY
+mode = prod, debug
+
+#arch = X64_JEANZAY_Intel, X64_JEANZAY_gcc,  X64_JEANZAY_pgi
+#    mode = prod, debug
+#    run_test=false
+#arch = X64_Jeanzai_intel
+#     mode = prod
+#     run_test=yes

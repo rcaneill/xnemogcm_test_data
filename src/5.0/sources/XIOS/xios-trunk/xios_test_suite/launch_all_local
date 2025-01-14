@@ -1,0 +1,5 @@
+#!/bin/bash
+
+source ./load_env_local
+./launch_compile_local
+./launch_test_suite_local

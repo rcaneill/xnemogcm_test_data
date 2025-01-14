@@ -1,0 +1,10 @@
+module load subversion
+module load cmake
+
+CHMOD() { setfacl -R -m u::rwx,u:rpsl565:rwx,u:rpsl954:rwx,u:rgzi016:rwx,g::r-x,o::r-x,m::rwx "$@" ;}
+export -f CHMOD
+
+export xios_full_machine_name="Jean-Zay"
+export xios_test_suite_repository=${WORK}/XIOS_TEST_SUITE_REPOSITORY
+export xios_reference_dir=${WORK}
+mkdir -p $xios_test_suite_repository ; CHMOD $xios_test_suite_repository

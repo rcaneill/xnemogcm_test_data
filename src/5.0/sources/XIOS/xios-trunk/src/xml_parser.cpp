@@ -1,0 +1,150 @@
+#include "xml_parser.hpp"
+
+#include "context.hpp"
+
+#include "attribute_template.hpp"
+#include "object_template.hpp"
+#include "group_template.hpp"
+#include "string_tools.hpp"
+
+namespace xios
+{
+   namespace xml
+   {
+      
+      string CXMLParser::currentIncludePath_="." ;
+
+      string CXMLParser::updateIncludePath(const string& filePath)
+      {
+        string path = strTrim(filePath) ;
+        vector<string> match=splitRegex(path+'/',"/" ) ;
+
+        // check if empty path
+        bool isEmpty=true ;
+        for(auto& m : match) 
+          if (!m.empty())
+          {
+            isEmpty=false ;
+            break ;
+          }
+
+        if (isEmpty) ERROR("string CXMLParser::updatePath(const string& filePath)",
+                     << "File path to include an new XML is empty :'"<<filePath<<"'" );
+
+        if (match.back().empty()) ERROR("string CXMLParser::updatePath(const string& filePath)",
+                     << "File path to include an new XML must not be a directory but a file :'"<<filePath<<"'" );
+        bool isAbsolutePath = match.front().empty() ;
+        
+        if (isAbsolutePath) currentIncludePath_="" ;
+        for(int i=0; i<match.size()-1; ++i) if (! match[i].empty()) currentIncludePath_ = currentIncludePath_ + "/" + match[i] ;
+        
+        string finalPath = currentIncludePath_ + "/" + match.back() ;
+
+        return finalPath ;
+      }
+
+
+      /// ////////////////////// Définitions ////////////////////// ///
+
+      void CXMLParser::ParseFile(const StdString & filename, const std::set<StdString>& parseContextList)
+      TRY
+      {
+         StdIFStream ifs ( filename.c_str() , StdIFStream::in );
+         if ( (ifs.rdstate() & std::ifstream::failbit ) != 0 )
+           ERROR("void CXMLParser::ParseFile(const StdString & filename)",
+                  <<endl<< "Can not open <"<<filename<<"> file" );
+
+         CXMLParser::ParseStream(ifs, filename, parseContextList);
+      }
+      CATCH
+
+      void CXMLParser::ParseString(const StdString & xmlContent)
+      {
+         StdIStringStream iss ( xmlContent /*, StdIStringStream::in*/ );
+         std::set<StdString> contxtList;
+         CXMLParser::ParseStream(iss,"string", contxtList);
+      }
+
+      void CXMLParser::ParseStream(StdIStream & stream, const string& fluxId, const std::set<StdString>& parseContextList)
+      {
+         if (!stream.good())
+            ERROR("CXMLParser::ParseStream(const StdIStream & stream)",
+                  << "Bad xml stream !");
+         StdOStringStream oss;
+         while(!stream.eof() && !stream.fail ()) oss.put(stream.get());
+         const StdString xmlcontent( oss.str(), 0, oss.str().size()-1 );
+         try
+         {
+            rapidxml::xml_document<char> doc;
+            doc.parse<0>(const_cast<char*>(xmlcontent.c_str()));
+
+            CXMLNode node(doc.first_node());
+            THashAttributes attributes;
+
+            if (node.getElementName().compare(CXMLNode::GetRootName()) != 0)
+               ERROR("CXMLParser::ParseStream(StdIStream & stream)",
+                     << "Root element should be named simulation (actual = \'"
+                     << node.getElementName() << "\')!");
+            try
+            {
+              CContextGroup* rootContext = CContext::getRoot() ;
+              rootContext->parse(node, true, parseContextList) ;
+            }
+            catch(CException& e)
+            {
+              CException::StackInfo stk;
+              stk.info.append("Exception occurred while parsing XML file \"");
+              stk.info.append(attributes["src"]);
+              stk.info.append("\".\n");
+              stk.file = FILE_NAME;
+              stk.function = FUNCTION_NAME;
+              stk.line = __LINE__;
+              e.stack.push_back(stk);
+              if (CXios::xiosStack)
+                throw;
+             else
+               throw 0;
+            }
+            catch(...)
+            {
+              CException exc;
+              CException::StackInfo stk;
+              stk.info.append("Exception occurred while parsing XML file \"");
+              stk.info.append(attributes["src"]);
+              stk.info.append("\".\n");
+              stk.file = FILE_NAME;
+              stk.function = FUNCTION_NAME;
+              stk.line = __LINE__;
+              exc.stack.push_back(stk);
+              if (CXios::xiosStack)
+                throw exc;
+             else
+               throw 0;
+            }
+
+         }
+         catch (rapidxml::parse_error & exc)
+         {
+            const char* ptr = exc.where<char>() ;
+            const char* begin = xmlcontent.c_str() ;
+            const char* content=oss.str().c_str() ;
+            size_t pos=ptr-begin ;
+            int lineNumber = 1 ;
+            int columnNumber = 0 ;
+            const char* line;
+            const char* endLine;
+
+            for(const char* i=content;i<content+pos; ++i, ++columnNumber) if (*i=='\n') { lineNumber++ ; line=i ; columnNumber=0 ;}
+            for(endLine=content+pos; *endLine!='\n' && *endLine!='\0' ; ++endLine) ;
+            string strLine(line,endLine-line) ;
+
+            ERROR("CXMLParser::ParseStream(StdIStream & stream)", << endl
+                  << "Error is occuring when parsing XML flux from <"<<fluxId<<"> at character "<< pos<<" line "<<lineNumber<<" column "<< columnNumber<< endl
+                  << strLine<<endl
+                  << string(columnNumber-1,'x')<<'^'<<endl)
+//                  <<" Error : " << exc.what() )
+         }
+      }
+
+   }// namespace xml
+} // namespace xios
