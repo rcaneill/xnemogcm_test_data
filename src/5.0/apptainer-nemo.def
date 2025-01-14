@@ -128,5 +128,5 @@ From: debian:bookworm-20241223-slim
         # Replace input files given by user
         cp /nemo/input/* .
         # Run nemo
-        mpirun -n ${NPROC} ./nemo : -n 1 ./xios_server.exe
+        mpirun -n ${NPROC} ./nemo
     done
