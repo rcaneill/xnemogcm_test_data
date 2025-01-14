@@ -49,8 +49,6 @@
 !-----------------------------------------------------------------------
 &namdom        !   time and space domain
 !-----------------------------------------------------------------------
-   ln_linssh   = .false.    !  =T  linear free surface  ==>>  model level are fixed in time
-   !
    rn_Dt      = 7200.     !  time step for the dynamics
    ln_meshmask = .true.   !  =T create a mesh file
 /
