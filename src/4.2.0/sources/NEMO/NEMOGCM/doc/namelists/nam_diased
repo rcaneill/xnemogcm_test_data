@@ -1,0 +1,30 @@
+!-----------------------------------------------------------------------
+&nam_diased     !  Diagnostic arrays
+!-----------------------------------------------------------------------
+!
+   seddiag3d(1)   = 'SedpH      ' , 'pH                                     ',  '-      '
+   seddiag3d(2)   = 'SedCO3por  ' , 'Dissolved CO3 concentration            ',  'mol/L'
+   seddiag3d(3)   = 'SaturCO3   ' , 'CO3 saturation                         ',  '-'
+   seddiag2d(1)   = 'FlxO2      ' , 'Dissolved Oxygen Flux                  ',  'mol/L'
+   seddiag2d(2)   = 'FlxNO3     ' , 'Nitrates flux                          ',  'mol/cm2/s'
+   seddiag2d(3)   = 'FlxPO4     ' , 'Phosphate flux                         ',  'mol/cm2/s'
+   seddiag2d(4)   = 'FlxNH4     ' , 'Total Ammonium flux                    ',  'mol/cm2/s'
+   seddiag2d(5)   = 'FlxH2S     ' , 'Total H2S flux                         ',  'mol/cm2/s'
+   seddiag2d(6)   = 'FlxSO4     ' , 'Total SO4 flux                         ',  'mol/cm2/s'
+   seddiag2d(7)   = 'FlxFe2     ' , 'Total Fe2+ flux                        ',  'mol/cm2/s'
+   seddiag2d(8)   = 'FlxAlkalini' , 'Total Alkalinity flux                  ',  'mol/cm2/s'
+   seddiag2d(9)   = 'FlxLig     ' , 'Total Ligand flux                      ',  'mol/cm2/s'
+   seddiag2d(10)  = 'FlxDIC     ' , 'Dissolved inorganic carbon flux        ',  'mol/cm2/s'
+   seddiag2d(11)  = 'FlxSi      ' , 'Silicate flux                          ',  'mol/cm2/s'
+   seddiag2d(12)  = 'FlxFeO     ' , 'FeO burial flux                        ',  'mol/cm2/s'
+   seddiag2d(13)  = 'FlxFeS     ' , 'FeS burial flux                        ',  'mol/cm2/s'
+   seddiag2d(14)  = 'FlxPOC     ' , 'POC burial flux                        ',  'mol/cm2/s'
+   seddiag2d(15)  = 'FlxPOS     ' , 'POS burial flux                        ',  'mol/cm2/s'
+   seddiag2d(16)  = 'FlxPOR     ' , 'POR burial flux                        ',  'mol/cm2/s'
+   seddiag2d(17)  = 'FlxCaCO3   ' , 'Calcite burial flux                    ',  'mol/cm2/s'
+   seddiag2d(18)  = 'FlxBSi     ' , 'BSi burial flux                        ',  'mol/cm2/s'
+   seddiag2d(19)  = 'FlxClay    ' , 'Clay burial flux                       ',  'mol/cm2/s'
+   seddiag2d(20)  = 'Flxtot     ' , 'Total burial flux                      ',  'mol/cm2/s'
+   seddiag2d(21)  = 'dzdep      ' , 'Sedimentation rate                     ',  'cm/s'
+   seddiag2d(22)  = 'Rstepros   ' , 'Number of iterations                   ',  '-'
+/

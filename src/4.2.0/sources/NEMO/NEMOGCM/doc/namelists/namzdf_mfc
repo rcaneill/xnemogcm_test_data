@@ -1,0 +1,11 @@
+!-----------------------------------------------------------------------
+&namzdf_mfc     !   Mass Flux Convection
+!-----------------------------------------------------------------------
+   ln_edmfuv  = .false.        ! Activate on velocity fields (Not available yet)
+   rn_cemf    =  1.            ! entrain/detrain coef. (<0 => cte; >0 % depending on dW/dz
+   rn_cwmf    = -0.            ! entrain/detrain coef. (<0 => cte; >0 % depending on dW/dz
+   rn_cent    = 2.e-5          ! entrain of convective area
+   rn_cdet    = 3.e-5          ! detrain of convective area 
+   rn_cap     = 0.9            ! Coef. for CAP estimation
+   App_max    = 0.1            ! Maximum convection area (% of the cell)
+/

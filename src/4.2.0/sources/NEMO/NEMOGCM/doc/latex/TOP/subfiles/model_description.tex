@@ -1,0 +1,806 @@
+\documentclass[../main/TOP_manual]{subfiles}
+
+\begin{document}
+
+\newcommand{\cd}{\mathrm{CO_2}}
+\newcommand{\Ct}{\mathrm{C_T}}
+\newcommand{\pacd}{\mathrm{p^a_{CO_2}}}
+\newcommand{\cq}{\mathrm{^{14}C}}
+\newcommand{\Dcq}{\Delta ^{14}\mathrm{C}}
+\newcommand{\Rq}{\mathrm{^{14}{R}}}
+
+\chapter{Model Description}
+\label{chap:ModDes}
+%\chaptertoc
+
+\section{The transport-reaction equation}
+\label{sec:Bas}
+
+The time evolution of any passive tracer $C$ is given by the transport equation, which is similar to that of active tracer - temperature or salinity :
+
+\begin{equation}
+\frac{\partial C}{\partial t} = {S(C)} -  \frac{1}{b_t} \left[   \frac{\partial e_{2u}\,e_{3u} \;  u\, C}{\partial i} +   \frac{\partial e_{1v}\,e_{3v} \;  uv, C}{\partial i}  \right] + \frac{1}{e_{3t}} \frac{\partial w\, C}{\partial k} + D^{lC} + D^{vC}
+\label{Eq_tracer}
+\end{equation}
+
+where expressions of $D^{lC}$ and $D^{vC}$ depend on the choice for the lateral and vertical subgrid scale parameterizations (see sections 4.2 and 4.3 in NEMO manual).
+
+{S(C)}, the first term on the right hand side of \autoref{Eq_tracer}, is the SMS - Sources Minus Sinks - inherent to the tracer.
+In the case of a biological tracer such as phytoplankton, {S(C)} is the balance between phytoplankton growth and its loss through mortality and grazing.
+In the case of a tracer comprising carbon,  {S(C)} accounts for gas exchange, river discharge, flux to the sediments, gravitational sinking and other biogeochemical processes.
+In the case of a radioactive tracer, {S(C)} is simply the loss due to radioactive decay.
+
+The second term (within brackets) represents the advection of the tracer in three dimensions.
+It can be interpreted as the budget between the incoming and outgoing tracer fluxes in a volume $T$-cells $b_t= e_{1t}\,e_{2t}\,e_{3t}$
+
+The third term represents the change due to lateral diffusion.
+
+The fourth term denotes the change due to vertical diffusion, parameterized as eddy diffusion to represent vertical turbulent fluxes :
+
+\begin{equation}
+D^{vC} =  \frac{1}{e_{3t}} \frac{\partial}{\partial k} \left[  A^{vT} \frac{\partial C}{\partial k} \right]
+\label{Eq_trczdf}
+\end{equation}
+
+where $A^{vT}$ is the vertical eddy diffusivity coefficient of active tracers.
+
+\section{Physical transport component (TRP)}
+
+The passive tracer transport component shares the same advection/diffusion routines with the dynamics, with specific treatment of some features like the damping or the positivity of passive tracers concentrations.
+
+\subsection{Advection}
+
+The advection schemes used for the passive tracers are the same as those used for $T$ and $S$. They are described in section 4.1 of the NEMO manual.
+The choice of an advection scheme can be selected independently and can differ from the ones used for active tracers.
+This choice is made in \textit{namelist\_top} (ref or cfg) in the namelist block \textit{namtrc\_adv}, by setting to \textit{true} one and only one of the logicals \textit{ln\_trcadv\_xxx}, as it is done for the active tracers counterparts.
+
+Note that Centred (cen), Flux Corrected Transport (fct), Upstream-Biased (ubs), and QuiCKest (qck) parameterizations are not \textit{positive} schemes meaning that negative values can appear in an initially strictly positive tracer field which is advected, implying that artificial extrema are permitted. Their use is not recommended for passive tracers.
+
+%------------------------------------------namtrc_adv----------------------------------------------------
+\nlst{namtrc_adv}
+%--------------------------------------------------------------------------------------------------------
+
+\subsection{Lateral diffusion}
+
+After NEMO v4.0, the lateral diffusion of passive tracers uses exactly the same form of active tracers, meaning that the numerical scheme is inherited from the physical setup and forced to be the same.
+However the passive tracer mixing coefficient can be chosen as a multiple of the active ones by changing the value of \textit{rn\_ldf\_multi} in namelist \textit{namtrc\_ldf}.
+The choice of the numerical scheme is then set in the \forcode{&namtra_ldf} namelist section for the dynamic described in section 4.2 of NEMO manual.
+
+\textit{rn\_fact\_lap} is a factor used to increase zonal equatorial diffusion for depths beyond 200 m. It can be useful to achieve a better representation of Oxygen Minimum Zone (OMZ) in some biogeochemical models, especially at coarse resolution \citep{getzlaff_2013}.
+
+%------------------------------------------namtrc_ldf----------------------------------------------------
+\nlst{namtrc_ldf}
+%--------------------------------------------------------------------------------------------------------
+
+%-----------------The code allows also to increase zonal equatorial diffusion for passive tracers by introducing an enhanced zonal diffusivity coefficent in the equatorial domain which can be defined by the equation below :
+%-----------------\begin{equation} \label{eq:traqsr_iradiance}
+%-----------------Aht  = Aht *  rn_fact_lap * \exp( - \max( 0., z -1000  ) / 1000}  \quad \text{for $L=1$ to $N$}
+%-----------------\end{equation}
+
+\subsection{Vertical sinking of particles}
+
+The module \textit{trc\_sink} computes the vertical flux of tracers that undergo to gravitational sinking (e.g., particulated matter). It also offers a temporary solution for the problem that may arise in specific situation where the CFL criterion is broken for vertical sedimentation of particles. To avoid this, a time splitting algorithm has been coded. The number of iterations (niter) necessary to respect the CFL criterion is dynamically computed. A specific maximum number of iterations (\textit{nitermax}) can be specified in the namelist. This allows to avoid a very large number of iterations when explicit free surface is used, for instance. If niter is larger than the prescribed nitermax, sinking speeds are clipped so that the CFL criterion is respected. The numerical scheme used to compute sedimentation is based on the MUSCL advection scheme.
+
+%------------------------------------------namtrc_bdy----------------------------------------------------
+\nlst{namtrc_snk}
+%--------------------------------------------------------------------------------------------------------
+
+\subsection{Tracer damping}
+
+The use of newtonian damping  to climatological fields or observations is also coded, sharing the same routine as that of active tracers.
+Boolean variables are defined in \textit{namelist\_top\_ref} to specify which tracers are affected by the restoring procedure.
+Options are defined through the \textit{\&namtrc\_dmp} namelist variables.
+The restoring term is added when the namelist parameter \textit{ln\_trcdmp} is set to \textit{true}.
+The restoring coefficient is a three-dimensional array read in a file, whose name is specified by the namelist variable \textit{cn\_resto\_tr}.
+This netcdf file can be generated using the \textit{DMP\_TOOLS} tool.
+
+%------------------------------------------namtrc_dmp----------------------------------------------------
+\nlst{namtrc_dmp}
+%--------------------------------------------------------------------------------------------------------
+
+\subsection{Tracer positivity}
+
+Some numerical schemes can generate negative values of passive tracers concentration, thus leading to unrealistic features.
+For example, isopycnal diffusion can created local extrema, meaning that negative concentrations are allowed to generate.
+
+The trcrad routine artificially corrects negative concentrations with a very crude solution that either sets negative concentrations to zero without adjusting the tracer budget (CFCs or C14 chemical coumpounds), or by removing negative concentrations while computing the corresponding tracer content that is added and then, adjusting the tracer concentration using a multiplicative factor so that the total tracer concentration is preserved (e.g., in PISCES).
+The treatment of negative concentrations is an option and can be selected in the namelist \textit{\&namtrc\_rad} by setting the parameter \textit{ln\_trcrad} to \textit{true}.
+
+%------------------------------------------namtrc_rad----------------------------------------------------
+\nlst{namtrc_rad}
+%--------------------------------------------------------------------------------------------------------
+
+\subsection{Offline transport mode}
+\label{Offline}
+
+Coupling passive tracers offline with NEMO requires a set of physical fields computed in a previous ocean simulation.
+Those fields are read in files and interpolated on-the-fly at each model time step.
+There are two sets of fields to perform offline simulations :
+
+\begin{itemize}
+        \item linear free surface ( ln\_linssh = .true. )  where the vertical scale factor is constant with time. At least, the following dynamical parameters should be absolutely passed
+        to transport : the effective ocean transport velocities (eulerian plus the eddy induced plus all others parameterizations), vertical diffusion coefficient and the freshwater flux
+.
+        %------------------------------------------namtrc_sms----------------------------------------------------
+        \nlstlocal{namdta_dyn_linssh}
+        %-----------------------------------------------------------------------------------------------------------
+        \item non linear free surface ( ln\_linssh = .false. or key\_qco ): the same fields than the ones in the linear free surface case. In addition, the horizontal divergence transport is needed to  recompute the time evolution of the sea surface heigth and the vertical scale factor and depth, and thus the time evolution of the vertical transport velocity.
+        %------------------------------------------namtrc_sms----------------------------------------------------
+        \nlstlocal{namdta_dyn_nolinssh}
+        %-----------------------------------------------------------------------------------------------------------
+\end{itemize}
+
+Additionally, temperature, salinity, and mixed layer depth are needed to compute slopes for isopycnal diffusion. Some ecosystem models like PISCES need sea ice concentration, short-wave radiation at the ocean surface, and wind speed (or at least, wind stress).
+
+The so-called offline mode is useful since it has lower computational costs for example to perform very longer simulations – about 3000 years - to reach equilibrium of CO$_{2}$ sinks for climate-carbon studies.
+
+The offline interface is located in the code repository : <repository>/src/OFF/. It is activated by adding the\textit{ key\_offline} CPP key to the CPP keys list.
+There are two specifics routines for the offline code :
+\begin{itemize}
+        \item dtadyn.F90 : this module reads and computes the dynamical fields at
+each model time-step
+        \item nemogcm.F90 : a degraded version of the main nemogcm.F90 code of NEMO to
+manage the time-stepping
+\end{itemize}
+
+\section{Forcing and Boundary conditions (BC)}
+
+\subsection{Tracer boundary conditions}
+
+In TOP, different types of boundary conditions can be specified for biogeochemical tracers. For every single variable, it is possible to define a field of surface boundary conditions, such as deposition of dust or nitrogen, which is then interpolated to the grid and timestep using the fld\_read function (see also Sec. 6.2 of NEMO manual). Through the same facility one can apply coastal inputs/loads (coastal boundary conditions) and to specify the treatment of lateral open boundary conditions. For the latter, the spatial interpolation functionality should not be activated. 
+
+The entire set of boundary conditions is activated with the paramter \forcode{ln_trcbc = .true.} in namtrc\_cfg (more details in Model Setup section).
+
+\subsection*{Surface and lateral boundaries}
+
+The namelist \textit{\&namtrc\_bc}  is in file \textit{namelist\_top\_cfg}  and allows to specify the name of the files, the frequency of the input and the time and space interpolation as done for any other field using the fld\_read interface.
+
+%------------------------------------------namtrc_bc----------------------------------------------------
+\nlst{namtrc_bc}
+%-------------------------------------------------------------------------------------------------------
+\subsection*{Lateral open boundaries}
+
+The BDY for passive tracer are set together with the physical oceanic variables (ln?bdy  =.true.). Boundary conditions are set in the structure used to define the passive tracer properties in the « obc » column. These boundary conditions are applied on the segments defined for the physical system, as described in the BDY section of NEMO manual.
+\begin{itemize}
+	\item cn\_trc\_dflt : the type of OBC applied to all the tracers
+	\item cn\_trc :  the boundary condition used for tracers with data file
+\end{itemize} 
+
+%------------------------------------------namtrc_bdy----------------------------------------------------
+\nlst{namtrc_bdy}
+%--------------------------------------------------------------------------------------------------------
+
+\subsection{Sea-ice interface}
+
+\subsection*{Sea-ice growth and melt effect}
+
+NEMO provides three options for the specification of tracer concentrations in sea ice: (-1) identical tracer concentrations in sea ice and ocean, which corresponds to no concentration/dilution effect upon ice growth and melt; (0) zero concentrations in sea ice, which gives the largest concentration-dilution effect upon ice growth and melt; (1) specified concentrations in sea ice, which gives a possibly more realistic effect of sea ice on tracers. Option (-1) and (0) work for all tracers, but (1) is currently only available for PISCES.
+
+%------------------------------------------namtrc_ice----------------------------------------------------
+\nlst{namtrc_ice}
+%--------------------------------------------------------------------------------------------------------
+
+\subsection*{Antarctic Ice Sheet tracer supply}
+
+The external input of biogeochemical tracers from the Antarctic Ice Sheet (AIS) is represented by associating a tracer content with the freshwater flux from icebergs and ice shelves \citep{person_sensitivity_2019}. This supply is currently implemented only for dissolved Fe (\autoref{img_icbisf}) and is effective in model configurations with south-extended grids (e.g., eORCA1 and eORCA025). As the ORCA2 grid does not extend south into Antarctica, the external source of tracers from the AIS cannot be enabled in this configuration. 
+
+For icebergs, a homogeneous distribution of biogeochemical tracers is applied from the surface to a depth that can be defined in \textit{\&namtrc\_ais}, with a default values of 120 m. It should be noted that the freshwater flux from icebergs affects only the ocean properties at the surface. For ice shelves, biogeochemical tracers follow the explicit or parameterized representation of freshwater flux distribution modeled by the NEMO physical core. The AIS tracer supply is activated by setting \textit{ln\_trcais} to \textit{true} in the \textit{\&namtrc} section.
+
+\begin{figure}[!h]
+	\centering
+	\includegraphics[width=0.80\textwidth]{ICB-ISF-Feflx}
+	\caption{Annual Fe fluxes from icebergs and ice shelves in the Southern Ocean.}
+	\label{img_icbisf}
+\end{figure}
+
+%------------------------------------------namtrc_ais----------------------------------------------------
+\nlst{namtrc_ais}
+%--------------------------------------------------------------------------------------------------------
+
+\subsection{Light vertical attenuation}
+
+A dedicated module (\forcode{trcopt}) allows to compute form the sea surface solar radiation the amount of light that penetrate into the ocean interior depending on the chlorophyll field. 
+The visible part of solar radiation is used to derive the photosynthetic available radiation (PAR) using a simplified version of the model by \cite{morel_1988}, as described in \cite{lengaigne_2007}. 
+
+In a nutshell, visible light is split into three wavebands (blue: 400–500 nm, green: 500–600 nm, red: 600–700 nm) and for each one the chlorophyll-dependent attenuation coefficients are fitted 
+to the coefficients computed from the full spectral model of \cite{morel_1988} (as modified in \cite{morel_2001}) assuming the same power-law expression. 
+
+The available light is then converted to PAR using a time-space constant value (\forcode{parlux}) or 
+by prescribing a spatially variable distribution of the fraction of the downwelling shortwave radiation (\forcode{sn_par}), 
+as specified with the logical parameter \forcode{ln_varpar}.
+
+The \forcode{light_loc} parameter allows to select the way that light is computed within the gridcell volume, namely as the mean value at the cell center (\forcode{'center'}) or integrated within the cell (\forcode{'integral'}).
+
+
+%--------------------------------------------namopt------------------------------------------------------
+\nlst{namopt}
+%--------------------------------------------------------------------------------------------------------
+
+
+\section{“Source minus Sinks” modules (SMS)}
+
+\label{SMS_models}
+%------------------------------------------namtrc_sms----------------------------------------------------
+%\nlst{namtrc}
+%--------------------------------------------------------------------------------------------------------
+
+\subsection{Ideal Age}
+%---------------------------------------------namage-----------------------------------------------------
+\nlst{namage}
+%--------------------------------------------------------------------------------------------------------
+
+An `ideal age' tracer is integrated online in TOP when \textit{ln\_age} = \texttt{.true.} in namelist \textit{namtrc}.
+This tracer marks the duration in units of years that fluid has spent in the interior of the ocean, insulated from exposure to the atmosphere  (\autoref{img_ageatl} and \autoref{img_age200}).
+
+\begin{figure}[!h]
+	\centering
+	\includegraphics[width=0.80\textwidth]{Age_Atl}
+	\caption{Vertical distribution of the Age tracer in the Atlantic Ocean at 35°W from a 62-year simulation.}
+	\label{img_ageatl}
+\end{figure}
+
+\begin{figure}[!h]
+	\centering
+	\includegraphics[width=0.80\textwidth]{Age_200m}
+	\caption{Age tracer at 200 m depth from a 62-year simulation.}
+	\label{img_age200}
+\end{figure}
+
+Thus, away from the surface for $z<-H_{\mathrm{Age}}$ where $H_{\mathrm{Age}}$ is specified by the \textit{namage} namelist variable \textit{rn\_age\_depth}, whose default value is 10~m, there is a source $\mathrm{SMS_{\mathrm{Age}}}$ of the age tracer $A$:
+
+\begin{equation}
+  \label{eq:TOP-age-interior}
+  \mathrm{SMS_{\mathrm{Age}}} = 1 \mathrm{yr}\;^{-1} = 1/T_{\mathrm{year}},
+\end{equation}
+
+where the length of the current year $T_{\mathrm{year}} = 86400*N_{\mathrm{days\;in\;current\; year}}\;\mathrm{s}$, where $N_{\mathrm{days\;in\;current\; year}}$ may be 366 or 365 depending on whether the current year is a leap year or not.
+Near the surface, for $z>-H_{\mathrm{Age}}$, ideal age is relaxed back to zero:
+
+\begin{equation}
+  \label{eq:TOP-age-surface}
+   \mathrm{SMS_{\mathrm{Age}}} = -\lambda_{\mathrm{Age}}A,
+\end{equation}
+
+where the relaxation rate $\lambda_{\mathrm{Age}}$  (units $\mathrm{s}\;^{-1}$) is specified by the \textit{namage} namelist variable \textit{rn\_age\_kill\_rate} and has a default value of 1/7200~s.
+Since this relaxation is applied explicitly, the relaxation rate should in principle not exceed $1/\Delta t$, where $\Delta t$ is the time step used to step forward passive tracers (2 * \textit{nn\_dttrc * rn\_rdt} when the default  leapfrog time-stepping scheme is employed).
+
+Currently the 1-dimensional reference depth of the grid boxes is used rather than the dynamically evolving depth to determine whether the age tracer is incremented or relaxed to zero.
+This means that the age tracer module only works correctly in z-coordinates.
+To ensure that the forcing is independent from the level thicknesses, where the tracer cell at level $k$ has its upper face $z=-depw(k)$ above the depth $-H_{\mathrm{Age}}$, but its lower face $z=-depw(k+1)$ below that depth, then the age source is computed as:
+
+\begin{equation}
+  \label{eq:TOP-age-mixed}
+   \mathrm{SMS_{\mathrm{Age}}} = -f_{\mathrm{kill}}\lambda_{\mathrm{Age}}A +f_{\mathrm{add}}/T_{\mathrm{year}} ,
+\end{equation}
+
+where
+
+\begin{align}
+    f_{\mathrm{kill}} &= e3t_k^{-1}(H_{\mathrm{Age}} - depw(k)) , \\
+    f_{\mathrm{add}} &= 1 - f_{\mathrm{kill}}.
+\end{align}
+
+This implementation was first used in the CORE-II intercomparison runs described in \citet{danabasoglu_2014}.
+
+\subsection{Inert carbons tracer}
+
+%------------------------------------------namage----------------------------------------------------
+%
+\nlst{namcfc}
+%----------------------------------------------------------------------------------------------------------
+
+Chlorofluorocarbons 11 and 12 (CFC-11 and CFC-12) and sulfur hexafluoride (SF6) are synthetic chemicals manufactured for industrial and domestic applications from the early 20th century onwards.
+CFC-11 (CCl$_{3}$F) is a volatile liquid at room temperature, and was widely used in refrigeration.
+CFC-12 (CCl$_{2}$F$_{2}$) is a gas at room temperature, and, like CFC-11, was widely used as a refrigerant,
+and additionally as an aerosol propellant.
+SF6 (SF$_{6}$) is also a gas at room temperature, with a range of applications based around its property as an excellent electrical insulator (often replacing more toxic alternatives).
+All three gases are relatively inert chemicals that are both non-toxic and non-flammable, and their wide use has led to their accumulation in the atmosphere.
+Large-scale production of CFC-11 and CFC-12 began in the 1930s, while production of SF6 began in the 1950s, and the time-histories of their atmospheric concentrations are shown in Figure \autoref{img_cfcatm}.
+As can be seen in the figure, while the concentration of SF6 continues to rise to the present day, concentrations of both CFC-11 and CFC-12 have levelled off and declined since around the 1990s.
+These declines have been driven by the Montreal Protocol (effective since August 1989), which has banned the production of CFC-11 and CFC-12 (as well as other CFCs) because of their role in the depletion of
+stratospheric ozone (O$_{3}$), critical in decreasing the flux of ultraviolet radiation to the Earth's surface. All three chemicals are also  significantly more potent greenhouse gases
+than CO$_{2}$ (especially SF6), although their relatively low atmospheric concentrations limit their role in climate change. \\
+
+The ocean is a notable sink for all three gases, and their relatively recent occurrence in the atmosphere, coupled to the ease of making high precision measurements of their dissolved concentrations, has made them
+valuable in oceanography. % for tracking interior ventilation and mixing.
+Because they only enter the ocean via surface air-sea exchange, and are almost completely chemically and biologically inert, their distribution within the ocean interior reveals ventilation of the latter via transport and mixing.
+Measuring the dissolved concentrations of these gases -- as well as the mixing ratios between them -- shows circulation pathways within the ocean as well as water mass ages (i.e. the time since has been last in contact with the
+atmosphere).
+This feature has made them valuable across a wide range of oceanographic problems.
+In ocean modelling, they can be used to evaluate the realism of the simulated circulation and
+ventilation patterns, which is key for understanding the behaviour of modelled marine biogeochemistry (e.g. \citep{dutay_2002,palmieri_2015}). \\
+
+Modelling these gases (henceforth CFCs) in NEMO is done within the passive tracer transport module, TOP, using the conservation state equation \autoref{Eq_tracer}
+
+Advection and diffusion of the CFCs in NEMO are calculated by the physical module, TRP,
+whereas sources and sinks are done by the CFC module within TOP.
+The only source of CFCs to the ocean is via air-sea gas exchange at its surface, and since CFCs are generally
+stable within the ocean, we assume that there are no sinks (i.e. no loss processes) within the ocean interior.
+Consequently, the sinks-minus-sources term for CFCs consists only of their air-sea fluxes, $F_{cfc}$, as
+described in the Ocean Model Inter-comparison Project (OMIP) protocol \citep{orr_2017}:
+
+% Because CFCs being stable in the ocean, we consider that there is no CFCs sink.
+% The only CFC source in the ocean is through the Air-Sea gas exchange at the surface.
+% These are calculated as air-sea fluxes (F$_{cfc}$), as described in the OMIP6 protocol \citep{artOMIP6}:
+
+\begin{eqnarray}
+F_{cfc} = K_{w} \, \cdot \, (C_{sat} - C_{surf}) \, \cdot  \, (1 - f_{i})
+\label{equ_CFC_flux}
+\end{eqnarray}
+
+Where $K_{w}$ is the piston velocity (in m~s$^{-1}$), as defined in Equation \autoref{equ_Kw};
+$C_{sat}$ is the saturation concentration of the CFC tracer, as defined in Equation \autoref{equ_C_sat};
+$C_{surf}$ is the local surface concentration of the CFC tracer within the model (in mol~m$^{-3}$);
+and $f_{i}$ is the fractional sea-ice cover of the local ocean (ranging between 0.0 for ice-free ocean,
+ to 1.0 for completely ice-covered ocean with no air-sea exchange).
+
+The saturation concentration of the CFC, $C_{sat}$, is calculated as follows:
+
+\begin{eqnarray}
+C_{sat} = Sol \, \cdot \, P_{cfc}
+\label{equ_C_sat}
+\end{eqnarray}
+
+Where $Sol$ is the gas solubility in mol~m$^{-3}$~pptv$^{-1}$, as defined in Equation \autoref{equ_Sol_CFC};
+and $P_{cfc}$ is the atmosphere concentration of the CFC (in parts per trillion by volume, pptv).
+This latter concentration is provided to the model by the historical time-series of \citet{bullister_2017}.
+This includes bulk atmospheric concentrations of the CFCs for both hemispheres -- this is necessary because of
+the geographical asymmetry in the production and release of CFCs to the atmosphere.
+Within the model, hemispheric concentrations are uniform, with the exception of the region between
+10$^{\circ}$N and 10$^{\circ}$ in which they are linearly interpolated.
+
+The piston velocity $K_{w}$ is a function of 10~m wind speed (in m~s$^{-1}$) and sea surface temperature,
+$T$ (in $^{\circ}$C), and is calculated here following \citet{wanninkhof_1992}:
+
+\begin{eqnarray}
+K_{w} = X_{conv} \, \cdot \, a \, \cdot \, u^2 \, \cdot \, \sqrt{ \frac{Sc(T)}{660} }
+\label{equ_Kw}
+\end{eqnarray}
+
+Where $X_{conv}$ = $\frac{0.01}{3600}$, a conversion factor that changes the piston velocity
+from cm~h$^{-1}$ to m~s$^{-1}$;
+$a$ is a constant re-estimated by \citet{wanninkhof_2014} to 0.251 (in $\frac{cm~h^{-1}}{(m~s^{-1})^{2}}$);
+and $u$ is the 10~m wind speed in m~s$^{-1}$ from either an atmosphere model or reanalysis atmospheric forcing.
+$Sc$ is the Schmidt number, and is calculated as follow, using coefficients from \citet{wanninkhof_2014} (see Table \autoref{tab_Sc}).
+
+\begin{eqnarray}
+Sc =  a0 + (a1 \, \cdot \, T) + (a2  \, \cdot \, T^2) + (a3 \, \cdot \, T^3) + (a4 \, \cdot \, T^4)
+\label{equ_Sc}
+\end{eqnarray}
+
+The solubility, $Sol$, used in Equation \autoref{equ_C_sat} is calculated in mol~l$^{-1}$~atm$^{-1}$,
+and is specific for each gas.
+It has been experimentally estimated by \citet{warner_1985} as a function of temperature and salinity:
+
+% AXY: this equation looks both weird and possibly wrong; it doesn't look like the one in the
+% code version that I have to hand, although this might be out of date; in any case, I'dag
+% strongly suggest avoiding the use of the \frac{}{100}, and instead substitute a term that is
+% "degrees Kelvin divided by 100" (which is weird in itself); and make this term use Celcius
+% so that you're not using T twice in different ways
+
+\begin{eqnarray}
+\ln{(Sol)} = a_1 + \frac{a_2}{ T_{X}} + a_3 \, \cdot \, \ln{ T_{X} } + a_4 \, \cdot \, T_{X}^2 + S \, \cdot \, ( b_1 + b_2 \, \cdot \, T_{X} + b_3 \, \cdot \, T_{X}^2 )
+\label{equ_Sol_CFC}
+\end{eqnarray}
+
+% \begin{eqnarray}
+% \ln{(Sol)} = a1 + a2 \, \frac{100}{T} + a3 \, \ln{ (\frac{T}{100}) } + a4 \, \frac{T}{100}^2 + S \, ( b1 + b2 \, \frac{T}{100} + b3 \, \frac{T}{100}^2 )
+% \label{equ_Sol_CFC}
+% \end{eqnarray}
+
+Where $T_{X}$ is $\frac{T + 273.16}{100}$, a function of temperature;
+and the $a_{x}$ and $b_{x}$ coefficients are specific for each gas (see Table \autoref{tab_ref_CFC}).
+This is then converted to mol~m$^{-3}$~pptv$^{-1}$ assuming a constant atmospheric surface pressure of 1~atm.
+The solubility of CFCs thus decreases with rising $T$ while being relatively insensitive to salinity changes.
+Consequently, this translates to a pattern of solubility where it is greatest in cold, polar regions (see Figure \autoref{img_cfcsol}).
+
+% AXY: not 100% sure about the units below; they might be in nanomol, or in seconds or years
+
+The standard outputs of the CFC module are seawater CFC concentrations (in mol~m$^{-3}$), the net air-sea flux (in mol~m$^{-2}$~d$^{-1}$) and the cumulative net air-sea flux (in mol~m$^{-2}$).
+Using XIOS, it is possible to obtain outputs such as the vertical integral of CFC concentrations (in mol~m$^{-2}$; see Figure \autoref{img_cfcinv}).
+This property, when divided by the surface CFC concentration, estimates the local penetration depth (in m) of the CFC.
+
+% AXY: not sure what's meant by some of the below; I've tried to reword it above
+% The standard outputs of the CFC module are the CFCs concentration in the sea water, and the records of the outputs-frequency-averaged as well as the total air-sea fluxes.
+% Using XIOS, it is also possible to ask for the CFCs vertical inventory in the output file (see Figure cfc inventory example ?).
+
+\subsubsection*{Notes}
+
+In comparison to the OMIP protocol, the CFC module in NEMO has several differences:
+
+% AXY: consider an itemized list here if you've got a list of differences
+
+For instance, C$_{sat}$ is calculated for a fixed surface pressure of 1atm. This may be corrected in a future version of the module.\\
+
+
+\begin{table}[!t]
+\caption{Coefficients for fit of the CFCs solubility (Eq. \autoref{equ_Sol_CFC}).}
+\vskip4mm
+\centering
+\begin{tabular}{l l l l l l l l l}
+\hline
+Gas   & & a1 & a2 & a3 & a4 & b1 & b2 & b3 \\
+\hline
+CFC-11 & & -218.0971 & 298.9702 & 113.8049 & -1.39165 & -0.143566  & 0.091015   & -0.0153924 \\
+CFC-12 & & -229.9261 & 319.6552 & 119.4471 & -1.39165 & -0.142382  & 0.091459   & -0.0157274 \\
+SF6    & & -80.0343  & 117.232  & 29.5817  & 0.0      & 0.0335183  & -0.0373942 & 0.00774862 \\
+\hline
+\end{tabular}
+\label{tab_ref_CFC}
+\end{table}
+
+
+\begin{table}[!t]
+\caption{Coefficients for fit of the CFCs Schmidt number (Eq. \autoref{equ_Sc}).}
+\vskip4mm
+\centering
+\begin{tabular}{l l l l l l l }
+\hline
+Gas  & & a0 & a1 & a2 & a3 & a4 \\
+\hline
+CFC-11 & & 3579.2  & -222.63 & 7.5749 & -0.14595 & 0.0011874   \\
+CFC-12 & & 3828.1  & -249.86 & 8.7603 & -0.1716  & 0.001408    \\
+SF6    & & 3177.5  & -200.57 & 6.8865 & -0.13335 & 0.0010877   \\
+\hline
+\end{tabular}
+\label{tab_Sc}
+\end{table}
+
+%% -----------------------------------
+%% -----------------------------------
+%% Figures %%
+
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=0.70\textwidth]{CFC-atm-evol}
+  \caption{Atmospheric CFC11, CFC12 and SF6 partial pressure evolution in both hemispheres.}
+\label{img_cfcatm}
+\end{figure}
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=0.70\textwidth]{CFC_solub}
+  \caption{CFC11 solubility in mol m$^{-3}$ pptv$^{-1}$, calculated from the World Ocean Atlas 2013 temperature and salinity annual climatology.}
+\label{img_cfcsol}
+\end{figure}
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=0.70\textwidth]{CFC_inventory}
+  \caption{CFC11 vertical inventory in $\mu$mol m$^{-2}$, from one of the UK Earth System Model 1 model (UKESM1 - which uses NEMO as ocean component, with TOP for the passive tracers) historical run at year 2000.}
+\label{img_cfcinv}
+\end{figure}
+
+
+\subsection{Radiocarbon}
+
+%------------------------------------------namage----------------------------------------------------
+%
+\nlst{namc14_fcg}
+\nlst{namc14_typ}
+\nlst{namc14_sbc}
+%----------------------------------------------------------------------------------------------------------
+
+The C14 package has been implemented in NEMO by Anne Mouchet $\Dcq$.
+It offers several possibilities: $\Dcq$ as a physical tracer of the ocean ventilation (natural $\cq$), assessment of bomb radiocarbon uptake, as well as transient studies of paleo-historical ocean radiocarbon distributions.
+
+\subsection*{Method}
+
+Let  $\Rq$ represent the ratio of $\cq$ atoms to the total number of carbon atoms in the sample, i.e. $\cq/\mathrm{C}$.
+Then, radiocarbon anomalies are reported as:
+
+\begin{equation}
+\Dcq = \left( \frac{\Rq}{\Rq_\mathrm{ref}} - 1 \right) 10^3, \label{eq:c14dcq}
+\end{equation}
+
+where $\Rq_{\textrm{ref}}$ is a reference ratio.
+For the purpose of ocean ventilation studies, $\Rq_{\textrm{ref}}$ is set to one.
+
+Here we adopt the approach of \cite{fiadeiro_1982} and \cite{toggweiler_1989a,toggweiler_1989b} in which  the ratio $\Rq$ is transported rather than the individual concentrations C and $\cq$.
+This approach calls for a strong assumption, i.e., that of a homogeneous and constant dissolved inorganic carbon (DIC) field \citep{toggweiler_1989a,mouchet_2013}.
+While in terms of
+oceanic $\Dcq$, it yields similar results to approaches involving carbonate chemistry, it underestimates the bomb radiocarbon inventory because it assumes a constant air-sea $\cd$ disequilibrium (Mouchet, 2013).
+Yet, field reconstructions of the ocean bomb $\cq$ inventory are also biased low \citep{naegler_2009} since they assume that the anthropogenic perturbation did not affect ocean DIC since the pre-bomb epoch.
+For these reasons, bomb $\cq$ inventories obtained with the present method are directly comparable to reconstructions based on field measurements.
+
+This simplified approach also neglects the effects of fractionation (e.g.,  air-sea exchange) and of biological processes.
+Previous studies by \cite{bacastow_1990} and \cite{joos_1997} resulted in nearly identical $\Dcq$ distributions among experiments considering biology or not.
+Since observed $\Rq$ ratios are corrected for the isotopic fractionation when converted to the standard $\Dcq$ notation \citep{stuiver_1977} the model results are directly comparable to observations.
+
+Therefore the simplified approach is justified for the purpose of assessing the circulation and ventilation of OGCMs.
+
+The equation governing the transport of $\Rq$  in the ocean is
+
+\begin{equation}
+\frac{\partial}{\partial t} {\Rq} =  - \bigtriangledown \cdot ( \mathbf{u} \Rq - \mathbf{K} \cdot \bigtriangledown \Rq )  - \lambda \Rq, \label{eq:quick}
+\end{equation}
+
+where $\lambda$ is the radiocarbon decay rate, ${\mathbf{u}}$ the 3-D velocity field, and $\mathbf{K}$ the diffusivity tensor.
+
+At the air-sea interface a Robin boundary condition \citep{haine_2006} is applied to \autoref{eq:quick}, i.e., the flux
+through the interface is proportional to the difference in the ratios between
+the ocean and the atmosphere
+
+\begin{equation}
+\mathcal{\!F} =  \kappa_{R}  (\Rq  - \Rq_{a} ), \label{eq:BCR}
+\end{equation}
+
+where $\mathcal{\!F}$ is the flux out of the ocean, and $\Rq_{a}$ is the atmospheric $\cq/\mathrm{C}$ ratio.
+The transfer velocity $ \kappa_{R} $ for the radiocarbon ratio in \autoref{eq:BCR} is computed as
+
+\begin{equation}
+ \kappa_{R} =  \frac{\kappa_{\cd} K_0}{\overline{\Ct}} \, \pacd   \label{eq:Rspeed}
+\end{equation}
+
+with $\kappa_{\cd}$ the carbon dioxide transfer or piston velocity, $K_0$ the $\cd$ solubility in seawater, $\pacd$ the atmospheric $\cd$ pressure at sea level, and $\overline{\Ct}$ the average sea-surface dissolved inorganic carbon concentration.
+
+The $\cd$ transfer velocity is based on the empirical formulation of \cite{wanninkhof_1992} with chemical enhancement \citep{wanninkhof_1996,wanninkhof_2014}.
+The original formulation is modified to account for the reduction of the  air-sea exchange rate in the presence of sea ice.
+Hence
+
+\begin{equation}
+\kappa_\cd=\left( K_W\,\mathrm{w}^2 + b  \right)\, (1-f_\mathrm{ice})\,\sqrt{660/Sc}, \label{eq:wanc14}
+\end{equation}
+with $\mathrm{w}$ the wind magnitude, $f_\mathrm{ice}$ the fractional ice cover, and $Sc$ the Schmidt number.
+$K_W$ in \autoref{eq:wanc14} is an empirical coefficient with dimension of an inverse velocity.
+The chemical enhancement term $b$ is represented as a function of temperature $T$ \citep{wanninkhof_1992}
+\begin{equation}
+b=2.5 ( 0.5246 + 0.016256 T+ 0.00049946  * T^2 ). \label{eq:wanchem}
+\end{equation}
+
+%We compare the results of equilibrium and transient experiments obtained with both methods in section \autoref{sec:UNDEU}.
+
+%
+\subsubsection{Model setup}
+\label{sec:setup}
+
+To activate the \texttt{C14} package, set the parameter \textit{ln\_c14} = \texttt{.true.} in namelist \textit{namtrc}.
+
+\paragraph{Parameters and formulations}
+\label{sec:param}
+ %
+The radiocarbon decay rate (\forcode{rlam14}; in \texttt{trcnam\_c14} module) is set to $\lambda=(1/8267)$ yr$^{-1}$ \citep{stuiver_1977}, which corresponds to a half-life of 5730 yr.\\[1pt]
+%
+The Schmidt number $Sc$, Eq. \autoref{eq:wanc14}, is calculated using the formulation of \cite{wanninkhof_2014}.
+The $\cd$ solubility $K_0$ in \autoref{eq:Rspeed} is taken from \cite{weiss_1974}. $K_0$ and $Sc$ are computed with the OGCM temperature and salinity fields (\texttt{trcsms\_c14} module).\\[1pt]
+%
+The following parameters intervening in the air-sea exchange rate are set in \texttt{namelist\_c14}:
+
+\begin{itemize}
+\item The reference DIC concentration $\overline{\Ct}$ (\forcode{xdicsur}) intervening in \autoref{eq:Rspeed} is classically set to 2 mol m$^{-3}$ \citep{toggweiler_1989a,orr_2001,butzin_2005}.
+%
+\item The value of the empirical coefficient $K_W$ (\forcode{xkwind}) in \autoref{eq:wanc14} depends on the wind field and on the model upper ocean mixing rate \citep{toggweiler_1989a,wanninkhof_1992,naegler_2009,wanninkhof_2014}.
+It should be adjusted so that the globally averaged $\cd$ piston velocity is $\kappa_\cd = 16.5\pm 3.2$ cm/h \citep{naegler_2009}.
+%The sensitivity to this parametrization is discussed in section \autoref{sec:result}.
+%
+\item Chemical enhancement (term $b$  in Eq. \autoref{eq:wanchem}) may be set on/off by means of the logical variable \forcode{ln_chemh}.
+\end{itemize}
+
+%
+\paragraph{Experiment type}
+The type of experiment is determined by the value given to \forcode{kc14typ} in \texttt{namelist\_c14}.
+There are three possibilities:
+
+\begin{enumerate}
+\item natural                    $\Dcq$: \forcode{kc14typ}=0
+\item bomb                       $\Dcq$: \forcode{kc14typ}=1
+\item transient paleo-historical $\Dcq$: \forcode{kc14typ}=2
+\end{enumerate}
+
+% 
+\textbf{Natural or Equilibrium radiocarbon}
+\forcode{kc14typ}=0
+
+Unless otherwise specified in \texttt{namelist\_c14}, the atmospheric $\Rq_a$ (\forcode{rc14at}) is set to one, the atmospheric $\cd$ (\forcode{pco2at}) to 280 ppm, and the ocean $\Rq$ is initialized with \forcode{rc14init=0.85}, i.e., $\Dcq=$-150\textperthousand \cite[typical for deep-ocean, Fig 6 in][]{key_2004}.
+
+Equilibrium experiment should last until 98\% of the ocean volume exhibit a drift of less than 0.001\textperthousand/year \citep{orr_2000}; this is usually achieved after few kyr (Fig. \autoref{fig:drift}).
+%
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.9\hsize]{drift-EXP06}
+\end{center}
+\vspace{-4ex}
+\caption{ Time evolution of $\Rq$ inventory anomaly for equilibrium run with homogeneous ocean initial state.
+The anomaly (or drift) is given in \%  change in total ocean inventory per 50 years.
+Time on x-axis is in simulation year.\label{fig:drift} }
+\end{figure}
+
+\textbf{Transient: Bomb}
+\label{sec:bomb}
+\forcode{kc14typ}=1
+
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.9\hsize]{C14bombCO2-NB}
+\end{center}
+\vspace{-4ex}
+\caption{Atmospheric $\Dcq$ (solid; left axis) and $\cd$ (dashed; right axis)  forcing for the $\cq$-bomb experiments.
+The $\Dcq$ is illustrated for the three zonal bands (upper, middle, and lower curves correspond to latitudes $> 20$N, $\in [20\mathrm{S},20\mathrm{N}]$, and $< 20$S, respectively.} \label{fig:bomb}
+\end{figure}
+
+Performing this type of experiment requires that a pre-industrial equilibrium run has been performed beforehand (\forcode{ln_rsttr} should be set to \texttt{.TRUE.}).
+
+An exception to this rule is when performing a perturbation bomb experiment as was possible with the package \texttt{C14b}.
+It is still possible to easily set-up that type of transient experiment for which no previous run is needed.
+In addition to the instructions given in this section, it is however necessary to adapt the \texttt{atmc14.dat} file so that it does no longer contain any negative $\Dcq$ values (Suess effect in the pre-bomb period).
+
+The model  is integrated from a given initial date following the observed records provided from 1765 AD on ( Fig. \autoref{fig:bomb}).
+The file \texttt{atmc14.dat}  \cite[][\& I.
+Levin, personal comm.]{enting_1994} provides atmospheric $\Dcq$ for three latitudinal bands: 90S-20S,    20S-20N \&    20N-90N.
+Atmospheric $\cd$ in the file \texttt{splco2.dat} is obtained from a spline fit through ice core data and direct atmospheric measurements \cite[][\& J.
+Orr, personal comm.]{orr_2000}.
+Dates in these forcing files are expressed as yr AD.
+
+To ensure that the atmospheric forcing is applied properly as well as that output files contain consistent dates and inventories, the experiment should be set up carefully:
+
+\begin{itemize}
+\item Specify the starting date of the experiment: \forcode{nn_date0} in \texttt{namelist}.  \forcode{nn_date0} is written as Year0101 where Year may take any positive value (AD).
+\item Then the parameters \forcode{nn_rstctl} in  \texttt{namelist} (on-line) and \forcode{nn_rsttr} in \texttt{namelist\_top} (off-line)  must be \textbf{set to 0} at the start of the experiment (force the date to \forcode{nn_date0} for the \textbf{first} experiment year).
+\item These two parameters (\forcode{nn_rstctl} and \forcode{nn_rsttr}) have then to be \textbf{set to 2} for the following years (the date must be read in the restart file).
+\end{itemize}
+
+If the experiment date is outside the data time span, the first or last atmospheric concentrations are then prescribed depending on whether the date is earlier or later.
+	Note that \forcode{tyrc14_beg} (\texttt{namelist\_c14}) is not used in this context.
+
+%
+\textbf{Transient: Past}
+\forcode{kc14typ}=2
+%
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[width=0.9\hsize]{PaleoCO2C14-NB}
+\end{center}
+\vspace{-4ex}
+\caption{Atmospheric $\Dcq$ (solid) and $\cd$ (dashed)  forcing for the Paleo experiments.
+The $\cd$ scale is given on the right axis.} \label{fig:paleo}
+\end{figure}
+
+This experiment type does not need a previous equilibrium run.
+It should start 5--6 kyr earlier than the period to be analyzed.
+Atmospheric $\Rq_a$ and $\cd$ are prescribed from forcing files.
+The ocean $\Rq$ is initialized with the value attributed to \forcode{rc14init} in \texttt{namelist\_c14}.
+
+The file \texttt{intcal13.14c} \citep{reimer_2013} contains atmospheric $\Dcq$ from 0 to 50 kyr cal BP\footnote{cal BP: number of years before 1950 AD}.
+The $\cd$ forcing is provided in file \texttt{ByrdEdcCO2.txt}.
+The content of this file is based on  the high resolution record from EPICA Dome C \citep{monnin_2004} for the Holocene and the Transition, and on Byrd Ice Core CO2 Data for 20--90 kyr BP  \citep{ahn_2008}.
+These atmospheric values are reproduced in Fig. \autoref{fig:paleo}.
+Dates in these files are expressed as yr BP.
+
+To ensure that the atmospheric forcing is applied properly as well as that output files contain consistent dates and inventories the experiment should be set up carefully.
+The true experiment starting date is given by \forcode{tyrc14_beg} (in yr BP) in \texttt{namelist\_c14}.
+In consequence, \forcode{nn_date0} in \texttt{namelist} MUST be set to 00010101.\\
+Then the parameters \forcode{nn_rstctl} in  \texttt{namelist} (on-line) and \forcode{nn_rsttr} in \texttt{namelist\_top} (off-line)  must be set to 0 at the start of the experiment (force the date to \forcode{nn_date0} for the first experiment year).
+These two parameters have then to be set to 2 for the following years (read the date in the restart file). \\
+If the experiment date is outside the data time span then the first or last atmospheric concentrations are prescribed depending on whether the date is earlier or later.
+
+%
+\paragraph{Model output}
+\label{sec:output}
+
+All output fields in Table \autoref{tab:out} are routinely computed.
+It depends on the actual settings in \texttt{iodef.xml} whether they are saved or not.
+%
+\begin{table}[!h]
+\begin{center}
+\caption{Standard output fields for the C14 package \label{tab:out}.}
+%\begin{small}
+\renewcommand{\arraystretch}{1.3}%
+\begin{tabular}[h]{|l*{3}{|c}|l|}
+\hline
+Field     & Type   & Dim & Units              & Description                                               \\ \hline
+RC14      & ptrc   & 3-D & -                  & Radiocarbon ratio                                         \\
+DeltaC14  & diad   & 3-D & \textperthousand   & $\Dcq$                                                    \\
+C14Age    & diad   & 3-D & yr                 & Radiocarbon age                                           \\
+RAge      & diad   & 2-D & yr                 & Reservoir age                                             \\
+qtr\_c14  & diad   & 2-D & m$^{-2}$ yr$^{-1}$ & Air-to-sea net $\Rq$ flux                                 \\
+qint\_c14 & diad   & 2-D & m$^{-2}$           & Cumulative air-to-sea $\Rq$ flux                          \\
+AtmCO2    & scalar & 0-D & ppm                & Global atmospheric $\cd$                                  \\
+AtmC14    & scalar & 0-D & \textperthousand   & Global atmospheric $\Dcq$                                 \\
+K\_CO2    & scalar & 0-D & cm h$^{-1}$        & Global $\cd$ piston velocity ($ \overline{\kappa_{\cd}}$) \\
+K\_C14    & scalar & 0-D & m yr$^{-1}$        & Global $\Rq$ transfer velocity  ($ \overline{\kappa_R}$)  \\
+C14Inv    & scalar & 0-D & $10^{26}$ atoms    & Ocean radiocarbon inventory                               \\ \hline
+\end{tabular}
+%\end{small}
+\end{center}
+\end{table}
+%!   Standard ratio: 1.176E-12 ; Avogadro's nbr = 6.022E+23 at/mol ; bomb C14 traditionally reported as 1.E+26 atoms
+%   REAL(wp), PARAMETER            :: atomc14=1.176*6.022E-15   ! conversion factor
+% atomc14 * xdicsur * zdum
+
+The radiocarbon age is computed as  $(-1/\lambda) \ln{ \left( \Rq \right)}$, with zero age corresponding to $\Rq=1$.
+
+The reservoir age is the age difference between the ocean uppermost layer and the atmosphere.
+It is usually reported as conventional radiocarbon age; i.e., computed by means of the Libby radiocarbon mean life \cite[8033 yr;][]{stuiver_1977}
+
+\begin{align}
+{^{14}\tau_\mathrm{c}}= -8033 \; \ln \left(1 + \frac{\Dcq}{10^3}\right), \label{eq:convage}
+\end{align}
+
+where ${^{14}\tau_\mathrm{c}}$ is expressed in years B.P.
+Here we do not use that convention and compute reservoir ages with the mean lifetime $1/\lambda$.
+Conversion from one scale to the other is readily performed.
+The conventional radiocarbon age is lower than the radiocarbon age by $\simeq3\%$.
+
+The ocean radiocarbon  inventory is computed as
+
+\begin{equation}
+N_A \Rq_\mathrm{oxa} \overline{\Ct} \left( \int_\Omega \Rq d\Omega \right) /10^{26}, \label{eq:inv}
+\end{equation}
+
+where $N_A$ is the Avogadro's number ($N_A=6.022\times10^{23}$ at/mol), $\Rq_\mathrm{oxa}$ is the oxalic acid radiocarbon standard \cite[$\Rq_\mathrm{oxa}=1.176\times10^{-12}$;][]{stuiver_1977}, and $\Omega$ is the ocean volume.
+Bomb $\cq$ inventories are traditionally reported in units of $10^{26}$ atoms, hence the denominator in \autoref{eq:inv}.
+
+All transformations from second to year, and inversely, are performed with the help of the physical constant \forcode{rsiyea} the sideral year length expressed in seconds\footnote{The variable (\forcode{nyear_len}) which reports the length in days of the previous/current/future year (see \textrm{oce\_trc.F90}) is not a constant. }.
+
+The global transfer velocities represent time-averaged\footnote{the actual duration is set in \texttt{iodef.xml}} global integrals of the transfer rates:
+
+\begin{equation}
+ \overline{\kappa_{\cd}}= \int_\mathcal{S} \kappa_{\cd} d\mathcal{S}  \text{ and } \overline{\kappa_R}= \int_\mathcal{S} \kappa_R d\mathcal{S}
+\end{equation}
+
+
+\subsection{PISCES biogeochemical model}
+
+PISCES is a biogeochemical model that simulates the lower trophic levels of marine ecosystem (phytoplankton, microzooplankton, and mesozooplankton) and the biogeochemical cycles of carbon and of the main nutrients (P, N, Si, and Fe) (\autoref{img_piscesdesign} and \autoref{img_pisces}).
+
+\begin{figure}[ht]
+	\begin{center}
+		\vspace{0cm}
+		\includegraphics[width=0.80\textwidth]{Fig_PISCES_model}
+		\caption{Schematic view of the PISCES-v2 model (figure by Jorge Martinez-Rey).}
+		\label{img_piscesdesign}
+	\end{center}
+\end{figure}
+
+\begin{figure}[!h]
+	\centering
+	\includegraphics[width=0.80\textwidth]{PISCES_tracers}
+	\caption{Surface concentrations of NO$_{3}$, PO$_{4}$, total chlorophyll, and air-sea CO$_{2}$ flux from the last year of a 62-year simulation.}
+	\label{img_pisces}
+\end{figure}
+
+The  model is intended to be used for both regional and global configurations at high or low spatial resolutions as well as for short-term (seasonal, interannual) and long-term (climate change, paleoceanography) analyses. 
+
+Two versions of PISCES are available in NEMO v4.0 :
+
+\begin{itemize}
+	\item PISCES-v2, by setting \textit{ln\_p4z} = \texttt{.true.} in \textit{namelist\_pisces\_ref}. This version can be seen as one of the many Monod models \citep{monod_1958}. It assumes a constant Redfield ratio and phytoplankton growth depends on the external concentration in nutrients. There are twenty-four prognostic variables (tracers) including two phytoplankton compartments  (diatoms and nanophytoplankton), two zooplankton size-classes (microzooplankton and  mesozooplankton) and a description of the carbonate chemistry. Formulations in PISCES-v2 are based on a mixed Monod/Quota formalism: On one hand, stoichiometry of C/N/P is fixed and growth rate of phytoplankton is limited by the external availability in N, P, and Si. On the other hand, the iron and silicium quotas are variable and growth rate of phytoplankton is limited by the internal availability in Fe. Various parameterizations can be activated in PISCES-v2, setting for instance the complexity of iron chemistry or the description of particulate organic materials.
+	
+	\item PISCES-QUOTA, by setting \textit{ln\_p5z} = \texttt{.true.} in \textit{namelist\_pisces\_ref}. This version has been built on the PISCES-v2 model described in \citet{aumont_2015}. PISCES-QUOTA has thirty-nine prognostic compartments. Phytoplankton growth is controlled by five modeled limiting nutrients: Nitrate and Ammonium, Phosphate, Silicate, and Iron. Five living compartments are represented: Three phytoplankton size classes/groups corresponding to picophytoplankton, nanophytoplankton, and diatoms, and two zooplankton size classes, which are microzooplankton and mesozooplankton. For phytoplankton, the prognostic variables are the carbon, nitrogen, phosphorus,  iron, chlorophyll and silicon biomasses (the latter only for diatoms). This means that the N/C, P/C, Fe/C, and Chl/C ratios of the three phytoplankton groups as well as the Si/C ratio of diatoms are prognostically predicted by the model. Zooplankton are assumed to be strictly homeostatic \citep[e.g.,][]{sterner_2003,woods_2013,meunier_2014}. As a consequence, the C/N/P/Fe ratios of these groups are maintained constant and are not allowed to vary. In PISCES, the Redfield ratios C/N/P are set to 122/16/1 \citep{takahashi_1985} and the -O/C ratio is set to 1.34 \citep{kortzinger_2001}. No silicified zooplankton is assumed. The bacterial pool is not yet explicitly modeled.
+\end{itemize}
+
+There are three non-living compartments: Semi-labile dissolved organic matter, small sinking particles, and large sinking particles.
+As a consequence of the variable stoichiometric ratios of phytoplankton and of the stoichiometric regulation of zooplankton, elemental ratios in organic matter cannot be supposed constant anymore as that was the case in PISCES-v2.
+Indeed, the nitrogen, phosphorus, iron, silicon, and calcite pools of the particles are now all explicitly modeled.
+The sinking speed of the particles is not altered by their content in calcite and biogenic silicate (''The ballast effect'', \citep{honjo_1996,armstrong_2001}).
+The latter particles are assumed to sink at the same speed as the large organic matter particles.
+All the non-living compartments experience aggregation due to turbulence and differential settling as well as Brownian coagulation for DOM.
+
+\subsection{MY\_TRC interface for coupling external BGC models}
+\label{Mytrc}
+
+NEMO-TOP has one built-in biogeochemical model - PISCES - but there are several BGC models - MEDUSA, ERSEM, BFM or ECO3M - which are meant to be used within the NEMO plateform.
+Therefore it was necessary to provide to the users a framework to easily add their own BGCM model.
+The generalized interface is pivoted on MY\_TRC module that contains template files to build the coupling between NEMO and any external BGC model.
+Call to MY\_TRC is activated by setting  \textit{ln\_my\_trc} = \texttt{.true.} in namelist \textit{namtrc}.\\
+
+The following 6 fortran files are available in MY\_TRC with the specific purposes here described.
+
+\begin{itemize}
+   \item \textit{par\_my\_trc.F90} :  This module allows to define additional arrays and public variables to be used within the MY\_TRC interface
+   \item \textit{trcini\_my\_trc.F90} :  Here are initialized user defined namelists and the call to the external BGC model initialization procedures to populate general tracer array (trn and trb).
+Here are also likely to be defined suport arrays related to system metrics that could be needed by the BGC model.
+  \item \textit{trcnam\_my\_trc.F90} :  This routine is called at the beginning of trcini\_my\_trc and should contain the initialization of additional namelists for the BGC model or user-defined code.
+  \item \textit{trcsms\_my\_trc.F90} :  The routine performs the call to Boundary Conditions and its main purpose is to contain the Source-Minus-Sinks terms due to the biogeochemical processes of the external model.
+Be aware that lateral boundary conditions are applied in trcnxt routine.
+IMPORTANT: the routines to compute light penetration along the water column and the tracer vertical sinking should be defined/called in here, as generalized modules are still missing in the code.
+ \item \textit{trcice\_my\_trc.F90} : Here it is possible to prescribe the tracers concentrations in sea ice that will be used as boundary conditions when ice formation and melting occurs (nn\_ice\_tr =1 in namtrc\_ice).
+See e.g. the correspondent PISCES subroutine.
+ \item \textit{trcwri\_my\_trc.F90} : This routine performs the output of the model tracers using IOM module (see NEMO manual Chapter on Output and Diagnostics).
+It is possible to place here the output of additional variables produced by the model, if not done elsewhere in the code, using the call to \textit{iom\_put}.
+\end{itemize}
+
+
+\end{document}

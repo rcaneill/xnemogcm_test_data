@@ -1,0 +1,7 @@
+!-----------------------------------------------------------------------
+&namtile        !   parameters of the tiling
+!-----------------------------------------------------------------------
+   ln_tile = .false.     !  Use tiling (T) or not (F)
+   nn_ltile_i = 99999    !  Length of tiles in i
+   nn_ltile_j = 10       !  Length of tiles in j
+/

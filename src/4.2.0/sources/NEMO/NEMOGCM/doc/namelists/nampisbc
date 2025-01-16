@@ -1,0 +1,22 @@
+!-----------------------------------------------------------------------
+&nampisbc     !   parameters for inputs deposition
+!-----------------------------------------------------------------------
+!              !  file name        ! frequency (hours) ! variable      ! time interp. !  clim  ! 'yearly'/ ! weights  ! rotation ! land/sea mask !
+!              !                   !  (if <0  months)  !   name        !   (logical)  !  (T/F) ! 'monthly' ! filename ! pairing  ! filename      !
+   sn_dust     = 'dust.orca'       ,     -1            , 'dust'        ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_ironsed  = 'bathy.orca'      ,    -12            , 'bathy'       ,  .false.     , .true. , 'yearly'  , ''       , ''    , ''
+   sn_hydrofe  = 'hydrofe.orca'    ,    -12            , 'epsdb'       ,  .false.     , .true. , 'yearly'  , ''       , ''    , ''
+!
+   cn_dir      = './'      !  root directory for the location of the dynamical files
+   ln_ironsed  =  .false.   ! boolean for Fe input from sediments
+   ln_ironice  =  .false.   ! boolean for Fe input from sea ice
+   ln_hydrofe  =  .false.   ! boolean for from hydrothermal vents
+   sedfeinput  =  2.e-9    ! Coastal release of Iron
+   distcoast   =  5.e3     ! Distance off the coast for Iron from sediments
+   mfrac       =  0.035    ! Fe mineral fraction of dust
+   wdust       =  2.0      ! Dust sinking speed
+   icefeinput  =  15.e-9   ! Iron concentration in sea ice
+   hratio      =  1.e+7    ! Fe to 3He ratio assumed for vent iron supply
+!                          ! ln_ligand
+   lgw_rath    =  0.2      ! Weak ligand ratio from sed hydro sources
+/

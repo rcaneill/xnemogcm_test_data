@@ -1,0 +1,37 @@
+NETCDF_INCDIR="-I ${NETCDF_DIR}/include"
+NETCDF_LIBDIR="-L ${NETCDF_DIR}/lib"
+NETCDF_LIB="-lnetcdf_c++4 -lnetcdf -lnetcdff"
+
+HDF5_INCDIR="-I${HDF5_DIR}/include"
+HDF5_LIBDIR="-L${HDF5_DIR}/lib"
+HDF5_LIB="-lhdf5_hl -lhdf5 -lz"
+
+MPI_INCDIR=""
+MPI_LIBDIR=""
+MPI_LIB=""
+
+BOOST_INCDIR=""
+BOOST_LIBDIR=""
+BOOST_LIB=""
+
+BLITZ_INCDIR=""
+BLITZ_LIBDIR=""
+BLITZ_LIB=""
+
+OASIS_INCDIR="-I$ROOT/../oasis3-mct/BLD/build/lib/psmile.MPI1"
+OASIS_LIBDIR="-L$ROOT/../oasis3-mct/BLD/lib"
+OASIS_LIB="-lpsmile.MPI1 -lscrip -lmct -lmpeu"
+
+IOIPSL_INCDIR="-I$ROOT/../IOIPSL/inc"
+IOIPSL_LIBDIR="-L$ROOT/../IOIPSL/lib"
+IOIPSL_LIB="-lioipsl"
+
+XIOS_ROOTDIR="$PWD/../XIOS"
+XIOS_INCDIR="-I$ROOT/../XIOS/inc"
+XIOS_LIBDIR="-L$ROOT/../XIOS/lib"
+XIOS_LIB="-lxios -lstdc++"
+
+ORCHIDEE_INCDIR="-I$ROOT/../ORCHIDEE/inc"
+ORCHIDEE_LIBDIR="-L$ROOT/../ORCHIDEE/lib"
+ORCHIDEE_LIB="-lorchidee"
+

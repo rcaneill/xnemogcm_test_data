@@ -1,0 +1,8 @@
+!-----------------------------------------------------------------------
+&nam_inorg     !   Inorganic chemistry in sediments (CacO3, Si)
+!-----------------------------------------------------------------------
+   rcopal   =  1.25     ! Reactivity for clay  [l.mol-1.an-1]
+   rccal    =  0.1      ! Dissolution rate of calcite [in yr-1]
+   rcligc   =  0.1      ! Degradation rate of ligands [in yr-1]
+   ratligc  =  1.E-4    ! L/C ratio in POC
+/

@@ -1,0 +1,39 @@
+   !!----------------------------------------------------------------------
+   !! NEMO/OCE 4.0 , NEMO Consortium (2018)
+   !! $Id: grt_cir_dis.h90 13226 2020-07-02 14:24:31Z orioltp $
+   !! Software governed by the CeCILL license (see ./LICENSE)
+   !!----------------------------------------------------------------------
+
+   REAL(KIND=wp) FUNCTION grt_cir_dis( pa1, pa2, pb1, pb2, pc1, pc2 )
+      !!----------------------------------------------------------------------
+      !!                     *** FUNCTION grt_cir_dis ***
+      !!
+      !! ** Purpose : Great circle distance between pts (lat1,lon1) 
+      !!               & (lat2,lon2)
+      !!                   
+      !! ** Method   : Geometry.
+      !!
+      !! History :
+      !!        !  1995-12 (G. Madec, E. Durand, A. Weaver, N. Daget) Original 
+      !!        !  2006-03 (A. Vidard) Migration to NEMOVAR 
+      !!        !  2006-10 (A. Weaver) Cleanup
+      !!----------------------------------------------------------------------
+      
+      !! * Arguments
+      REAL(KIND=wp) :: pa1   !  sin(lat1)
+      REAL(KIND=wp) :: pa2   !  sin(lat2)
+      REAL(KIND=wp) :: pb1   !  cos(lat1) * cos(lon1)
+      REAL(KIND=wp) :: pb2   !  cos(lat2) * cos(lon2)
+      REAL(KIND=wp) :: pc1   !  cos(lat1) * sin(lon1)
+      REAL(KIND=wp) :: pc2   !  cos(lat2) * sin(lon2)
+
+      REAL(KIND=wp) :: cosdist ! cosine of great circle distance
+
+      ! Compute cosine of great circle distance, constraining it to be between
+      ! -1 and 1 (rounding errors can take it slightly outside this range
+      cosdist = MAX( MIN( pa1 * pa2 + pb1 * pb2 + pc1 * pc2, 1.0_wp), -1.0_wp )
+
+      grt_cir_dis = &
+         &  ASIN( SQRT( 1.0_wp - cosdist**2.0_wp ) )
+      
+   END FUNCTION grt_cir_dis

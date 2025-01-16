@@ -1,0 +1,26 @@
+!-----------------------------------------------------------------------
+&nam_trased     !   Prognostic variables
+!-----------------------------------------------------------------------
+!                 !           !                                          !             !
+!                 !    name   !           title of the field             !   units     ! initial data from file or not !
+!                 !           !                                          !             !
+   sedsol(1)      = 'SedFeO  ' , 'Fe(OH)3 Concentration                  ',  '%'
+   sedsol(2)      = 'SedFeS  ' , 'FeS Concentration                      ',  '%'
+   sedsol(3)      = 'SedPOC  ' , 'POC Concentration                      ',  '%'
+   sedsol(4)      = 'SedPOS  ' , 'Semi-ref POC Concentration             ',  '%'
+   sedsol(5)      = 'SedPOR  ' , 'Refractory POC Concentration           ',  '%'
+   sedsol(6)      = 'SedCaCO3' , 'Calcite Concentration                  ',  '%'
+   sedsol(7)      = 'SedBSi  ' , 'Biogenic Silicate Concentration        ',  '%'
+   sedsol(8)      = 'SedClay ' , 'Clay Concentration                     ',  '%'
+   sedwat(1)      = 'SedO2   ' , 'Dissolved Oxygen Concentration         ',  'mol/L'
+   sedwat(2)      = 'SedNO3  ' , 'Nitrates Concentration                 ',  'mol/L'
+   sedwat(3)      = 'SedPO4  ' , 'Phosphate Concentration                ',  'mol/L'
+   sedwat(4)      = 'SedNH4  ' , 'Total Ammonium Concentration           ',  'mol/L '
+   sedwat(5)      = 'SedH2S  ' , 'Total H2S Concentration                ',  'mol/L '
+   sedwat(6)      = 'SedSO4  ' , 'Total SO4 Concentration                ',  'mol/L '
+   sedwat(7)      = 'SedFe2  ' , 'Total Fe2+ Concentration               ',  'mol/L '
+   sedwat(8)      = 'SedAlkalini' , 'Total Alkalinity Concentration      ',  'eq/L '
+   sedwat(9)      = 'Sedligand  ' , 'Total ligand Concentration          ',  'mol/L '
+   sedwat(10)     = 'SedDIC  ' , 'Dissolved inorganic Concentration      ',  'mol/L'
+   sedwat(11)     = 'SedSil  ' , 'Silicate Concentration                 ',  'mol/L'
+/

@@ -1,0 +1,715 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass book
+\use_default_options true
+\master ../../XIOS_user_guide.lyx
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\float_placement !tph
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize a4paper
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Chapter
+Axis
+\end_layout
+
+\begin_layout Standard
+Like Domain, Axis is a sub-component of Grid but is one dimension.
+ In meteorological applications, axis represents a vertical line with different
+ levels.
+\end_layout
+
+\begin_layout Section
+Working with configuration file
+\end_layout
+
+\begin_layout Standard
+The way to define an axis with configuration file is similar to define a
+ domain.
+\end_layout
+
+\begin_layout Subsection
+Basic configuration
+\end_layout
+
+\begin_layout Standard
+Similar to domain, an axis is defined inside its definition part with the
+ tag 
+\series bold
+\color black
+axis_definition
+\series default
+\color inherit
+.
+ 
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<axis_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+  <axis id="axis_A" />
+\end_layout
+
+\begin_layout Plain Layout
+
+  <axis axis_ref="axis_A" />
+\end_layout
+
+\begin_layout Plain Layout
+
+</axis_definition>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The first one is to specify explicitly identification of an axis with an
+ id.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<axis_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+  <axis id="axis_A" />  
+\end_layout
+
+\begin_layout Plain Layout
+
+</axis_definition>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+In this way, with id, the axis can be processed, e.x modified its attributes,
+ with Fortran interface; besides, it is only possible to reference to a
+ axis whose id is explicitly defined.
+\end_layout
+
+\begin_layout Standard
+To make a reference to an axis, we use axis_ref
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<axis_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+  <axis axis_ref="axis_A" />
+\end_layout
+
+\begin_layout Plain Layout
+
+</axis_definition>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+An axis defined by axis_ref will inherit all attributes of the referenced
+ one, except its id attribute.
+ If there is no id specified, an implicit one is assigned to this new axis.
+ The axis with implicit id can only be used inside the scope where it is
+ defined, it can not be referenced, nor be processed.
+ It is rare to define an axis without id inside axis_definition.
+ 
+\end_layout
+
+\begin_layout Standard
+To define a new axis inside a grid, we use the tag 
+\series bold
+\color black
+axis.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<grid id="grid_A">          
+\end_layout
+
+\begin_layout Plain Layout
+
+   <axis axis_ref="axis_A" />
+\end_layout
+
+\begin_layout Plain Layout
+
+</grid>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The xml lines above can be translated as: the grid_A composed of an axis_A
+ that is defined somewhere else before.
+ More precisely, the grid grid_A is constituted of a 
+\begin_inset Quotes eld
+\end_inset
+
+unknown id
+\begin_inset Quotes erd
+\end_inset
+
+ axis which has inherited all attributes (and their values) from axis A
+ (name, long name, i_index, j_index, ...
+ etc).
+\end_layout
+
+\begin_layout Subsection
+Advanced configuration
+\end_layout
+
+\begin_layout Standard
+Like domain, there are several transformation which can be defined with
+ configuration file.
+ All transformations on an axis have form *_axis.
+ 
+\end_layout
+
+\begin_layout Standard
+Till now, XIOS supports the following transformation on axis:
+\end_layout
+
+\begin_layout Itemize
+zoom_axis: Like zoom functionality in XIOS 1.0, the destination grid is the
+ zoomed region of the source grid.
+\end_layout
+
+\begin_layout Itemize
+interpolation_axis: Implement interpolation from an axis to one another.
+ For now, only polynominal interpolation is available.
+\end_layout
+
+\begin_layout Itemize
+inverse_axis: Inverse an axis
+\end_layout
+
+\begin_layout Standard
+It is not difficult to define a transformation: Include type of transformation
+ inside axis definition, as the following
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<axis_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+  <axis id="axis_A" />
+\end_layout
+
+\begin_layout Plain Layout
+
+  <axis id="axis_A_zoom" axis_ref="axis_A"> 
+\end_layout
+
+\begin_layout Plain Layout
+
+   <zoom_axis zoom_begin="1" zoom_n="3"/>
+\end_layout
+
+\begin_layout Plain Layout
+
+  </axis>
+\end_layout
+
+\begin_layout Plain Layout
+
+</axis_definition>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The concrete example is translated as: the axis named axis_A_zoom is transformed
+ from axis name axis_A with a zoom activity.
+ The detailed attributes of zoom_axis can be found in reference document,
+ but simply it contains the begining and size of zoomed region.
+\end_layout
+
+\begin_layout Standard
+One remark is the transformed axis SHOULD have an id, in this case, it's
+ axis_A_zoom.
+ As mentioned before, a no-id axis or any no-id component of XIOS can only
+ be used inside its definition scope.
+\end_layout
+
+\begin_layout Standard
+To make use of transformation, the grid must contain axis which references
+ to transformed ones.
+ 
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<grid id="grid_A">          
+\end_layout
+
+\begin_layout Plain Layout
+
+  <axis axis_ref="axis_A" />
+\end_layout
+
+\begin_layout Plain Layout
+
+</grid>
+\end_layout
+
+\begin_layout Plain Layout
+
+<grid id="grid_A_zoom">          
+\end_layout
+
+\begin_layout Plain Layout
+
+  <axis axis_ref="axis_A_zoom" />
+\end_layout
+
+\begin_layout Plain Layout
+
+</grid>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+On defining this way, we tell XIOS to establish a connection between two
+ grids by a transformation (zoom) with: grid source - grid_A, grid destination
+ - grid_A_zoom.
+\end_layout
+
+\begin_layout Standard
+As mentioned in Grid Chapter, in order to use transformed grid, just reference
+ to it in field_definition
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<field_definition level="1" enabled=".TRUE." default_value="9.96921e+36">
+\end_layout
+
+\begin_layout Plain Layout
+
+  <field id="field_A"  operation="average" freq_op="3600s" grid_ref="grid_A"
+ />
+\end_layout
+
+\begin_layout Plain Layout
+
+  <field id="field_A_zoom"  operation="average" freq_op="3600s" grid_ref="grid_A
+_zoom" />
+\end_layout
+
+\begin_layout Plain Layout
+
+ </field_definition>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Although xml is helpful to define several configurations, it can not be
+ used to customize attributes of axis.
+ So it's the turn of Fortran interface.
+\end_layout
+
+\begin_layout Section
+Working with FORTRAN code
+\end_layout
+
+\begin_layout Standard
+Although axis is not as complexe as domain, there are some mandatory attributes
+ to define.
+ Different from precedent version, XIOS 2.0 supports distribution of data
+ on a axis.
+ The followings describe the essential parts of axis.
+ Details of its attributes and operations can be found in XIOS reference
+ guide.
+\end_layout
+
+\begin_layout Subsection
+Local axis index
+\end_layout
+
+\begin_layout Standard
+Axis is often used with domain, which is broken into several distributed
+ pieces, to make a 3 dimension grid.
+ However, there are cases in which data on axis are distributed among processes.
+ Following we consider a simple case: a axis with global size 9 and its
+ data are distributed evenly among 3 client processes, each of which has
+ size 3.
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement !tbph
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename ../images/Distributed_Axis.pdf
+	lyxscale 50
+	scale 60
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Global axis data
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "globalAxis"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The local axis can be described by the following way.
+\end_layout
+
+\begin_layout Standard
+Specify the the beginning and size of local axis with:
+\end_layout
+
+\begin_layout Itemize
+n_glo: global size of axis.
+ 
+\end_layout
+
+\begin_layout Itemize
+begin: global position where a local axis begin
+\end_layout
+
+\begin_layout Itemize
+n: local size of axis on each process 
+\end_layout
+
+\begin_layout Standard
+For example, the local axis in the middle (the yellow one) can be specified
+ with:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+CALL xios_set_axis_attr("axis_A",n_glo=9, begin=3, n=3)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection
+Local axis data
+\end_layout
+
+\begin_layout Standard
+Simpler than local domain data, data on axis is always on-dimension.
+ Like local domain data, local axis data represent the data offset from
+ local axis, and it can be defined in two ways.
+\end_layout
+
+\begin_layout Standard
+Specify the begining and size of data on the local axis:
+\end_layout
+
+\begin_layout Itemize
+data_begin: the local position of data on axis where data begins
+\end_layout
+
+\begin_layout Itemize
+data_n: size of data on each local axis
+\end_layout
+
+\begin_layout Standard
+Or specify data with its position in the local axis:
+\end_layout
+
+\begin_layout Itemize
+data_index: array of local position of data in the local axis.
+\end_layout
+
+\begin_layout Standard
+Although the valid data must be inside a local axis, it is not neccessary
+ for data to have same size.
+ In fact, data can have larger size than local axis.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+CALL xios_set_axis_attr("axis_A", data_begin=-1, data_n=n+2)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+For local axis_A, the negative value of data_begin indicates that data is
+ larger than local axis, the valid part of data needs extracted from the
+ real data.
+ If data_begin has a positive value, that means data size is smaller than
+ local axis.
+ The default value of data_begin is 0, which implies that local data fit
+ into local axis properly.
+ 
+\end_layout
+
+\begin_layout Standard
+Loal data can be defined with:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+CALL xios_set_axis_attr("axis_A",data_index=data)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+with
+\end_layout
+
+\begin_layout Itemize
+data = {-1,0,1,2,3}
+\end_layout
+
+\begin_layout Subsection
+Value
+\end_layout
+
+\begin_layout Standard
+Value of axis plays a same role as longitude and latitude of domain.
+ As local data, it can be distributed among processes.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+CALL xios_set_axis_attr("axis_A", value=valueAxis)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+with
+\end_layout
+
+\begin_layout Itemize
+valueAxis = {30, 40, 50}
+\end_layout
+
+\begin_layout Standard
+Because there is a need of direction of an axis, then comes the attribute
+ positive
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+CALL xios_set_axis_attr("axis_A", positive='up')
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+All attributes of axis can be found in Reference Guide.
+\end_layout
+
+\begin_layout Standard
+
+\end_layout
+
+\end_body
+\end_document

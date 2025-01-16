@@ -1,0 +1,9 @@
+!-----------------------------------------------------------------------
+&nampislig     !   Namelist parameters for ligands, nampislig
+!-----------------------------------------------------------------------
+   rlgw        =  300.     ! Lifetime (years) of weak ligands
+   rlig        =  1.E-4    ! Remin ligand production per unit C
+   prlgw       =  3.E-4    ! Photolysis of weak ligand
+   rlgs        =  1.       ! Lifetime (years) of strong ligands
+   xklig       =  1.E-9    ! 1/2 saturation constant of photolysis
+/

@@ -1,0 +1,75 @@
+#!/usr/bin/env bash
+
+#SBATCH -J sette
+#SBATCH -o sette.%j.out
+#SBATCH -e sette.%j.err
+#SBATCH -N NODES
+#SBATCH --ntasks-per-node=NPROC_NODE
+#SBATCH -p mono
+#SBATCH -q normal
+#SBATCH --time=01:00:00
+#SBATCH --exclusive
+
+# Test specific settings. Do not hand edit these lines; the fcm_job.sh script will set these
+# (via sed operating on this template job file). 
+#
+  OCEANCORES=NPROCS
+  export SETTE_DIR=DEF_SETTE_DIR
+
+###############################################################
+#
+export MPIRUN="mpirun --map-by node --bind-to core"
+#
+# load sette functions (only post_test_tidyup needed)
+. ${SETTE_DIR}/all_functions.sh
+
+# modules to load
+module purge
+module load gcc/9.3.0 openmpi/4.0.5_gcc9.3.0 hdf5/1.8.18_gcc9.3.0 netcdf/4.7.1_gcc9.3.0 xios/trunk_rev2136_gcc9.3.0
+export XIO_HOME=${XIOS_DIR}
+
+# Don't remove neither change the following line
+# BODY
+
+#
+# These variables are needed by post_test_tidyup function in all_functions.sh
+#
+  export INPUT_DIR=DEF_INPUT_DIR
+  export CONFIG_DIR=DEF_CONFIG_DIR
+  export TOOLS_DIR=DEF_TOOLS_DIR
+  export NEMO_VALIDATION_DIR=DEF_NEMO_VALIDATION
+  export NEW_CONF=DEF_NEW_CONF
+  export CMP_NAM=DEF_CMP_NAM
+  export TEST_NAME=DEF_TEST_NAME
+  export EXE_DIR=DEF_EXE_DIR
+  ulimit -a
+  ulimit -s unlimited
+#
+# end of set up
+###############################################################
+#
+# change to the working directory 
+#
+cd ${EXE_DIR}
+  echo Running on host `hostname`
+  echo Time is `date`
+  echo Directory is `pwd`
+# 
+#  Run the parallel MPI executable 
+#
+  echo "Running time ${MPIRUN} ./nemo"
+#
+  if [ MPI_FLAG == "yes" ]; then
+     ${MPIRUN} -n $OCEANCORES ./nemo
+  else
+     time ./nemo
+  fi
+
+#
+  post_test_tidyup
+
+# END_BODY
+# Don't remove neither change the previous line
+
+
+  exit

@@ -1,0 +1,7 @@
+!-----------------------------------------------------------------------
+&nampissed     !   Namelist parameters for sediment mobilisation
+!-----------------------------------------------------------------------
+   nitrfix     =  2.e-7    ! Nitrogen fixation rate
+   diazolight  =  30.      ! Diazotrophs sensitivity to light (W/m2)
+   concfediaz  =  1.e-10   ! Diazotrophs half-saturation Cste for Iron
+/

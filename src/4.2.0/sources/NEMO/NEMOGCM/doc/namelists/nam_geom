@@ -1,0 +1,12 @@
+!-----------------------------------------------------------------------
+&nam_geom     !  Characteristics of the sediment columns
+!-----------------------------------------------------------------------
+  jpksed  = 18         ! Number of vertical layers
+  sedzmin = 0.1        ! Minimum vertical spacing
+  sedhmax = 15.0       ! Maximum depth of the sediment
+  sedkth  = 9.0        ! Default parameters
+  sedacr  = 2.0        ! Default parameters
+  porsurf = 0.9        ! Sediment porosity at the surface
+  porinf  = 0.75       ! Sediment porosity at infinite depth
+  rhox    = 0.25       ! Length scale of porosity variation (cm)
+/

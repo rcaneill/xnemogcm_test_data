@@ -1,0 +1,79 @@
+#!/bin/bash
+#SBATCH -A GROUP_IDRIS@cpu
+#SBATCH --job-name=SETTE_JOB      # nom du job
+#SBATCH --partition=cpu_p1        # Nom de la partition d'exécution
+#SBATCH --ntasks=NPROCS                # Nombre total de processus MPI
+#SBATCH --ntasks-per-node=40       # Nombre de processus MPI par noeud
+# /!\ Attention, la ligne suivante est trompeuse mais dans le vocabulaire
+# de Slurm "multithread" fait bien référence à l'hyperthreading.
+#SBATCH --hint=nomultithread       # 1 processus MPI par coeur physique (pas d'hyperthreading)
+#SBATCH --time=00:29:00            # Temps d’exécution maximum demande (HH:MM:SS)
+#SBATCH --output=sette.jobid_%j.out  # Nom du fichier de sortie
+#SBATCH --error=sette.jobid_%j.out   # Nom du fichier d'erreur (ici commun avec la sortie)
+##########################################################################
+#
+# Test specific settings. Do not hand edit these lines; the fcm_job.sh script will set these
+# (via sed operating on this template job file). 
+#
+  OCEANCORES=NPROCS
+  export SETTE_DIR=DEF_SETTE_DIR
+#
+# set up mpp computing environment
+#
+# Local settings for machine BULL (TITANE at CCRT France)
+#
+export MPIRUN="srun --mpi=pmi2 --cpu-bind=cores -K1"
+
+#
+# load sette functions (only post_test_tidyup needed)
+#
+  . ${SETTE_DIR}/all_functions.sh
+#
+
+# modules to load
+
+# Don't remove neither change the following line
+# BODY
+
+#
+# These variables are needed by post_test_tidyup function in all_functions.sh
+#
+  export EXE_DIR=DEF_EXE_DIR
+  export INPUT_DIR=DEF_INPUT_DIR
+  export CONFIG_DIR=DEF_CONFIG_DIR
+  export TOOLS_DIR=DEF_TOOLS_DIR
+  export NEMO_VALIDATION_DIR=DEF_NEMO_VALIDATION
+  export NEW_CONF=DEF_NEW_CONF
+  export CMP_NAM=DEF_CMP_NAM
+  export TEST_NAME=DEF_TEST_NAME
+#
+# end of set up
+###############################################################
+#
+# change to the working directory 
+#
+cd ${EXE_DIR}
+
+  echo Running on host `hostname`
+  echo Time is `date`
+  echo Directory is `pwd`
+# 
+#  Run the parallel MPI executable 
+#
+  echo "Running time ${MPIRUN} ./nemo"
+#
+  if [ MPI_FLAG == "yes" ]; then
+     time ${MPIRUN} ./nemo
+  else
+     time ./nemo
+  fi
+
+#
+  post_test_tidyup
+
+# END_BODY
+# Don't remove neither change the previous line
+
+
+  exit
+

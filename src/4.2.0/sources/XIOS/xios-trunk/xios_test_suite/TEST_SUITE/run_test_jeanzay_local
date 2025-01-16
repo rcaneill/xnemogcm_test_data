@@ -1,0 +1,5 @@
+#!/bin/bash
+
+sbatch --wait job_jeanzay_local.sh 
+
+bash -c "python generate_test.py"

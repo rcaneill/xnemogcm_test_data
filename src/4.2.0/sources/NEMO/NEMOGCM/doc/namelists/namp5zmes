@@ -1,0 +1,33 @@
+!-----------------------------------------------------------------------
+&namp5zmes     !   parameters for mesozooplankton
+!-----------------------------------------------------------------------
+   part2       =  0.75     ! part of calcite not dissolved in mesozoo guts
+   grazrat2    =  0.5      ! maximal mesozoo grazing rate
+   bmetexc2    =  .true.   ! Metabolic use of excess carbon 
+   resrat2     =  0.005    ! exsudation rate of mesozooplankton
+   mzrat2      =  0.01     ! mesozooplankton mortality rate
+   xpref2d     =  1.       ! meso preference for diatoms
+   xpref2n     =  0.3      ! meso preference for nano
+   xpref2z     =  1.       ! meso preference for zoo
+   xpref2m     =  0.       ! meso preference for zoo
+   xpref2c     =  0.3      ! meso preference for poc
+   xthresh2zoo =  1E-8     ! zoo feeding threshold for mesozooplankton
+   xthresh2dia =  1E-8     ! diatoms feeding threshold for mesozooplankton
+   xthresh2phy =  1E-8     ! nanophyto feeding threshold for mesozooplankton
+   xthresh2mes =  1E-8     ! meso feeding threshold for mesozooplankton
+   xthresh2poc =  1E-8     ! poc feeding threshold for mesozooplankton
+   xthresh2    =  3E-7     ! Food threshold for grazing
+   xkgraz2     =  20.E-6   ! half sturation constant for meso grazing
+   epsher2     =  0.5      ! Efficicency of Mesozoo growth
+   epsher2min  =  0.5      ! Minimum efficiency of mesozoo growth
+   ssigma2     =  0.5      ! Fraction excreted as semi-labile DOM
+   srespir2    =  0.2      ! Active respiration
+   unass2c     =  0.3      ! non assimilated fraction of C by mesozoo
+   unass2n     =  0.3      ! non assimilated fraction of N by mesozoo
+   unass2p     =  0.3      ! non assimilated fraction of P by mesozoo
+   xsigma2     =  0.5      ! Predation window size
+   xsigma2del  =  1.0      ! Predation window size scaling
+   grazflux    =  3.e3     ! flux-feeding rate
+   ln_dvm_meso =  .false.  ! Activates DVM for mesozooplankton
+   xfracmig    =  0.25     ! Fraction of mesozooplankton performing DVM
+/

@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<simulation>
+
+ <context id="surface">
+   <calendar type="Gregorian" start_date="2012-03-01 15:00:00" time_origin="2012-02-28 15:00:00 + 1d" />
+
+   <field_definition level="1" enabled=".TRUE." default_value="1000">
+     <field id="field_A_srf"  operation="average" freq_op="3600s" grid_ref="grid_A"/>
+     <field id="field_A_expand"  operation="average" grid_ref="grid_dst" field_ref="field_A_srf"/>
+   </field_definition>
+
+   <file_definition type="one_file" par_access="collective" output_freq="1h" output_level="10" enabled=".TRUE." >
+     <file id="output" name="output">
+        <field field_ref="field_A_expand" name="field"/>
+     </file>
+   </file_definition>
+
+   <axis_definition>
+     <axis id="axis_srf" positive="up"/>
+   </axis_definition>
+
+   <domain_definition>
+     <domain id="domain_srf" />     
+     <domain id="domain_dst" domain_ref="domain_srf" >
+       <expand_domain/>
+       <compute_connectivity_domain id="compute" type="node"/>
+     </domain>
+   </domain_definition>
+
+   <grid_definition>
+     <grid id="grid_A">
+       <domain domain_ref="domain_srf" />
+       <axis axis_ref="axis_srf" />
+     </grid>
+     <grid id="grid_dst">
+       <domain domain_ref="domain_dst" />
+       <axis axis_ref="axis_srf" />
+     </grid>
+   </grid_definition>
+  </context>
+
+  <context id="xios">
+      <variable_definition>
+        <variable_group id="buffer">
+            <variable id="optimal_buffer_size" type="string">performance</variable>
+            <variable id="buffer_size_factor" type="double">1.0</variable>
+         </variable_group>
+
+        <variable_group id="parameters" >
+          <variable id="using_server" type="bool">false</variable>
+          <variable id="info_level" type="int">50</variable>
+          <variable id="print_file" type="bool">true</variable>
+        </variable_group>
+      </variable_definition>
+  </context>
+
+</simulation>
+

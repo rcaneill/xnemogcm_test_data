@@ -1,0 +1,1165 @@
+<html>
+
+<!--
+ ##########################################################################
+ Author: Patrick.Brockmann@cea.fr
+ ##########################################################################
+-->
+
+<head>
+
+    <meta charset="utf-8">
+
+    <style type="text/css">
+        body {
+            font-family: arial;
+            font-size: 12px;
+        }
+
+        .row {
+            margin-top: 10px;
+            margin-bottom: 20px;
+        }
+
+        #mynetwork {
+            width: 1000px;
+            height: 1000px;
+            border: 1px solid lightgray;
+        }
+
+        #mynetwork1 {
+            width: 200px;
+            height: 200px;
+            border: 1px solid lightgray;
+        }
+
+        input {
+            padding: 10px;
+        }
+
+        ul li {
+            display: inline;
+            border: 1px solid gray;
+            padding: 4px;
+            margin: 2px;
+            border-radius: 4px;
+        }
+
+        .btn {
+            margin-top: 5px;
+        }
+
+        /* /!\ Use border-top-color not border-color for firefox compatibility */
+    </style>
+
+</head>
+
+<body>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+
+    <script type="text/javascript" src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.js"></script>
+    <link href="http://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/css/bootstrap.css" rel="stylesheet" type="text/css" />
+
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/vis/4.21.0/vis.min.css" rel="stylesheet" type="text/css" />
+
+    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+
+    <script type="text/javascript">
+
+        //######################################################################################################
+        $(document).ready(function() {
+
+            var container = $('#mynetwork')[0];
+            var container1 = $('#mynetwork1')[0];
+
+            //===========================================================
+            $('#file').on('change', function() {
+                var file = $("#file").prop('files')[0];
+                handleFileSelect(file);
+            });
+
+            //===========================================================
+            $('#lastTemporal').on('click', function() {
+                var node = nodes.get(nodeSelected);
+
+                if (node.class == 5) //temporal filter
+                {
+                    // disable all parents
+                    node.hidden = true;
+                    console.log("node.id = ", node.id, "hidden = ", node.hidden);
+                    nodes.update(node);
+
+                    var connectedEdgeArray = edges.get(network.getConnectedEdges(node.id));
+                    for (j = 0; j < connectedEdgeArray.length; j++) {
+                        var edge = connectedEdgeArray[j];
+                        if (edge.to == node.id) {
+                            edge.hidden = true;
+                        }
+
+                    }
+                    edges.update(connectedEdgeArray);
+
+                    var allNode = nodes.get(allParentsNode);
+                    for (i = 0; i < allNode.length; i++) {
+                        var node = allNode[i];
+                        node.hidden = true;
+                    }
+                    nodes.update(allNode);
+
+                    for (i = 0; i < allNode.length; i++) {
+                        var node = allNode[i];
+
+                        var cNodes = nodes.get(network.getConnectedNodes(node.id, 'to'));
+                        for (j = 0; j < cNodes.length; j++) {
+                            var cnode = cNodes[j];
+
+                            if (cnode.hidden != true) {
+                                node.hidden = false;
+                                nodes.update(node);
+                                break;
+                            }
+                        }
+                    }
+                    nodes.update(allNode);
+
+                    node = nodes.get(nodeSelected);
+                    node.hidden = false;
+                    console.log("node.id = ", node.id, "hidden = ", node.hidden);
+                    nodes.update(node);
+
+                    allNode = nodes.get();
+                    nodes.update(allNode);
+
+
+
+                    // enable last input
+                    var inputnodes = network.getConnectedNodes(node.id, 'from');
+                    var repere = 0;
+                    for (i = 0; i < inputnodes.length; i++) {
+                        repere = Math.max(repere, nodes.get(inputnodes[i]).id);
+                    }
+                    var inputnode = nodes.get(repere);
+                    console.log("last inputnode id = ", inputnode.id);
+
+                    inputnode.hidden = false;
+                    nodes.update(inputnode);
+
+                    var edges_ofinputnode = edges.get(network.getConnectedEdges(inputnode.id));
+                    for (i = 0; i < edges_ofinputnode.length; i++) {
+                        var edge = edges_ofinputnode[i];
+                        if (edge.from == inputnode.id) {
+                            edge.hidden = false;
+                        }
+                    }
+                    edges.update(edges_ofinputnode);
+
+                    var allNode = nodes.get();
+                    nodes.update(allNode);
+
+                }
+
+
+            });
+
+
+            //===========================================================
+            $('#showGraph').on('click', function() {
+                //===== hide all except selected
+                var allNode = nodes.get();
+
+                for (i = 0; i < allNode.length; i++) {
+                    var node = allNode[i];
+
+                    if (node.hidden != true) {
+                        node.hidden = true;
+                    }
+                }
+
+                nodes.update(allNode);
+
+                var node = nodes.get(nodeSelected);
+                node.hidden = false;
+                nodes.update(node);
+
+                //===== enable all parents
+                console.log("showAllParents: allParentsNode = ", allParentsNode);
+                allNode = nodes.get(allParentsNode);
+
+                for (i = 0; i < allNode.length; i++) {
+                    node = allNode[i];
+                    node.font = {
+                        color: 'black'
+                    }
+                    node.hidden = false;
+                    if (node.filled == 1) {
+                        node.color = {
+                            background: redNode.background,
+                            border: redNode.border,
+                            hover: redNode.background,
+                            highlight: {
+                                background: redNode.background,
+                                border: 'blue'
+                            }
+                        }
+                    } else {
+                        node.color = {
+                            background: styleArr[node.class].background,
+                            border: styleArr[node.class].border,
+                            highlight: {
+                                background: styleArr[node.class].background,
+                                border: 'blue'
+                            }
+                        }
+                    }
+                }
+
+                nodes.update(allNode);
+
+                node = nodes.get(nodeSelected);
+                var connectedEdgeArray = edges.get(network.getConnectedEdges(node.id));
+                for (j = 0; j < connectedEdgeArray.length; j++) {
+                    var edge = connectedEdgeArray[j];
+                    if (edge.to == node.id) {
+                        edge.hidden = false;
+                    }
+
+                }
+                edges.update(connectedEdgeArray);
+
+                allNode = nodes.get();
+                nodes.update(allNode);
+
+                //===== enable all children
+                allNode = nodes.get(allChildNode);
+
+                for (i = 0; i < allNode.length; i++) {
+                    node = allNode[i];
+                    node.font = {
+                        color: 'black'
+                    }
+                    node.hidden = false;
+                    if (node.filled == 1) {
+                        node.color = {
+                            background: redNode.background,
+                            border: redNode.border,
+                            hover: redNode.background,
+                            highlight: {
+                                background: redNode.background,
+                                border: 'blue'
+                            }
+                        }
+                    } else {
+                        node.color = {
+                            background: styleArr[node.class].background,
+                            border: styleArr[node.class].border,
+                            highlight: {
+                                background: styleArr[node.class].background,
+                                border: 'blue'
+                            }
+                        }
+                    }
+                }
+
+                nodes.update(allNode);
+
+                node = nodes.get(nodeSelected);
+                connectedEdgeArray = edges.get(network.getConnectedEdges(node.id));
+                for (j = 0; j < connectedEdgeArray.length; j++) {
+                    var edge = connectedEdgeArray[j];
+                    if (edge.from == node.id) {
+                        edge.hidden = false;
+                    }
+
+                }
+                edges.update(connectedEdgeArray);
+
+                allNode = nodes.get();
+                nodes.update(allNode);
+
+
+                network1 = new vis.Network(container1, data);
+
+
+            });
+
+
+
+            //===========================================================
+            $('#disableAll').on('click', function() {
+                var allNode = nodes.get();
+
+                for (i = 0; i < allNode.length; i++) {
+                    var node = allNode[i];
+
+                    if (node.hidden != true) {
+                        node.hidden = true;
+                    }
+                }
+                nodes.update(allNode);
+            });
+
+
+            //===========================================================
+            $('#enableAll').on('click', function() {
+                var allNode = nodes.get();
+
+                for (i = 0; i < allNode.length; i++) {
+                    var node = allNode[i];
+
+                    if (node.hidden != false) {
+                        node.hidden = false;
+                    }
+                }
+                nodes.update(allNode);
+
+                var allEdge = edges.get();
+                for (i = 0; i < allEdge.length; i++) {
+                    var edge = allEdge[i];
+
+                    if (edge.hidden != false) {
+                        edge.hidden = false;
+                    }
+                }
+                edges.update(allEdge);
+
+            });
+
+
+
+            //===========================================================
+            $('#enableInput').on('click', function() {
+                var allNode = nodes.get();
+
+                for (i = 0; i < allNode.length; i++) {
+                    var node = allNode[i];
+
+                    if (node.class == 1) {
+                        node.hidden = false;
+                    }
+                }
+                nodes.update(allNode);
+            });
+
+
+
+            //===========================================================
+            $('#enableOutput').on('click', function() {
+                var allNode = nodes.get();
+
+                for (i = 0; i < allNode.length; i++) {
+                    var node = allNode[i];
+
+                    if (node.class >= 6 || node.filled == 1) {
+                        node.hidden = false;
+                    }
+                }
+                nodes.update(allNode);
+            });
+
+
+            //===========================================================
+            $('#hideNode').on('click', function() {
+                var node = nodes.get(nodeSelected);
+
+                node.color = {
+                    background: transparentNode.background,
+                    border: transparentNode.border,
+                    highlight: {
+                        background: transparentNode.border,
+                        border: 'blue'
+                    }
+                }
+                node.font = {
+                    color: transparentNode.background
+                }
+                nodes.update(node);
+
+                var connectedEdgeArray = edges.get(network.getConnectedEdges(node.id));
+                for (i = 0; i < connectedEdgeArray.length; i++) {
+                    var edge = connectedEdgeArray[i];
+
+                    edge.color = {
+                        color: transparentEdge.color,
+                        highlight: transparentEdge.color,
+                        hover: transparentEdge.color,
+                    }
+                    edge.font = {
+                        size: 0
+                    }
+
+                }
+                edges.update(connectedEdgeArray);
+
+            });
+
+
+            //===========================================================
+            $('#showNode').on('click', function() {
+                var node = nodes.get(nodeSelected);
+
+                node.font = {
+                    color: 'black'
+                }
+                if (node.filled == 1) {
+                    node.color = {
+                        background: redNode.background,
+                        border: redNode.border,
+                        hover: redNode.background,
+                        highlight: {
+                            background: redNode.background,
+                            border: 'blue'
+                        }
+                    }
+                } else {
+                    node.color = {
+                        background: styleArr[node.class].background,
+                        border: styleArr[node.class].border,
+                        highlight: {
+                            background: styleArr[node.class].background,
+                            border: 'blue'
+                        }
+                    }
+                }
+                nodes.update(node);
+
+                var connectedEdgeArray = edges.get(network.getConnectedEdges(node.id));
+                for (i = 0; i < connectedEdgeArray.length; i++) {
+
+                    var edge = connectedEdgeArray[i];
+
+                    edge.color = {
+                        color: 'black',
+                        highlight: 'black',
+                        hover: 'black',
+                    }
+                    edge.font = {
+                        size: 14,
+                    }
+                }
+                edges.update(connectedEdgeArray);
+            });
+
+
+            //===========================================================
+            $('#enableParents').on('click', function() {
+                console.log("enableParents: ", allParentsNode);
+
+                var node = nodes.get(nodeSelected);
+
+                var connectedParents = nodes.get(network.getConnectedNodes(node.id, "from"));
+                console.log("connectedParents = ", connectedParents);
+
+                for (i = 0; i < connectedParents.length; i++) {
+                    var node = connectedParents[i];
+                    node.font = {
+                        color: 'black'
+                    }
+                    node.hidden = false;
+                    if (node.filled == 1) {
+                        node.color = {
+                            background: redNode.background,
+                            border: redNode.border,
+                            hover: redNode.background,
+                            highlight: {
+                                background: redNode.background,
+                                border: 'blue'
+                            }
+                        }
+                    } else {
+                        node.color = {
+                            background: styleArr[node.class].background,
+                            border: styleArr[node.class].border,
+                            highlight: {
+                                background: styleArr[node.class].background,
+                                border: 'blue'
+                            }
+                        }
+                    }
+                }
+                nodes.update(connectedParents);
+            });
+
+
+
+            //===========================================================
+            $('#enableAllParents').on('click', function() {
+                console.log("showAllParents: allParentsNode = ", allParentsNode);
+                var allNode = nodes.get(allParentsNode);
+
+                for (i = 0; i < allNode.length; i++) {
+                    var node = allNode[i];
+                    node.font = {
+                        color: 'black'
+                    }
+                    node.hidden = false;
+                    if (node.filled == 1) {
+                        node.color = {
+                            background: redNode.background,
+                            border: redNode.border,
+                            hover: redNode.background,
+                            highlight: {
+                                background: redNode.background,
+                                border: 'blue'
+                            }
+                        }
+                    } else {
+                        node.color = {
+                            background: styleArr[node.class].background,
+                            border: styleArr[node.class].border,
+                            highlight: {
+                                background: styleArr[node.class].background,
+                                border: 'blue'
+                            }
+                        }
+                    }
+                }
+
+                nodes.update(allNode);
+
+                var node = nodes.get(nodeSelected);
+                var connectedEdgeArray = edges.get(network.getConnectedEdges(node.id));
+                for (j = 0; j < connectedEdgeArray.length; j++) {
+                    var edge = connectedEdgeArray[j];
+                    if (edge.to == node.id) {
+                        edge.hidden = false;
+                    }
+
+                }
+                edges.update(connectedEdgeArray);
+
+                allNode = nodes.get();
+                nodes.update(allNode);
+
+            });
+
+
+
+
+            //===========================================================
+            $('#disableAllParents').on('click', function() {
+                console.log("disableAllParents: ", allParentsNode);
+
+                var node = nodes.get(nodeSelected);
+                node.hidden = true;
+                console.log("node.id = ", node.id, "hidden = ", node.hidden);
+                nodes.update(node);
+
+                var connectedEdgeArray = edges.get(network.getConnectedEdges(node.id));
+                for (j = 0; j < connectedEdgeArray.length; j++) {
+                    var edge = connectedEdgeArray[j];
+                    if (edge.to == node.id) {
+                        edge.hidden = true;
+                    }
+
+                }
+                edges.update(connectedEdgeArray);
+
+                var allNode = nodes.get(allParentsNode);
+                for (i = 0; i < allNode.length; i++) {
+                    var node = allNode[i];
+                    node.hidden = true;
+                }
+                nodes.update(allNode);
+
+                for (i = 0; i < allNode.length; i++) {
+                    var node = allNode[i];
+
+                    var cNodes = nodes.get(network.getConnectedNodes(node.id, 'to'));
+                    for (j = 0; j < cNodes.length; j++) {
+                        var cnode = cNodes[j];
+
+                        if (cnode.hidden != true) {
+                            node.hidden = false;
+                            nodes.update(node);
+                            break;
+                        }
+                    }
+                }
+                nodes.update(allNode);
+
+                node = nodes.get(nodeSelected);
+                node.hidden = false;
+                console.log("node.id = ", node.id, "hidden = ", node.hidden);
+                nodes.update(node);
+
+                allNode = nodes.get();
+                nodes.update(allNode);
+            });
+
+
+            //===========================================================
+            $('#enableChild').on('click', function() {
+                console.log("enableChild: ", allChildNode);
+                var node = nodes.get(nodeSelected);
+
+                var connectedChild = nodes.get(network.getConnectedNodes(node.id, "to"));
+                console.log("connectedChild = ", connectedChild);
+
+                for (i = 0; i < connectedChild.length; i++) {
+                    var node = connectedChild[i];
+                    node.font = {
+                        color: 'black'
+                    }
+                    node.hidden = false;
+                    if (node.filled == 1) {
+                        node.color = {
+                            background: redNode.background,
+                            border: redNode.border,
+                            hover: redNode.background,
+                            highlight: {
+                                background: redNode.background,
+                                border: 'blue'
+                            }
+                        }
+                    } else {
+                        node.color = {
+                            background: styleArr[node.class].background,
+                            border: styleArr[node.class].border,
+                            highlight: {
+                                background: styleArr[node.class].background,
+                                border: 'blue'
+                            }
+                        }
+                    }
+                }
+                nodes.update(connectedChild);
+                var connectedEdgeArray = edges.get(network.getConnectedEdges(node.id));
+                for (j = 0; j < connectedEdgeArray.length; j++) {
+                    var edge = connectedEdgeArray[j];
+                    if (edge.from == node.id) {
+                        edge.hidden = false;
+                    }
+
+                }
+                edges.update(connectedEdgeArray);
+
+            });
+
+
+
+            //===========================================================
+            $('#enableAllChild').on('click', function() {
+                console.log("enableAllChild: ", allChildNode);
+
+                var node = nodes.get(nodeSelected);
+                node.hidden = false;
+                console.log("node.id = ", node.id, "hidden = ", node.hidden);
+                nodes.update(node);
+
+                var connectedEdgeArray = edges.get(network.getConnectedEdges(node.id));
+                for (j = 0; j < connectedEdgeArray.length; j++) {
+                    var edge = connectedEdgeArray[j];
+                    if (edge.from == node.id) {
+                        edge.hidden = false;
+                    }
+
+                }
+                edges.update(connectedEdgeArray);
+
+                var edgesforupdate = [];
+                var count=0;
+
+
+                var allNode = nodes.get(allChildNode);
+
+                for (i = 0; i < allNode.length; i++) {
+                    node = allNode[i];
+                    node.font = {
+                        color: 'black'
+                    }
+                    node.hidden = false;
+                    if (node.filled == 1) {
+                        node.color = {
+                            background: redNode.background,
+                            border: redNode.border,
+                            hover: redNode.background,
+                            highlight: {
+                                background: redNode.background,
+                                border: 'blue'
+                            }
+                        }
+                    } else {
+                        node.color = {
+                            background: styleArr[node.class].background,
+                            border: styleArr[node.class].border,
+                            highlight: {
+                                background: styleArr[node.class].background,
+                                border: 'blue'
+                            }
+                        }
+                    }
+                    var decendentEdges = edges.get(network.getConnectedEdges(node.id)); 
+                    for (j = 0; j < decendentEdges.length; j++) {
+                        if (decendentEdges[j].from == node.id) {
+                            edgesforupdate[count] = decendentEdges[j];
+
+                            edgesforupdate[count].hidden = false;
+                            count++;
+                        }
+                    }
+                }
+
+                nodes.update(allNode);
+                edges.update(edgesforupdate);
+
+                allNode = nodes.get();
+                nodes.update(allNode);
+
+                
+
+            });
+
+            //===========================================================
+            $('#disableAllChild').on('click', function() {
+                console.log("disableAllChind: ", allChildNode);
+                var node = nodes.get(nodeSelected);
+                node.hidden = true;
+                console.log("node.id = ", node.id, "hidden = ", node.hidden);
+                nodes.update(node);
+
+                var connectedEdgeArray = edges.get(network.getConnectedEdges(node.id));
+                for (j = 0; j < connectedEdgeArray.length; j++) {
+                    var edge = connectedEdgeArray[j];
+                    if (edge.from == node.id) {
+                        edge.hidden = true;
+                    }
+
+                }
+                edges.update(connectedEdgeArray);
+
+                var edgesforupdate = [];
+                var count=0;
+
+                var allNode = nodes.get(allChildNode);
+                for (i = 0; i < allNode.length; i++) {
+                    var node = allNode[i];
+                    node.hidden = true;
+                }
+                nodes.update(allNode);
+
+                for (i = 0; i < allNode.length; i++) {
+                    var node = allNode[i];
+
+                    var pNodes = nodes.get(network.getConnectedNodes(node.id, 'from'));
+                    for (j = 0; j < pNodes.length; j++) {
+                        var pnode = pNodes[j];
+
+                        if (pnode.hidden != true) {
+                            node.hidden = false;
+                            nodes.update(node);
+                            break;
+                        }
+                    }
+                    var decendentEdges = edges.get(network.getConnectedEdges(node.id)); 
+                    for (j = 0; j < decendentEdges.length; j++) {
+                        if (decendentEdges[j].from == node.id) {
+                            edgesforupdate[count] = decendentEdges[j];
+
+                            edgesforupdate[count].hidden = true;
+                            count++;
+                        }
+                    }
+                }
+                nodes.update(allNode);
+                edges.update(edgesforupdate);
+
+                node = nodes.get(nodeSelected);
+                node.hidden = false;
+                console.log("node.id = ", node.id, "hidden = ", node.hidden);
+                nodes.update(node);
+
+                allNode = nodes.get();
+                nodes.update(allNode);
+            });
+
+            //===========================================================
+            var shapeArr = [
+                'box',
+                'ellipse',
+                'ellipse',
+                'ellipse',
+                'box',
+                'ellipse'
+            ];
+
+            var styleArr = {
+                1: {
+                    background: 'LightSlateGray',
+                    border: 'SlateGray',
+                    shape: 'box'
+                },
+                2: {
+                    background: 'Khaki',
+                    border: 'DarkKhaki',
+                    shape: 'ellipse'
+                },
+                3: {
+                    background: 'Orchid',
+                    border: 'DarkOrchid',
+                    shape: 'ellipse'
+                },
+                4: {
+                    background: 'Orange',
+                    border: 'DarkOrange',
+                    shape: 'ellipse'
+                },
+                5: {
+                    background: 'YellowGreen',
+                    border: 'OliveDrab',
+                    shape: 'box'
+                },
+                6: {
+                    background: 'LightGray',
+                    border: 'Gray',
+                    shape: 'ellipse'
+                },
+                7: {
+                    background: 'LightBlue',
+                    border: 'Gray',
+                    shape: 'ellipse'
+                }
+            }
+
+            var transparentNode = {
+                background: 'white',
+                border: 'LightGray'
+            }
+
+            var redNode = {
+                background: 'Red',
+                border: 'DarkRed'
+            }
+
+            var transparentEdge = {
+                color: '#00000000',
+                font: 0
+            }
+
+            var nbClass = shapeArr.length;
+
+            //===========================================================
+            var node;
+            var nodes;
+            var edges;
+            var network;
+
+
+            //==================================================
+            var allParentsNode = [];
+            var allChildNode = [];
+
+            var allParentsEdge = [];
+            var allChildEdge = [];
+
+            //===========================================================
+            function handleFileSelect(file) {
+
+                if (!window.File || !window.FileReader || !window.FileList || !window.Blob) {
+                    alert('The File APIs are not fully supported in this browser.');
+                    return;
+                }
+
+
+                var reader = new FileReader();
+                var json;
+
+                reader.onload = (function(file) {
+                    return function(e) {
+                        //console.log('e readAsText = ', e);
+                        //console.log('e readAsText target = ', e.target);
+                        try {
+                            //==================================================
+                            json = JSON.parse(e.target.result);
+                            //alert('json global var has been set to parsed json of this file here it is unevaled = \n' + JSON.stringify(json));
+
+                            //==================================================
+                            json.nodes.forEach(function(node, index) {
+                                var classVal = node.class;
+                                var typeVal = node.type;
+                                var entryVal = node.entry;
+                                var attrVal = node.attributes;
+                                var inputsVal = node.inputs;
+                                var labelVal = node.label;
+                                var cidVal = node.cid;
+                                var distVal = node.distance;
+                                var nbinVal = node.nbin;
+                                var nboutVal = node.nbout;
+
+                                node.color = {
+                                    background: styleArr[classVal].background,
+                                    border: styleArr[classVal].border,
+                                    hover: styleArr[classVal].background,
+                                    highlight: {
+                                        background: styleArr[classVal].background,
+                                        border: 'blue'
+                                    }
+                                }
+
+                                node.shape = styleArr[classVal].shape;
+
+                                if (node.class == 1 || node.class >= 6)
+                                    node.title = "node id = " + node.id + "</br>" + labelVal + "</br>field attributes : </br>" + attrVal + "</br>filter entry nb = " + entryVal + "</br>cid = " + cidVal + "</br>distance = " + distVal;
+                                else if (node.class == 5)
+                                    node.title = "node id = " + node.id + "</br>" + labelVal + "</br>filter type = " + typeVal + "</br> entry nb = " + entryVal + "</br> inputs_complete = " + inputsVal + "</br>cid = " + cidVal + "</br>distance = " + distVal;
+                                else
+                                    node.title = "node id = " + node.id + "</br>" + labelVal + "</br>filter entry nb = " + entryVal + "</br>cid = " + cidVal + "</br>distance = " + distVal;
+
+                                if (node.filled == 1) {
+                                    node.title += "</br></br> filter has no child!!!</br>" + "</br>field attributes : </br>" + attrVal + "</br> entry nb = " + entryVal;
+                                    node.color = {
+                                        background: 'Red',
+                                        border: 'DarkRed',
+                                        hover: 'Red',
+                                        highlight: {
+                                            background: 'Red',
+                                            border: 'blue'
+                                        }
+                                    }
+                                }
+
+                                node.level = distVal;
+
+                                if (node.class >= 6 || node.filled == 1) node.hidden = true;
+                                else node.hidden = true;
+
+                            });
+
+                            //==================================================
+                            json.edges.forEach(function(node, index) {
+                                var dateVal = node.date;
+                                var fidVal = node.fid;
+                                var fnameVal = node.fname;
+                                var gidVal = node.gid;
+                                var attVal = node.attributes;
+                                var idVal = node.id
+
+                                node.title = "id = " + idVal + "</br>field attributes : </br>" + attVal + "</br> date = " + dateVal;
+
+                            });
+
+                            //==================================================
+                            nodes = new vis.DataSet();
+                            nodes.add(json.nodes);
+
+                            edges = new vis.DataSet();
+                            edges.add(json.edges);
+
+                            //==================================================
+                            var data = {
+                                nodes: nodes,
+                                edges: edges
+                            };
+
+                            //==================================================
+                            var options = {
+                                edges: {
+                                    smooth: false,
+                                    arrows: 'to',
+                                    font: {
+                                        align: 'middle',
+                                        size: 14,
+                                    },
+                                    color: {
+                                        color: 'black',
+                                        highlight: 'black',
+                                        hover: 'black',
+                                    }
+                                },
+                                physics: {
+                                    enabled: false
+                                },
+                                nodes: {
+                                    borderWidth: 2
+                                },
+                                interaction: {
+                                    hover: true
+                                },
+                                layout: {
+                                    hierarchical: {
+                                        enabled: true,
+                                        direction: "LR",
+                                        sortMethod: "directed",
+                                        levelSeparation: 300,
+                                        nodeSpacing: 80,
+                                        treeSpacing: 100,
+                                        blockShifting: true,
+                                        edgeMinimization: true
+                                    }
+                                },
+
+
+                            };
+
+                            //==================================================
+                            network = new vis.Network(container, data, options);
+                            //network1 = new vis.Network(container1, data, options);
+                            
+
+
+
+                            //==================================================
+                            Array.prototype.unique = function() {
+                                var a = this.concat();
+                                for (var i = 0; i < a.length; ++i) {
+                                    for (var j = i + 1; j < a.length; ++j) {
+                                        if (a[i] === a[j])
+                                            a.splice(j--, 1);
+                                    }
+                                }
+                                return a;
+                            };
+
+                            //==================================================
+                            function findAllParents(nodesArray) {
+                                if (nodesArray.length == 0) {
+                                    return 1;
+                                }
+                                var parentsArray = network.getConnectedNodes(nodesArray[0], 'from');
+                                //console.log('node ', nodesArray[0], 'has ', parentsArray);
+                                nodesArray = nodesArray.concat(parentsArray).unique();
+                                //console.log('---> ', nodesArray);
+                                allParentsNode = allParentsNode.concat(nodesArray[0]).unique();
+
+
+                                nodesArray.splice(0, 1);
+                                return findAllParents(nodesArray);
+                            }
+
+                            //==================================================
+                            function findAllChild(nodesArray) {
+                                if (nodesArray.length == 0) {
+                                    return 1;
+                                }
+                                var childArray = network.getConnectedNodes(nodesArray[0], 'to');
+                                //console.log('node ', nodesArray[0], 'has ', childArray);
+                                nodesArray = nodesArray.concat(childArray).unique();
+                                //console.log('---> ', nodesArray);
+                                allChildNode = allChildNode.concat(nodesArray[0]).unique();
+                                nodesArray.splice(0, 1);
+                                return findAllChild(nodesArray);
+                            }
+
+                            //==================================================
+                            function getEdgeConnections(node) {
+                                var connectedEdgeArray = network.getConnectedEdges(node);
+                            }
+
+                            //==================================================
+                            network.on("click", function(params) {
+                                params.event = "[original event]";
+                                console.log('__________________________');
+                                nodeSelected = this.getNodeAt(params.pointer.DOM);
+                                if (nodeSelected === undefined) return 0;
+
+                                var node = nodes.get(nodeSelected);
+
+                                var connectedChild = nodes.get(network.getConnectedNodes(node.id, "to"));
+                                console.log('------->', connectedChild.length);
+                                if (connectedChild.length == 0) {
+                                    $('#enableAllChild').attr("disabled", true);
+                                } else {
+                                    $('#enableAllChild').attr("disabled", false);
+                                }
+
+                                var connectedEdgeArray = getEdgeConnections(nodeSelected);
+
+                                //--------------------------
+                                var parentsArray = network.getConnectedNodes(nodeSelected, 'from');
+
+
+                                allParentsNode = [nodeSelected];
+                                findAllParents(parentsArray);
+                                // remove selected node
+                                var index = allParentsNode.indexOf(nodeSelected);
+                                if (index !== -1) allParentsNode.splice(index, 1);
+                                console.log('Final parents: ', allParentsNode);
+
+
+                                //--------------------------
+                                var node = this.getNodeAt(params.pointer.DOM);
+                                var childArray = network.getConnectedNodes(nodeSelected, 'to');
+
+
+                                allChildNode = [nodeSelected];
+                                findAllChild(childArray);
+                                // remove selected node
+                                var index = allChildNode.indexOf(nodeSelected);
+                                if (index !== -1) allChildNode.splice(index, 1);
+                                console.log('Final child: ', allChildNode);
+
+
+                                //--------------------------
+                            });
+
+                        } catch (ex) {
+                            alert('ex when trying to parse json = ' + ex);
+                        }
+                    }
+                })(file);
+
+                reader.readAsText(file);
+
+            }
+
+            //######################################################################################################
+        });
+    </script>
+
+    <div class="container">
+
+        <div class="row">
+            <label class="btn btn-primary" for="file">
+                <input type="file" id="file" style="display:none" onchange="$('#upload-file-info').html(this.files[0].name)">
+                Load a JSON XIOS file
+            </label>
+            <button type="button" class="btn btn-default disabled" id="upload-file-info">...</button>
+        </div>
+
+        <div class="row">
+
+            <div class="btn-group">
+                <button type="button" class="btn btn-success" id="showNode">Show node</button>
+                <button type="button" class="btn btn-success" id="hideNode">Hide node</button>
+            </div>
+
+            <div class="btn-group">
+                <button type="button" class="btn btn-success" id="enableAll">Enable all</button>
+                <button type="button" class="btn btn-success" id="disableAll">Disable all</button>
+            </div>
+
+            <div class="btn-group">
+                <button type="button" class="btn btn-success" id="enableParents">Enable parents</button>
+                <button type="button" class="btn btn-success" id="enableChild">Enable children</button>
+            </div>
+
+            <div class="btn-group">
+                <button type="button" class="btn btn-success" id="enableAllParents">Enable all parents</button>
+                <button type="button" class="btn btn-success" id="disableAllParents">Disable all parents</button>
+            </div>
+
+            <div class="btn-group">
+                <button type="button" class="btn btn-success" id="enableAllChild">Enable all children</button>
+                <button type="button" class="btn btn-success" id="disableAllChild">Disable all children</button>
+            </div>
+
+            <button type="button" class="btn btn-success" id="enableInput">Enable input</button>
+            <button type="button" class="btn btn-success" id="enableOutput">Enable output</button>
+
+            <button type="button" class="btn btn-success" id="lastTemporal">Enable last temporal input</button>
+            <button type="button" class="btn btn-success" id="showGraph">Show subgraph (and hide other)</button>            
+
+
+        </div>
+
+        <div class="row">
+            <div id="mynetwork"></div>
+            <div id="mynetwork1"></div>
+        </div>
+
+</body>
+
+</html>

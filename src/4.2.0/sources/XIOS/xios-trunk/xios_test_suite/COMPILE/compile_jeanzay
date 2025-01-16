@@ -1,0 +1,29 @@
+#!/bin/bash
+#set -x 
+export revision=$(svn info --show-item revision .. 2>&1)
+python config_compile.py
+
+sbatch --wait job_compile_jeanzay.sh
+
+if [ "$COPY_TO_SERVER" = true ]
+  then
+  
+  build_dir=${xios_test_suite_repository}/BUILD
+  mkdir -p $build_dir ; CHMOD $build_dir
+  mkdir -p ${build_dir}/build_${xios_machine_name}
+
+  allreports=`ls ./build_${revision}_*.txt`
+  for report in $allreports
+  do
+     ll=$(wc -l $report | awk '{print $1}')
+     if [[ $(($ll)) > 4 ]] ;  then
+        echo "$report need to be copied"
+        cp $report ${build_dir}/build_${xios_machine_name}
+     fi
+  done
+
+  CHMOD -R ${build_dir}/build_${xios_machine_name}
+else
+    echo "without files copy"
+fi
+

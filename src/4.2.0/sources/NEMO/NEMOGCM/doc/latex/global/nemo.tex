@@ -1,0 +1,23 @@
+%% =================================================================================================
+%% Common abstract
+%% =================================================================================================
+
+``Nucleus for European Modelling of the Ocean'' as \NEMO\ is a state-of-the-art modelling framework of
+ocean-related engines for research activities and forecasting services in oceanography and climatology,
+developed in a sustainable way since 2008 by a European consortium of 5 institutes
+(\CMCC{CMCC} | \CNRS{CNRS} | \MOI{Mercator Océan} | \UKMO{Met Office} | \NERC{NERC}).
+It is intended to be a flexible tool for studying the physical and biogeochemical phenomena in
+the ocean circulation, as well as its interactions with the components of the Earth climate system,
+over a wide range of space and time scales.
+
+Concerning the physics, the fundamental engine for the \textcolor{blue}{``blue ocean''} solves
+the primitive equations of the ocean \{thermo\}dynamics.
+It can be supplemented by the \textcolor{gray}{``white ocean''} for sea-ice \{thermo\}dynamics,
+brine inclusions and subgrid-scale thickness variations (\SIcube), and also by
+the \textcolor{green}{``green ocean''} for \{on,off\}line oceanic tracers transport and
+biogeochemical processes (\TOP-\PISCES).
+External alternative models can be used instead of the core engines (\eg \BFM).
+Regarding the numerics, main features include versatile data assimilation interface,
+agile diagnostics generation thanks to \XIOS\ software,
+ocean-atmosphere coupling via the \OASIS\ library, and
+seamless embedded zooms with the \AGRIF\ 2-way nesting package.

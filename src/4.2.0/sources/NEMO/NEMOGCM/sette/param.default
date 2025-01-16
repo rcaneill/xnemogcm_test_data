@@ -1,0 +1,87 @@
+# Computer/user dependant variable needed to run sette
+#
+# REFERENCE run.stat tracer.stat you want to compare with
+# (if no change to the default, no check on result change will be done)
+NEMO_VALIDATION_REF=/path/to/reference/sette/results
+NEMO_REV_REF=0000
+#
+# ------------------------------------------------------------------------------------------
+# IMPORTANT:
+# variables (COMPILER, BATCH_CMD, BATCH_STAT, BATCH_NAME, FORCING_DIR)
+# can be exported from your shell startup files. 
+# If it is the case, nothing to do
+# otherwise, you need to update the default initialisation
+#
+# ADVISE: setup the default value in your startup file if it doesn't fit your need for at least
+# SETTE_COMPILER, SETTE_BATCH_CMD, SETTE_BATCH_STAT, SETTE_BATCH_NAME, SETTE_FORCING_DIR, 
+#
+# ------------------------------------------------------------------------------------------
+# COMPILER setting
+# Compiler among those in NEMOGCM/ARCH
+COMPILER=${SETTE_COMPILER:-XXXXXXXX}
+# ------------------------------------------------------------------------------------------
+#
+# BATCH command
+# command to submit a job
+BATCH_CMD=${SETTE_BATCH_CMD:-llsubmit}
+# command to check job status
+BATCH_STAT=${SETTE_BATCH_STAT:-llq}
+# generic sette job name (as it appears with $BATCH_STAT command)
+BATCH_NAME=${SETTE_BATCH_NAME:-sette}
+# ------------------------------------------------------------------------------------------
+#
+# FILES STORING paths
+# forcing files storing
+FORCING_DIR=${SETTE_FORCING_DIR:-$WORKDIR/FORCING}
+# validation files storing
+NEMO_VALIDATION_DIR=${SETTE_NEMO_VALIDATION_DIR:-$MAIN_DIR}/NEMO_VALIDATION
+# input files storing (namelist, iodef ...) (DO NOT CHANGE)
+INPUT_DIR=${CONFIG_DIR}/${NEW_CONF}/EXP00
+# optional custom SETTE tests directory
+#export CUSTOM_DIR=/path/to/custom/sette/tests
+# ------------------------------------------------------------------------------------------
+#
+# RUN setup
+# generic batch scrip prefix name if MPMD set to true/false
+JOB_PREFIX_MPMD=${SETTE_JOB_PREFIX_MPMD:-batch-mpmd}
+JOB_PREFIX_NOMPMD=${SETTE_JOB_PREFIX_NOMPMD:-batch}
+# ------------------------------------------------------------------------------------------
+#
+# MISCELLANEOUS
+# command for converting date (from git log -1) into 2-digit year + yearday
+date -j -f "%a %b %d %H:%M:%S %Y" "Tue Nov 30 17:10:53 2021" +"%y%j" >& /dev/null
+if [ $? == 0 ] ; then DATE_CONV='date -j -f "%a %b %d %H:%M:%S %Y" ' ;fi 
+date --date="Tue Nov 30 17:10:53 2021" +"%y%j" >& /dev/null
+if [ $? == 0 ] ; then DATE_CONV='date --date=' ;fi 
+# only for IBM
+#TMPDIR=${CONFIG_DIR}/${NEW_CONF}/EXP00
+# cleaning CFG_ST
+CLEAN_CONFIGS=${SETTE_CLEAN_CONFIGS:-"no"}
+# synchronisation MY_SRC and EXP00 of CFG_ST with MY_SRC and EXPREF form CFG
+SYNC_CONFIGS=${SETTE_SYNC_CONFIGS:-"no"}
+# langage (only en_US supported). This is used to grep information form linux/svn command.
+LC_MESSAGES=en_US
+# ------------------------------------------------------------------------------------------
+#
+# LIST OF CONFIGURATIONS
+# to be updated if you added an new configuration in sette_test-cases.sh or sette_reference-configuration.sh
+if [ -z "${TEST_CONFIGS}" ]; then
+  export TEST_CONFIGS=(${SETTE_TEST_CONFIGS[@]:-"ORCA2_ICE_PISCES ORCA2_OFF_PISCES AMM12 AGRIF WED025 GYRE_PISCES SAS ORCA2_ICE_OBS SWG ICE_AGRIF OVERFLOW LOCK_EXCHANGE VORTEX ISOMIP+"})
+fi
+#
+# TYPES OF TESTS TO PERFORM
+# Note an attempt will be made to compile each configuration even if none of these tests are activated
+export DO_RESTART=0  
+export DO_REPRO=0
+export DO_CORRUPT=0
+export DO_PHYOPTS=0
+TEST_TYPES=(${SETTE_TEST_TYPES[@]:-"RESTART REPRO PHYOPTS CORRUPT"})
+if [[ ${TEST_TYPES[*]} =~ .*RESTART.* ]]; then export DO_RESTART=1 ;fi
+if [[ ${TEST_TYPES[*]} =~ .*REPRO.* ]]; then export DO_REPRO=1 ;fi
+if [[ ${TEST_TYPES[*]} =~ .*CORRUPT.* ]]; then export DO_CORRUPT=1 ;fi
+if [[ ${TEST_TYPES[*]} =~ .*PHYOPTS.* ]]; then export DO_PHYOPTS=1 ;fi
+# ------------------------------------------------------------------------------------------
+#
+# reporting  
+# Set number of passes (default only 1). For a second pass, set '0 1'
+RPT_PASSES=${SETTE_RPT_NPASSES:-'0'} 

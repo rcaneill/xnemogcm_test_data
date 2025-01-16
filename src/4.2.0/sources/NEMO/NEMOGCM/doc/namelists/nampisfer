@@ -1,0 +1,10 @@
+!-----------------------------------------------------------------------
+&nampisfer     !   parameters for iron chemistry
+!-----------------------------------------------------------------------
+   ln_ligvar =  .false.   ! variable ligand concentration
+   xlam1     =  0.02      ! scavenging rate of Iron by biogenic particles
+   xlamdust  =  150.0     ! Scavenging rate of Iron by dust
+   ligand    =  1E-9     ! Ligands concentration 
+   kfep      =  0.01      ! Nanoparticle formation rate constant
+   scaveff   =  1.0       ! Fraction of scavenged Fe that goes to POFe
+/

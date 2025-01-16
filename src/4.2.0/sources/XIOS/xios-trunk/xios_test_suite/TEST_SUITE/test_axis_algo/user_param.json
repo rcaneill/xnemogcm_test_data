@@ -1,0 +1,14 @@
+[
+	{
+		"Domain": ["lmdz"],
+		"UseServer2": ["true"],
+		"NumberServers": [2, 4],
+        "AxisMask": ["false"]
+	},
+	{
+		"Domain": ["lmdz"],
+		"UseServer2": ["true"],
+		"NumberServers": [6, 8],
+        "AxisMask": ["false"]
+	}
+]

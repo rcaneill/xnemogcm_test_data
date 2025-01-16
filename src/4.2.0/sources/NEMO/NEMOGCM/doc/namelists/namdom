@@ -1,0 +1,13 @@
+!-----------------------------------------------------------------------
+&namdom        !   time and space domain
+!-----------------------------------------------------------------------
+   ln_linssh   = .false.   !  =T  linear free surface  ==>>  model level are fixed in time
+   !
+   rn_Dt       = 5400.     !  time step for the dynamics and tracer
+   rn_atfp     =    0.1    !  asselin time filter parameter
+   !
+   ln_crs      = .false.   !  Logical switch for coarsening module      (T => fill namcrs)
+   ln_c1d      = .false.   !  Single column domain (1x1pt)              (T => fill namc1d)
+   !
+   ln_meshmask = .true.   !  =T create a mesh file
+/

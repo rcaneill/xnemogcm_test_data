@@ -1,0 +1,104 @@
+#!/bin/bash 
+#!
+#BSUB -q p_short
+#BSUB -n TOTAL_NPROCS
+#BSUB -J NEMO_SETTE
+#BSUB -o job_sette.out
+#BSUB -e job_sette.out
+#BSUB -P R000
+#BSUB -R "span[ptile=36]"
+
+###############################################################
+# Test specific settings. Do not hand edit these lines; the fcm_job.sh script will set these
+# (via sed operating on this template job file). 
+#
+  OCEANCORES=NPROCS
+  XIOS_NUMPROCS=NXIOPROCS
+  export SETTE_DIR=DEF_SETTE_DIR
+
+###############################################################
+#
+# set up mpp computing environment
+#
+# Local settings for CMCC Skylake machine ZEUS 
+#
+
+export I_MPI_HYDRA_BRANCH_COUNT=`cat $LSB_DJOB_HOSTFILE | uniq  | wc -l`
+export MPIRUN="mpiexec.hydra"
+
+# local xios setting for MPMD
+export LD_LIBRARY_PATH=${XIOS}/lib:${LD_LIBRARY_PATH}
+XIOS_SERVER_PATHNAME="${XIOS}/bin/xios_server.exe"
+
+echo "Start JOBID ${LSB_JOBID}"
+
+#
+# load sette functions (only post_test_tidyup needed)
+#
+  . ${SETTE_DIR}/all_functions.sh
+
+
+# Don't remove neither change the following line 
+# BODY
+
+#
+# These variables are needed by post_test_tidyup function in all_functions.sh
+#
+  export EXE_DIR=DEF_EXE_DIR
+  export INPUT_DIR=DEF_INPUT_DIR
+  export CONFIG_DIR=DEF_CONFIG_DIR
+  export TOOLS_DIR=DEF_TOOLS_DIR
+  export NEMO_VALIDATION_DIR=DEF_NEMO_VALIDATION
+  export NEW_CONF=DEF_NEW_CONF
+  export CMP_NAM=DEF_CMP_NAM
+  export TEST_NAME=DEF_TEST_NAME
+#
+# end of set up
+
+
+###############################################################
+#
+# change to the working directory 
+#
+cd ${EXE_DIR}
+
+#
+  echo Running on host `hostname`
+  echo Time is `date`
+  echo Directory is `pwd`
+# 
+#  Run the parallel MPI executable 
+#
+  startTime=$(date +%s)
+  if [ MPI_FLAG == "yes" ]; then
+     if [ ${USING_MPMD} == "yes" ] && [ ${XIOS_NUMPROCS} -gt 0 ]; then
+        # XIOS detached mode
+        xioscmdfile="xioscmdfile"
+        # FIX for IMPI and XIOS execution
+        export I_MPI_LIBRARY_KIND="release_mt"
+        source ${I_MPI_ROOT}/intel64/bin/mpivars.sh ${I_MPI_LIBRARY_KIND}
+        #
+        echo "# Configuration file for mpiexec.hydra" > $xioscmdfile
+        echo "-n ${OCEANCORES} ./nemo" >> $xioscmdfile
+        echo "-n ${XIOS_NUMPROCS} ${XIOS_SERVER_PATHNAME}" >> $xioscmdfile
+
+        time ${MPIRUN} -configfile $xioscmdfile
+
+     else
+        # XIOS attached mode
+        time ${MPIRUN} ./nemo          
+     fi
+  else
+#  Run the serial executable
+     time ./nemo
+  fi
+  endTime=$(date +%s)
+  totalTime=$(($endTime-$startTime))
+  echo "Model finished after $totalTime seconds for test $TEST_NAME"
+#
+  post_test_tidyup
+
+# END_BODY
+# Don't remove neither change the previous line 
+
+  exit

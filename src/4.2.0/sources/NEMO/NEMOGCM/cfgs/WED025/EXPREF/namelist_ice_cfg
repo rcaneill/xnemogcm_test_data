@@ -1,0 +1,121 @@
+!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+!! SI3 namelist:  
+!!              1 - Generic parameters                 (nampar)
+!!              2 - Ice thickness discretization       (namitd)
+!!              3 - Ice dynamics                       (namdyn)
+!!              4 - Ice ridging/rafting                (namdyn_rdgrft)
+!!              5 - Ice rheology                       (namdyn_rhg)
+!!              6 - Ice advection                      (namdyn_adv)
+!!              7 - Ice surface boundary conditions    (namsbc)
+!!              8 - Ice thermodynamics                 (namthd)
+!!              9 - Ice heat diffusion                 (namthd_zdf)
+!!             10 - Ice lateral melting                (namthd_da)
+!!             11 - Ice growth in open water           (namthd_do)
+!!             12 - Ice salinity                       (namthd_sal)
+!!             13 - Ice melt ponds                     (namthd_pnd)
+!!             14 - Ice initialization                 (namini)
+!!             15 - Ice/snow albedos                   (namalb)
+!!             16 - Ice diagnostics                    (namdia)
+!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+!
+!------------------------------------------------------------------------------
+&nampar         !   Generic parameters
+!------------------------------------------------------------------------------
+/
+!------------------------------------------------------------------------------
+&namitd         !   Ice discretization
+!------------------------------------------------------------------------------
+   ln_cat_hfn       = .true.          !  ice categories are defined by a function following rn_himean**(-0.05)
+      rn_himean     =   2.0           !  expected domain-average ice thickness (m)
+   rn_himin         =   0.01          !  minimum ice thickness (m) used in remapping
+/
+!------------------------------------------------------------------------------
+&namdyn         !   Ice dynamics
+!------------------------------------------------------------------------------
+   ln_landfast_L16  = .true.          !  landfast: parameterization from Lemieux 2016
+/
+!------------------------------------------------------------------------------
+&namdyn_rdgrft  !   Ice ridging/rafting
+!------------------------------------------------------------------------------
+/
+!------------------------------------------------------------------------------
+&namdyn_rhg     !   Ice rheology
+!------------------------------------------------------------------------------
+   ln_rhg_EVP       = .true.          !  EVP rheology
+      ln_aEVP       = .false.         !     adaptive rheology (Kimmritz et al. 2016 & 2017)
+/
+!------------------------------------------------------------------------------
+&namdyn_adv     !   Ice advection
+!------------------------------------------------------------------------------
+   ln_adv_Pra       = .false.         !  Advection scheme (Prather)
+   ln_adv_UMx       = .true.          !  Advection scheme (Ultimate-Macho)
+      nn_UMx        =   5             !     order of the scheme for UMx (1-5 ; 20=centered 2nd order)
+/
+!------------------------------------------------------------------------------
+&namsbc         !   Ice surface boundary conditions
+!------------------------------------------------------------------------------
+   nn_snwfra        =   0             !  calculate the fraction of ice covered by snow (for zdf and albedo)
+                                      !     = 0  fraction = 1 (if snow) or 0 (if no snow)
+                                      !     = 1  fraction = 1-exp(-0.2*rhos*hsnw) [MetO formulation]
+                                      !     = 2  fraction = hsnw / (hsnw+0.02)    [CICE formulation]
+   nn_qtrice        =   0             !  Solar flux transmitted thru the surface scattering layer:
+                                      !     = 0  Grenfell and Maykut 1977 (depends on cloudiness and is 0 when there is snow)
+                                      !     = 1  Lebrun 2019 (equals 0.3 anytime with different melting/dry snw conductivities)
+/
+!------------------------------------------------------------------------------
+&namthd         !   Ice thermodynamics
+!------------------------------------------------------------------------------
+/
+!------------------------------------------------------------------------------
+&namthd_zdf     !   Ice heat diffusion
+!------------------------------------------------------------------------------
+/
+!------------------------------------------------------------------------------
+&namthd_da      !   Ice lateral melting
+!------------------------------------------------------------------------------
+/
+!------------------------------------------------------------------------------
+&namthd_do      !   Ice growth in open water
+!------------------------------------------------------------------------------
+   rn_hinew         =   0.02          !  thickness for new ice formation in open water (m), must be larger than rn_himin
+   ln_frazil        = .true.          !  Frazil ice parameterization (ice collection as a function of wind)
+/
+!------------------------------------------------------------------------------
+&namthd_sal     !   Ice salinity
+!------------------------------------------------------------------------------
+/
+!------------------------------------------------------------------------------
+&namthd_pnd     !   Melt ponds
+!------------------------------------------------------------------------------
+   ln_pnd            = .false.         !  activate melt ponds or not
+      ln_pnd_LEV     = .false.         !  level ice melt ponds (from Flocco et al 2007,2010 & Holland et al 2012)
+/
+!------------------------------------------------------------------------------
+&namini         !   Ice initialization
+!------------------------------------------------------------------------------
+   ln_iceini        = .true.          !  activate ice initialization (T) or not (F)
+   nn_iceini_file   =   1             !     0 = Initialise sea ice based on SSTs
+                                      !     1 = Initialise sea ice from single category netcdf file
+                                      !     2 = Initialise sea ice from multi category restart file
+   ! -- for ln_iceini_file = T
+   sn_hti = 'WED025_init_JRA_200001.nc', -12. ,'icethic_cea',  .false.  , .true., 'yearly'  , '' , '', ''
+   sn_hts = 'WED025_init_JRA_200001.nc', -12. ,'icesnow_cea',  .false.  , .true., 'yearly'  , '' , '', ''
+   sn_ati = 'WED025_init_JRA_200001.nc', -12. ,'ice_cover'  ,  .false.  , .true., 'yearly'  , '' , '', ''
+   sn_smi = 'NOT USED'              , -12. ,'smi'   ,  .false.  , .true., 'yearly'  , '' , '', ''
+   sn_tmi = 'NOT USED'              , -12. ,'tmi'   ,  .false.  , .true., 'yearly'  , '' , '', ''
+   sn_tsu = 'NOT USED'              , -12. ,'tsu'   ,  .false.  , .true., 'yearly'  , '' , '', ''
+   sn_tms = 'NOT USED'              , -12. ,'tms'   ,  .false.  , .true., 'yearly'  , '' , '', ''
+   !      melt ponds (be careful, sn_apd is the pond concentration (not fraction), so it differs from rn_apd)
+   sn_apd = 'NOT USED'              , -12. ,'apd'   ,  .false.  , .true., 'yearly'  , '' , '', ''
+   sn_hpd = 'NOT USED'              , -12. ,'hpd'   ,  .false.  , .true., 'yearly'  , '' , '', ''
+   sn_hld = 'NOT USED'              , -12. ,'hld'   ,  .false.  , .true., 'yearly'  , '' , '', ''
+   cn_dir='./'
+/
+!------------------------------------------------------------------------------
+&namalb         !   albedo parameters
+!------------------------------------------------------------------------------
+/
+!------------------------------------------------------------------------------
+&namdia         !   Diagnostics
+!------------------------------------------------------------------------------
+/

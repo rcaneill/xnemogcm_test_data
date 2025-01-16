@@ -1,0 +1,114 @@
+# if defined SINGLE_PRECISION
+#    define PRECISION sp
+#    define SENDROUTINE mppsend_sp
+#    define RECVROUTINE mpprecv_sp
+#    define MPI_TYPE MPI_REAL
+# else
+#    define PRECISION dp
+#    define SENDROUTINE mppsend_dp
+#    define RECVROUTINE mpprecv_dp
+#    define MPI_TYPE MPI_DOUBLE_PRECISION
+# endif
+
+   SUBROUTINE ROUTINE_LNK( pt2d, cd_type, psgn, kextj)
+      !!---------------------------------------------------------------------
+      !!                   ***  routine mpp_lbc_north_icb  ***
+      !!
+      !! ** Purpose :   Ensure proper north fold horizontal bondary condition
+      !!              in mpp configuration in case of jpn1 > 1 and for 2d
+      !!              array with outer extra halo
+      !!
+      !! ** Method  :   North fold condition and mpp with more than one proc
+      !!              in i-direction require a specific treatment. We gather
+      !!              the 4+kextj northern lines of the global domain on 1
+      !!              processor and apply lbc north-fold on this sub array.
+      !!              Then we scatter the north fold array back to the processors.
+      !!              This routine accounts for an extra halo with icebergs
+      !!              and assumes ghost rows and columns have been suppressed.
+      !!
+      !!----------------------------------------------------------------------
+      REAL(PRECISION), DIMENSION(:,:), INTENT(inout) ::   pt2d     ! 2D array with extra halo
+      CHARACTER(len=1)        , INTENT(in   ) ::   cd_type  ! nature of pt3d grid-points
+      !                                                     !   = T ,  U , V , F or W -points
+      REAL(PRECISION)         , INTENT(in   ) ::   psgn     ! = -1. the sign change across the
+      !!                                                    ! north fold, =  1. otherwise
+      INTEGER                 , INTENT(in   ) ::   kextj    ! Extra halo width at north fold
+      !
+      INTEGER ::   ji, jj, jr
+      INTEGER ::   ierr, itaille
+      INTEGER ::   ipj, ij, iproc, ijnr, ii1, ipi, impp
+      !
+      REAL(PRECISION), DIMENSION(:,:)  , ALLOCATABLE  ::  ztab_e, znorthloc_e
+      REAL(PRECISION), DIMENSION(:,:,:), ALLOCATABLE  ::  znorthgloio_e
+      !!----------------------------------------------------------------------
+#if ! defined key_mpi_off
+      !
+      ipj=4
+      ALLOCATE(        ztab_e(jpiglo, 1-kextj:ipj+kextj)       ,       &
+     &            znorthloc_e(jpimax, 1-kextj:ipj+kextj)       ,       &
+     &          znorthgloio_e(jpimax, 1-kextj:ipj+kextj,ndim_rank_north)    )
+      !
+# if defined SINGLE_PRECISION
+      ztab_e(:,:)      = 0._sp
+      znorthloc_e(:,:) = 0._sp
+# else
+      ztab_e(:,:)      = 0._dp
+      znorthloc_e(:,:) = 0._dp
+# endif
+      !
+      ij = 1 - kextj
+      ! put the last ipj+2*kextj lines of pt2d into znorthloc_e 
+      DO jj = jpj - ipj + 1 - kextj , jpj + kextj
+         znorthloc_e(1:jpi,ij)=pt2d(1:jpi,jj)
+         ij = ij + 1
+      END DO
+      !
+      itaille = jpimax * ( ipj + 2*kextj )
+      !
+      IF( ln_timing ) CALL tic_tac(.TRUE.)
+#if ! defined key_mpi_off
+      CALL MPI_ALLGATHER( znorthloc_e(1,1-kextj)    , itaille, MPI_TYPE,    &
+         &                znorthgloio_e(1,1-kextj,1), itaille, MPI_TYPE,    &
+         &                ncomm_north, ierr )
+#endif
+      !
+      IF( ln_timing ) CALL tic_tac(.FALSE.)
+      !
+      ijnr = 0
+      DO jr = 1, ndim_rank_north            ! recover the global north array
+         iproc = nfproc(jr)
+         IF( iproc /= -1 ) THEN
+            impp = nfimpp(jr)
+            ipi  = nfjpi(jr)
+            ijnr = ijnr + 1
+            DO jj = 1-kextj, ipj+kextj
+               DO ji = 1, ipi
+                  ii1 = impp + ji - 1       ! corresponds to mig(ji) but for subdomain iproc
+                  ztab_e(ii1,jj) = znorthgloio_e(ji,jj,ijnr)
+               END DO
+            END DO
+         ENDIF
+      END DO
+
+      ! 2. North-Fold boundary conditions
+      ! ----------------------------------
+      CALL lbc_nfd( ztab_e(:,1-kextj:ipj+kextj), cd_type, psgn, kextj )
+
+      ij = 1 - kextj
+      !! Scatter back to pt2d
+      DO jj = jpj - ipj + 1 - kextj , jpj + kextj
+         DO ji= 1, jpi
+            pt2d(ji,jj) = ztab_e(ji+nimpp-1,ij)
+         END DO
+         ij  = ij +1
+      END DO
+      !
+      DEALLOCATE( ztab_e, znorthloc_e, znorthgloio_e )
+      !
+#endif
+   END SUBROUTINE ROUTINE_LNK 
+
+#    undef PRECISION
+#    undef SENDROUTINE
+#    undef RECVROUTINE
+#    undef MPI_TYPE

@@ -1,0 +1,23 @@
+!-----------------------------------------------------------------------
+&namdta_dyn    !   offline ocean input files                            (OFF_SRC only)
+!-----------------------------------------------------------------------
+
+   cn_dir      = './'      !  root directory for the ocean data location
+
+   !           !  file name              ! frequency (hours) ! variable  ! time interp.!  clim  ! 'yearly'/ !
+   !           !                         !  (if <0  months)  !   name    !   (logical) !  (T/F) ! 'monthly' !
+   sn_tem      = 'dyna_grid_T'           ,       120.        , 'votemper'  ,  .true.   , .true. , 'yearly'  
+   sn_sal      = 'dyna_grid_T'           ,       120.        , 'vosaline'  ,  .true.   , .true. , 'yearly'  
+   sn_mld      = 'dyna_grid_T'           ,       120.        , 'somixhgt'  ,  .true.   , .true. , 'yearly' 
+   sn_emp      = 'dyna_grid_T'           ,       120.        , 'sowaflup'  ,  .true.   , .true. , 'yearly'
+   sn_fmf      = 'dyna_grid_T'           ,       120.        , 'iowaflup'  ,  .true.   , .true. , 'yearly'
+   sn_ice      = 'dyna_grid_T'           ,       120.        , 'soicecov'  ,  .true.   , .true. , 'yearly'
+   sn_qsr      = 'dyna_grid_T'           ,       120.        , 'soshfldo'  ,  .true.   , .true. , 'yearly' 
+   sn_wnd      = 'dyna_grid_T'           ,       120.        , 'sowindsp'  ,  .true.   , .true. , 'yearly' 
+   sn_uwd      = 'dyna_grid_U'           ,       120.        , 'uocetr_eff',  .true.   , .true. , 'yearly'
+   sn_vwd      = 'dyna_grid_V'           ,       120.        , 'vocetr_eff',  .true.   , .true. , 'yearly'
+   sn_wwd      = 'dyna_grid_W'           ,       120.        , 'wocetr_eff',  .true.   , .true. , 'yearly' 
+   sn_avt      = 'dyna_grid_W'           ,       120.        , 'voddmavs'  ,  .true.   , .true. , 'yearly'  
+   sn_ubl      = 'dyna_grid_U'           ,       120.        , 'sobblcox'  ,  .true.   , .true. , 'yearly' 
+   sn_vbl      = 'dyna_grid_V'           ,       120.        , 'sobblcoy'  ,  .true.   , .true. , 'yearly' 
+/

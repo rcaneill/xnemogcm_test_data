@@ -1,0 +1,31 @@
+!-----------------------------------------------------------------------
+&namp5zlim     !   parameters for nutrient limitations PISCES QUOTA    - ln_p5z
+!-----------------------------------------------------------------------
+   concnno3   =  2e-6     ! Nitrate half saturation of nanophytoplankton
+   concpno3   =  7e-7     ! Nitrate half saturation of picophytoplankton
+   concdno3   =  3E-6     ! Phosphate half saturation for diatoms
+   concnnh4   =  2E-6     ! NH4 half saturation for phyto
+   concpnh4   =  7E-7     ! NH4 half saturation for picophytoplankton
+   concdnh4   =  3E-6     ! NH4 half saturation for diatoms
+   concnpo4   =  2E-6     ! PO4 half saturation for phyto
+   concppo4   =  7E-7     ! PO4 half saturation for picophytoplankton
+   concdpo4   =  3E-6     ! PO4 half saturation for diatoms
+   concnfer   =  3E-9     ! Iron half saturation for phyto
+   concpfer   =  1E-9     ! Iron half saturation for picophytoplankton
+   concdfer   =  4.5E-9   ! Iron half saturation for diatoms
+   concbfe    =  3E-11    ! Half-saturation for Fe limitation of Bacteria
+   concbnh4   =  4.E-7    ! NH4 half saturation for phyto
+   concbno3   =  4.E-7    ! Phosphate half saturation for diatoms
+   concbpo4   =  4.E-7    ! Phosphate half saturation for bacteria
+   xsizedia   =  1.E-6    ! Minimum size criteria for diatoms
+   xsizephy   =  1.E-6    ! Minimum size criteria for phyto
+   xsizepic   =  5.E-7    ! Minimum size criteria for picophyto
+   xsizern    =  3.0      ! Size ratio for nanophytoplankton
+   xsizerp    =  2.0      ! Size ratio for picophytoplankton
+   xsizerd    =  4.0      ! Size ratio for diatoms
+   xksi1      =  8.E-6    ! half saturation constant for Si uptake
+   xksi2      =  20E-6    ! half saturation constant for Si/C
+   xkdoc      =  417.E-6  ! half-saturation constant of DOC remineralization
+   caco3r     =  0.3      ! mean rain ratio
+   oxymin     =  1.E-6    ! Half-saturation constant for anoxia
+/

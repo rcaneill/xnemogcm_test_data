@@ -1,0 +1,74 @@
+!-----------------------------------------------------------------------
+&namisf       !  Top boundary layer (ISF)                               (default: OFF)
+!-----------------------------------------------------------------------
+   !
+   ! ---------------- ice shelf load -------------------------------
+   !
+   cn_isfload = 'uniform'      ! scheme to compute ice shelf load (ln_isfcav = .true. in domain_cfg.nc)
+      rn_isfload_T = -1.9
+      rn_isfload_S = 34.4
+   !
+   ! ---------------- ice shelf melt formulation -------------------------------
+   !
+   ln_isf = .false.           ! activate ice shelf module
+      ln_isfdebug = .false.      ! add debug print in ISF code (global min/max/sum of specific variable)
+      cn_isfdir   = './'         ! directory for all ice shelf input file
+      !
+      ! ---------------- cavities opened -------------------------------
+      !
+      ln_isfcav_mlt = .false.    ! ice shelf melting into the cavity (need ln_isfcav = .true. in domain_cfg.nc)
+         cn_isfcav_mlt = '3eq'   ! ice shelf melting formulation (spe/2eq/3eq/oasis)
+         !                       ! spe = fwfisf is read from a forcing field ( melt > 0; freezing < 0 )
+         !                       ! 2eq = ISOMIP  like: 2 equations formulation (Hunter et al., 2006 for a short description)
+         !                       ! 3eq = ISOMIP+ like: 3 equations formulation (Asay-Davis et al., 2016 for a short description)
+         !                       ! oasis = fwfisf is given by oasis and pattern by file sn_isfcav_fwf
+         !              !  cn_isfcav_mlt = 2eq or 3eq cases:
+         cn_gammablk = 'vel'     ! scheme to compute gammat/s (spe,ad15,hj99)
+         !                       ! spe      = constant transfert velocity (rn_gammat0, rn_gammas0)
+         !                       ! vel      = velocity dependent transfert velocity (u* * gammat/s) (Asay-Davis et al. 2016 for a short description)
+         !                       ! vel_stab = velocity and stability dependent transfert coeficient (Holland et al. 1999 for a complete description)
+         rn_gammat0  = 1.4e-2    ! gammat coefficient used in spe, vel and vel_stab gamma computation method
+         rn_gammas0  = 4.0e-4    ! gammas coefficient used in spe, vel and vel_stab gamma computation method
+         !
+         rn_htbl     =  30.      ! thickness of the top boundary layer    (Losh et al. 2008)
+         !                       ! 0 => thickness of the tbl = thickness of the first wet cell
+         !
+         !* 'spe' and 'oasis' case
+         !___________!_____________!___________________!___________!_____________!_________!___________!__________!__________!_______________!
+         !           !  file name  ! frequency (hours) ! variable  ! time interp.!  clim   ! 'yearly'/ ! weights  ! rotation ! land/sea mask !
+         !           !             !  (if <0  months)  !   name    !  (logical)  !  (T/F)  ! 'monthly' ! filename ! pairing  ! filename      !
+         sn_isfcav_fwf = 'isfmlt_cav',      -12.      , 'fwflisf'  ,  .false.    , .true.  , 'yearly'  ,    ''    ,   ''     ,    ''
+      !
+      ! ---------------- cavities parametrised -------------------------------
+      !
+      ln_isfpar_mlt = .false.   ! ice shelf melting parametrised
+         cn_isfpar_mlt = 'spe'  ! ice shelf melting parametrisation (spe/bg03/oasis)
+         !                      ! spe   = fwfisf is read from a forcing field ( melt > 0; freezing < 0 )
+         !                      ! bg03  = melt computed using Beckmann and Goosse parametrisation
+         !                      ! oasis = fwfisf is given by oasis and pattern by file sn_isfpar_fwf
+         !
+         !* bg03 case
+         rn_isfpar_bg03_gt0 = 1.0e-4 ! gamma coeficient used in bg03 paper [m/s]
+         !
+         !*** File definition ***
+         !
+         !* all cases
+         !___________!_____________!___________________!___________!_____________!_________!___________!__________!__________!_______________!
+         !           !  file name  ! frequency (hours) ! variable  ! time interp.!  clim   ! 'yearly'/ ! weights  ! rotation ! land/sea mask !
+         !           !             !  (if <0  months)  !   name    !  (logical)  !  (T/F)  ! 'monthly' ! filename ! pairing  ! filename      !
+         sn_isfpar_zmax = 'isfmlt_par',       0.       ,'sozisfmax',  .false.    , .true.  , 'yearly'  ,    ''    ,   ''     ,    ''
+         sn_isfpar_zmin = 'isfmlt_par',       0.       ,'sozisfmin',  .false.    , .true.  , 'yearly'  ,    ''    ,   ''     ,    ''
+         !
+         !* 'spe' and 'oasis' case
+         sn_isfpar_fwf = 'isfmlt_par' ,      -12.      ,'sofwfisf' ,  .false.    , .true.  , 'yearly'  ,    ''    ,   ''     ,    ''
+         !
+         !* 'bg03' case
+         !* Leff is in [km]
+         sn_isfpar_Leff = 'isfmlt_par',       0.       ,'Leff'     ,  .false.    , .true.  , 'yearly'  ,    ''    ,   ''     ,    ''
+      !
+      ! ---------------- ice sheet coupling -------------------------------
+      !
+      ln_isfcpl = .false.
+         nn_drown       = 10        ! number of iteration of the extrapolation loop (fill the new wet cells)
+         ln_isfcpl_cons = .false.
+/

@@ -1,0 +1,10 @@
+[
+	{
+		"NumberServers": [2, 4],
+		"OneSided": ["false"]
+	},
+	{
+		"NumberServers": [6, 8],
+		"OneSided": ["false"]
+	}
+]

@@ -1,0 +1,6 @@
+!-----------------------------------------------------------------------
+&namc1d        !   1D configuration options                             (ln_c1d =T default: PAPA station)
+!-----------------------------------------------------------------------
+   rn_lat1d    =    50.1   !  Column latitude
+   rn_lon1d    =  -144.9   !  Column longitude
+/

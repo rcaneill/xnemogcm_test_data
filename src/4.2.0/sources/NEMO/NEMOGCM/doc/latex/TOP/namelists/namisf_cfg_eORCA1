@@ -1,0 +1,37 @@
+!-----------------------------------------------------------------------
+&namisf       !  Top boundary layer (ISF)                               (default: OFF)
+!-----------------------------------------------------------------------
+   !
+   ! ---------------- ice shelf melt formulation -------------------------------
+   !
+   ln_isf = .true.           ! activate ice shelf module
+      !
+      ! ---------------- cavities opened -------------------------------
+      !
+      ln_isfcav_mlt = .false.    ! ice shelf melting into the cavity (need ln_isfcav = .true. in domain_cfg.nc)
+         cn_isfcav_mlt = '3eq'   ! ice shelf melting formulation (spe/2eq/3eq/oasis)
+         !                       ! spe = fwfisf is read from a forcing field
+         !                       ! 2eq = ISOMIP  like: 2 equations formulation (Hunter et al., 2006 for a short description)
+         !                       ! 3eq = ISOMIP+ like: 3 equations formulation (Asay-Davis et al., 2016 for a short description
+         rn_htbl     =  30.      ! thickness of the top boundary layer    (Losh et al. 2008)
+         !                       ! 0 => thickness of the tbl = thickness of the first wet cell
+         !
+         !* 'spe' and 'oasis' case
+         !---------------------------------------------------------------------------------------------
+         !           !  file name  ! frequency (hours) ! variable  ! time interp.!  clim   ! 'yearly'/ !
+         !           !             !  (if <0  months)  !   name    !  (logical)  !  (T/F)  ! 'monthly' !
+         sn_isfcav_fwf = 'isfmlt_cav',      -12.      , 'fwflisf'  ,  .false.    , .true.  , 'yearly'  
+      !
+      ! ---------------- cavities parametrised -------------------------------
+      !
+      ln_isfpar_mlt = .true.   ! ice shelf melting parametrised
+         cn_isfpar_mlt = 'spe'  ! ice shelf melting parametrisation (spe/bg03/oasis)
+         !                      ! spe   = fwfisf is read from a forcing field
+         !
+         !---------------------------------------------------------------------------------------------
+         !           !  file name  ! frequency (hours) ! variable  ! time interp.!  clim   ! 'yearly'/ !
+         !           !             !  (if <0  months)  !   name    !  (logical)  !  (T/F)  ! 'monthly' !
+         sn_isfpar_zmax = 'runoff-icb_DaiTrenberth_Depoorter_eORCA1_JD.nc' ,   -12      ,'sodepmax_isf' ,   .false.  , .true.  , 'yearly' 
+         sn_isfpar_zmin = 'runoff-icb_DaiTrenberth_Depoorter_eORCA1_JD.nc' ,   -12      ,'sodepmin_isf' ,   .false.  , .true.  , 'yearly'
+         !* 'spe' and 'oasis' case
+         sn_isfpar_fwf = 'runoff-icb_DaiTrenberth_Depoorter_eORCA1_JD.nc' ,   -12      ,'sornfisf',    .false.      , .true.  , 'yearly'

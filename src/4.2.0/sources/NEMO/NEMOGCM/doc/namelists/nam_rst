@@ -1,0 +1,9 @@
+!-----------------------------------------------------------------------
+&nam_rst     !   parameters for restarting the sediment module
+!-----------------------------------------------------------------------
+   ln_rst_sed   =  .false.         !  restart flag
+   cn_sedrst_in  = "restart_sed"   !  name of the input restart file name of the sediment module
+   cn_sedrst_indir = "."           !  directory from which to read input sediment restarts
+   cn_sedrst_out = "restart_sed"   !  suffix of pass. [sediment] restart name (output)
+   cn_sedrst_outdir = "."          !  directory to which to write output sediment restarts
+/

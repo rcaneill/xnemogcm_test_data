@@ -1,0 +1,24 @@
+module load subversion   2>&1
+module load cmake        2>&1
+module load python/3.7.5 2>&1
+module load cdo/1.9.8    2>&1
+
+CHMOD() { setfacl -m u::rwX,u:rpsl565:rwX,u:rpsl954:rwX,u:rgzi016:rwX,g::r-X,o::r-X,m::rwX "$@" ;}
+export -f CHMOD
+
+export xios_full_machine_name="Jean-Zay"
+#export xios_test_suite_repository=/gpfswork/rech/psl/commun/XIOS_TEST_SUITE_REPOSITORY
+export xios_test_suite_repository=/gpfswork/rech/psl/uim55ri/CI/XIOS_TEST_SUITE_REPOSITORY
+#export xios_thredds_dir=/ccc/work/cont003/thredds/p86yann/XIOS_TEST_SUITE
+#export xios_reference_dir=/gpfswork/rech/psl/commun/XIOS_TEST_SUITE_REPOSITORY
+export xios_reference_dir=/gpfswork/rech/psl/uim55ri/CI/XIOS_TEST_SUITE_REPOSITORY
+
+export ref_location=/gpfswork/rech/psl/rpsl954/reference_dir
+export ref_location=/gpfswork/rech/psl/uim55ri/CI/reference/trunk
+export ref_file=reference.tar.gz
+
+export PYTHON=python
+export user_account="psl@cpu"
+
+mkdir -p $xios_test_suite_repository ; CHMOD $xios_test_suite_repository
+#mkdir -p $xios_thredds_dir ; CHMOD $xios_thredds_dir

@@ -1,0 +1,110 @@
+<!--
+ ============================================================================================== 
+    NEMO context
+============================================================================================== 
+-->
+<context id="nemo">
+    <!-- $id$ -->
+    <variable_definition>
+       <!-- Year/Month/Day of time origin for NetCDF files; defaults to 1800-01-01 -->
+       <variable id="ref_year"  type="int"> 1900 </variable>
+       <variable id="ref_month" type="int"> 01 </variable>
+       <variable id="ref_day"   type="int"> 01 </variable>
+       <variable id="rho0"      type="float" > 1026.0 </variable>
+       <variable id="cpocean"   type="float" > 3991.86795711963 </variable>
+       <variable id="convSpsu"  type="float" > 0.99530670233846  </variable>
+       <variable id="rhoic"     type="float" > 917.0 </variable>
+       <variable id="rhosn"     type="float" > 330.0 </variable>
+       <variable id="missval"  type="float" > 1.e20 </variable>	       
+    </variable_definition>
+
+<!-- Fields definition -->
+    <field_definition src="./field_def_nemo-oce.xml"/>   <!--  NEMO ocean dynamics                     -->
+
+<!-- Override field definitions for multiple-linear-regression analysis (diamlr) -->
+    <field_definition level="1" prec="4" operation="average" enabled=".TRUE." default_value="1.e20" >
+      <field_group id="diamlr_fields">
+        <!-- Time -->
+        <field id="diamlr_time" grid_ref="diamlr_grid_T_2D" prec="8" />
+        <!-- Regressors for tidal harmonic analysis -->
+        <field id="diamlr_r001" field_ref="diamlr_time" expr="sin( __TDE_M2_omega__ * diamlr_time )" enabled=".TRUE."  comment="harmonic:sin:M2" />
+        <field id="diamlr_r002" field_ref="diamlr_time" expr="cos( __TDE_M2_omega__ * diamlr_time )" enabled=".TRUE."  comment="harmonic:cos:M2" />
+        <field id="diamlr_r003" field_ref="diamlr_time" expr="sin( __TDE_K1_omega__ * diamlr_time )" enabled=".TRUE."  comment="harmonic:sin:K1" />
+        <field id="diamlr_r004" field_ref="diamlr_time" expr="cos( __TDE_K1_omega__ * diamlr_time )" enabled=".TRUE."  comment="harmonic:cos:K1" />
+        <field id="diamlr_r005" enabled=".FALSE." />
+        <field id="diamlr_r006" enabled=".FALSE." />
+        <field id="diamlr_r007" enabled=".FALSE." />
+        <field id="diamlr_r008" enabled=".FALSE." />
+        <field id="diamlr_r009" enabled=".FALSE." />
+        <field id="diamlr_r010" enabled=".FALSE." />
+        <field id="diamlr_r011" enabled=".FALSE." />
+        <field id="diamlr_r012" enabled=".FALSE." />
+        <field id="diamlr_r013" enabled=".FALSE." />
+        <field id="diamlr_r014" enabled=".FALSE." />
+        <field id="diamlr_r015" enabled=".FALSE." />
+        <field id="diamlr_r016" enabled=".FALSE." />
+        <field id="diamlr_r017" enabled=".FALSE." />
+        <field id="diamlr_r018" enabled=".FALSE." />
+        <field id="diamlr_r019" enabled=".FALSE." />
+        <field id="diamlr_r020" enabled=".FALSE." />
+        <field id="diamlr_r021" enabled=".FALSE." />
+        <field id="diamlr_r022" enabled=".FALSE." />
+        <field id="diamlr_r023" enabled=".FALSE." />
+        <field id="diamlr_r024" enabled=".FALSE." />
+        <field id="diamlr_r025" enabled=".FALSE." />
+        <field id="diamlr_r026" enabled=".FALSE." />
+        <field id="diamlr_r027" enabled=".FALSE." />
+        <field id="diamlr_r028" enabled=".FALSE." />
+        <field id="diamlr_r029" enabled=".FALSE." />
+        <field id="diamlr_r030" enabled=".FALSE." />
+        <field id="diamlr_r031" enabled=".FALSE." />
+        <field id="diamlr_r032" enabled=".FALSE." />
+        <field id="diamlr_r033" enabled=".FALSE." />
+        <field id="diamlr_r034" enabled=".FALSE." />
+        <field id="diamlr_r035" enabled=".FALSE." />
+        <field id="diamlr_r036" enabled=".FALSE." />
+        <field id="diamlr_r037" enabled=".FALSE." />
+        <field id="diamlr_r038" enabled=".FALSE." />
+        <field id="diamlr_r101" field_ref="diamlr_time" expr="diamlr_time^0.0"                       enabled=".TRUE."  comment="mean"            />
+        <!-- Fields selected for regression analysis -->
+        <field id="diamlr_f001" field_ref="ssh"  enabled=".TRUE." />
+        <field id="diamlr_f002" field_ref="uoce" enabled=".TRUE." />
+        <field id="diamlr_f003" field_ref="voce" enabled=".TRUE." />
+        <field id="diamlr_f004" field_ref="toce" enabled=".TRUE." />
+      </field_group>
+    </field_definition>
+
+<!-- Files definition -->
+    <file_definition src="./file_def_nemo-oce.xml"/>     <!--  NEMO ocean dynamics                     -->
+
+    <file_definition type="multiple_file" name="@expname@_@freq@_@startdate@_@enddate@" sync_freq="10d" min_digits="4">
+
+<!-- Activation of intermediate output for multiple-linear-regression analysis (diamlr) -->
+      <file_group id="diamlr_files" output_freq="1d"  output_level="10" enabled=".TRUE."/>
+
+<!-- Activation and selection of daily detided model diagnostics (diadetide) -->
+      <file_group id="diadetide_files" output_freq="1d" output_level="10" enabled=".TRUE.">
+	<file id="file22" name_suffix="_M2detided_grid_T" description="M2-detided ocean T-grid variables">
+	  <field id="diadetide_ssh"  field_ref="diadetide_weight_grid_T_2D" operation="accumulate"> this * ssh </field>
+	</file>
+	<file id="file23" name_suffix="_M2detided_grid_U" description="M2-detided ocean U-grid variables">
+	  <field id="diadetide_uoce" field_ref="diadetide_weight_grid_U_3D" operation="accumulate"> this * uoce </field>
+	</file>
+	<file id="file24" name_suffix="_M2detided_grid_V" description="M2-detided ocean V-grid variables">
+	  <field id="diadetide_voce"  field_ref="diadetide_weight_grid_V_3D" operation="accumulate"> this * voce </field>
+	</file>
+      </field_group>
+
+    </file_definition>
+
+<!-- Axis definition -->
+    <axis_definition src="./axis_def_nemo.xml"/>
+
+<!-- Domain definition -->
+    <domain_definition src="./domain_def_nemo.xml"/>
+
+<!-- Grids definition -->
+    <grid_definition   src="./grid_def_nemo.xml"/>
+  
+
+</context>

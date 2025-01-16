@@ -1,0 +1,23 @@
+!-----------------------------------------------------------------------
+&nam_poc     !   parameters for the redox reactions of the sediment module
+!-----------------------------------------------------------------------
+   redO2    =  138.    ! Redfield coef for Oxygen
+   redNo3   =  16.     ! Redfield coef for Nitrate
+   redPo4   =  1.      ! Redfield coef for Phosphate
+   redC     =  117.    ! Redfield coef for Carbon
+   redfep   =  0.05    ! Ration of Fe bound P
+   rcorgl   =  10.     ! Reactivity for labile POC [an-1]
+   rcorgs   =  0.1     ! Reactivity for semi-refractory POC [an-1]
+   rcorgr   =  1.E-4   ! Reactivity for refractory POC [an-1]
+   rcnh4    =  1E7     ! Reactivity for O2/NH4 [l.mol-1.an-1]
+   rch2s    =  1E8     ! Reactivity for O2/H2S [l.mol-1.an-1]
+   rcfe2    =  5E8     ! Reactivity for O2/Fe2+ [l.mol-1.an-1]
+   rcfeh2s  =  1E4     ! Reactivity for FEOH/H2S [l.mol-1.an-1]
+   rcfeso   =  2E6     ! Reactivity for FES/O2 [l.mol-1.an-1]
+   rcfesp   =  1E-4    ! Precipitation of FeS [mol.l-1.an-1]
+   rcfesd   =  1.E-3   ! Dissolution of FeS [an-1]
+   xksedo2  =  1.E-6   ! Half-saturation constant for oxic remin [mol/l]
+   xksedno3 =  5.E-6   ! Half-saturation constant for denitrification [mol/l] 
+   xksedfeo =  0.006   ! Half-saturation constant for iron remin [%]
+   xksedso4 =  5E-4    ! Half-saturation constant for SO4 remin [mol/l]
+/

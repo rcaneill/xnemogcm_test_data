@@ -1,0 +1,33 @@
+!-----------------------------------------------------------------------
+&namsbc_abl    !   Atmospheric Boundary Layer formulation           (ln_abl = T)
+!-----------------------------------------------------------------------
+   cn_dir           = './'      !  root directory for the location of the ABL grid file
+   cn_dom           = 'dom_cfg_abl.nc'
+
+   cn_ablrst_in     = "restart_abl"   !  suffix of abl restart name (input)
+   cn_ablrst_out    = "restart_abl"   !  suffix of abl restart name (output)
+   cn_ablrst_indir  = "."             !  directory to read   input abl restarts
+   cn_ablrst_outdir = "."             !  directory to write output abl restarts
+
+   ln_rstart_abl  = .false.
+   ln_hpgls_frc   = .false.
+   ln_geos_winds  = .false.
+   ln_smth_pblh   = .false.
+   nn_dyn_restore = 0         ! restoring option for dynamical ABL variables: = 0 no restoring
+                              !                                               = 1 equatorial restoring
+                              !                                               = 2 global restoring
+   rn_ldyn_min   =  4.5       ! dynamics nudging magnitude inside the ABL [hour] (~3 rn_Dt)
+   rn_ldyn_max   =  1.5       ! dynamics nudging magnitude above  the ABL [hour] (~1 rn_Dt)
+   rn_ltra_min   =  4.5       ! tracers  nudging magnitude inside the ABL [hour] (~3 rn_Dt)
+   rn_ltra_max   =  1.5       ! tracers  nudging magnitude above  the ABL [hour] (~1 rn_Dt)
+   nn_amxl       =  0         ! mixing length: = 0 Deardorff 80 length-scale
+                              !                = 1 length-scale based on the distance to the PBL height
+                              !                = 2 Bougeault & Lacarrere 89 length-scale
+                              ! CBR00  ! CCH02  ! MesoNH !
+   rn_Cm          = 0.0667    ! 0.0667 ! 0.1260 ! 0.1260 !
+   rn_Ct          = 0.1667    ! 0.1667 ! 0.1430 ! 0.1430 !
+   rn_Ce          = 0.40      ! 0.40   ! 0.34   ! 0.40   !
+   rn_Ceps        = 0.700     ! 0.700  ! 0.845  ! 0.850  !
+   rn_Ric         = 0.139     ! 0.139  ! 0.143  !   ?    ! Critical Richardson number (to compute PBL height and diffusivities)
+   rn_Rod         = 0.15      ! c0 in RMCA17 mixing length formulation (not yet implemented)
+/

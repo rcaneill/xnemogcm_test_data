@@ -1,0 +1,76 @@
+%% =================================================================================================
+%% Global custom commands
+%% =================================================================================================
+
+%% \newcommand{<name>}[<args>][<first argument value>]{<code>}
+
+%% Same font for NEMO and its core engines
+\newcommand{\NEMO   }{\textsl{NEMO}}
+\newcommand{\OPA    }{\textsl{OPA}}
+\newcommand{\SIcube }{\textsl{SI$^3$}}
+\newcommand{\TOP    }{\textsl{TOP}}
+\newcommand{\PISCES }{\textsl{PISCES}}
+\newcommand{\NEMOVAR}{\textsl{NEMOVAR}}
+
+%% URL links for consortium institutes and external components
+\newcommand{\CMCC }{\href{http://www.cmcc.it}          }
+\newcommand{\CNRS }{\href{http://www.cnrs.fr}          }
+\newcommand{\MOI  }{\href{http://www.mercator-ocean.fr}}
+\newcommand{\UKMO }{\href{http://www.metoffice.gov.uk} }
+\newcommand{\NERC }{\href{http://nerc.ukri.org}        }
+\newcommand{\AGRIF}{\href{http://agrif.imag.fr                  }{AGRIF}}
+\newcommand{\BFM  }{\href{http://bfm-community.eu               }{BFM}}
+\newcommand{\OASIS}{\href{http://portal.enes.org/oasis          }{OASIS}}
+\newcommand{\XIOS }{\href{http://forge.ipsl.jussieu.fr/ioserver }{XIOS}}
+
+%% Fortran in small capitals
+\newcommand{\fortran}{\textsc{Fortran}}
+\newcommand{\fninety}{\textsc{Fortran 90}}
+
+%% Common aliases
+\renewcommand{\deg}[1][]{\ensuremath{^{\circ}#1}}
+\newcommand{\eg    }{\ensuremath{e.g.}}
+\newcommand{\ie    }{\ensuremath{i.e.}}
+\newcommand{\zstar }{\ensuremath{z^\star}}
+\newcommand{\sstar }{\ensuremath{s^\star}}
+\newcommand{\ztilde}{\ensuremath{\tilde z}}
+\newcommand{\stilde}{\ensuremath{\tilde s}}
+
+%% Gurvan's comments
+\newcommand{\cmtgm}[1]{}
+
+%% Maths: reduce equation
+\newcommand{\fractext}[2]{\textstyle\frac{#1}{#2}}
+\newcommand{\lt}{\left}
+\newcommand{\pd}[2][]{\ensuremath{\frac{\partial #1}{\partial #2}}}
+\newcommand{\rdt}{\Delta t}
+\newcommand{\rt}{\right}
+\newcommand{\vect}[1][]{\ensuremath{\mathbf{#1}}}
+
+%% Retrieve month name
+\renewcommand{\today}{
+  \ifcase \month\or   January\or February\or    March\or    April\or
+                          May\or     June\or     July\or   August\or
+                    September\or  October\or November\or December
+  \fi, \number \year
+}
+
+%% Custom aliases
+\newcommand{\cf}{\ensuremath{C\kern-0.14em f}}
+\newcommand{\rML}[1][i]{\ensuremath{_{\mathrm{ML}\,#1}}}
+\newcommand{\rMLt}[1][i]{\tilde{r}_{\mathrm{ML}\,#1}}
+\newcommand{\triad}[6][]{\ensuremath{{}_{#2}^{#3}{\mathbb{#4}_{#1}}_{#5}^{\,#6}}}
+\newcommand{\triadd}[5]{\ensuremath{{}_{#1}^{#2}{\mathbb{#3}}_{#4}^{\,#5}}}
+\newcommand{\triadt}[5]{\ensuremath{{}_{#1}^{#2}{\tilde{\mathbb{#3}}}_{#4}^{\,#5}}}
+\newcommand{\rtriad}[2][]{\ensuremath{\triad[#1]{i}{k}{#2}{i_p}{k_p}}}
+\newcommand{\rtriadt}[1]{\ensuremath{\triadt{i}{k}{#1}{i_p}{k_p}}}
+
+%% New command for ToC (?)
+\newcommand{\chaptertoc}[1][Table of contents]{
+  \etocsettocstyle{\addsec*{#1}}{}
+  \localtableofcontents
+  \vfill
+}
+
+%% ORCID links
+\newcommand{\orcid}[1]{\href{http://orcid.org/#1}{\textcolor{orcidclr}\aiOrcidSquare}}

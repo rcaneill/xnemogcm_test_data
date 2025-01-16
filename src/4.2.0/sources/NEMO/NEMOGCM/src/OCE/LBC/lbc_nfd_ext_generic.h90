@@ -1,0 +1,120 @@
+
+   SUBROUTINE lbc_nfd_ext_/**/PRECISION( ptab, cd_nat, psgn, kextj )
+      !!----------------------------------------------------------------------
+      REAL(PRECISION), DIMENSION(:,1-kextj:),INTENT(inout) ::   ptab
+      CHARACTER(len=1), INTENT(in   ) ::   cd_nat      ! nature of array grid-points
+      REAL(PRECISION),  INTENT(in   ) ::   psgn        ! sign used across the north fold boundary
+      INTEGER,          INTENT(in   ) ::   kextj       ! extra halo width at north fold
+      !
+      INTEGER  ::    ji,  jj,  jh   ! dummy loop indices
+      INTEGER  ::   ipj
+      INTEGER  ::   ijt, iju, ipjm1
+      !!----------------------------------------------------------------------
+      !
+      SELECT CASE ( jpni )
+      CASE ( 1 )     ;   ipj = jpj        ! 1 proc only  along the i-direction
+      CASE DEFAULT   ;   ipj = 4          ! several proc along the i-direction
+      END SELECT
+      !
+      ipjm1 = ipj-1
+      !
+      IF( c_NFtype == 'T' ) THEN            ! *  North fold  T-point pivot
+         !
+         SELECT CASE ( cd_nat  )
+         CASE ( 'T' , 'W' )                         ! T-, W-point
+            DO jh = 0, kextj
+               DO ji = 2, jpiglo
+                  ijt = jpiglo-ji+2
+                  ptab(ji,ipj+jh) = psgn * ptab(ijt,ipj-2-jh)
+               END DO
+               ptab(1,ipj+jh) = psgn * ptab(3,ipj-2-jh)
+            END DO
+            DO ji = jpiglo/2+1, jpiglo
+               ijt = jpiglo-ji+2
+               ptab(ji,ipjm1) = psgn * ptab(ijt,ipjm1)
+            END DO
+         CASE ( 'U' )                               ! U-point
+            DO jh = 0, kextj
+               DO ji = 2, jpiglo-1
+                  iju = jpiglo-ji+1
+                  ptab(ji,ipj+jh) = psgn * ptab(iju,ipj-2-jh)
+               END DO
+               ptab(   1  ,ipj+jh) = psgn * ptab(    2   ,ipj-2-jh)
+               ptab(jpiglo,ipj+jh) = psgn * ptab(jpiglo-1,ipj-2-jh) 
+            END DO
+            DO ji = jpiglo/2, jpiglo-1
+               iju = jpiglo-ji+1
+               ptab(ji,ipjm1) = psgn * ptab(iju,ipjm1)
+            END DO
+         CASE ( 'V' )                               ! V-point
+            DO jh = 0, kextj
+               DO ji = 2, jpiglo
+                  ijt = jpiglo-ji+2
+                  ptab(ji,ipj-1+jh) = psgn * ptab(ijt,ipj-2-jh)
+                  ptab(ji,ipj+jh  ) = psgn * ptab(ijt,ipj-3-jh)
+               END DO
+               ptab(1,ipj+jh) = psgn * ptab(3,ipj-3-jh) 
+            END DO
+         CASE ( 'F' )                               ! F-point
+            DO jh = 0, kextj
+               DO ji = 1, jpiglo-1
+                  iju = jpiglo-ji+1
+                  ptab(ji,ipj-1+jh) = psgn * ptab(iju,ipj-2-jh)
+                  ptab(ji,ipj+jh  ) = psgn * ptab(iju,ipj-3-jh)
+               END DO
+            END DO
+            DO jh = 0, kextj
+               ptab(   1  ,ipj+jh) = psgn * ptab(    2   ,ipj-3-jh)
+               ptab(jpiglo,ipj+jh) = psgn * ptab(jpiglo-1,ipj-3-jh)
+            END DO
+         END SELECT
+         !
+      ENDIF   ! c_NFtype == 'T'
+      !
+      IF( c_NFtype == 'F' ) THEN            ! *  North fold  F-point pivot
+         !
+         SELECT CASE ( cd_nat  )
+         CASE ( 'T' , 'W' )                         ! T-, W-point
+            DO jh = 0, kextj
+               DO ji = 1, jpiglo
+                  ijt = jpiglo-ji+1
+                  ptab(ji,ipj+jh) = psgn * ptab(ijt,ipj-1-jh)
+               END DO
+            END DO
+         CASE ( 'U' )                               ! U-point
+            DO jh = 0, kextj
+               DO ji = 1, jpiglo-1
+                  iju = jpiglo-ji
+                  ptab(ji,ipj+jh) = psgn * ptab(iju,ipj-1-jh)
+               END DO
+               ptab(jpiglo,ipj+jh) = psgn * ptab(jpiglo-2,ipj-1-jh)
+            END DO
+         CASE ( 'V' )                               ! V-point
+            DO jh = 0, kextj
+               DO ji = 1, jpiglo
+                  ijt = jpiglo-ji+1
+                  ptab(ji,ipj+jh) = psgn * ptab(ijt,ipj-2-jh)
+               END DO
+            END DO
+            DO ji = jpiglo/2+1, jpiglo
+               ijt = jpiglo-ji+1
+               ptab(ji,ipjm1) = psgn * ptab(ijt,ipjm1)
+            END DO
+         CASE ( 'F' )                               ! F-point
+            DO jh = 0, kextj
+               DO ji = 1, jpiglo-1
+                  iju = jpiglo-ji
+                  ptab(ji,ipj+jh  ) = psgn * ptab(iju,ipj-2-jh)
+               END DO
+               ptab(jpiglo,ipj+jh) = psgn * ptab(jpiglo-2,ipj-2-jh)
+            END DO
+            DO ji = jpiglo/2+1, jpiglo-1
+               iju = jpiglo-ji
+               ptab(ji,ipjm1) = psgn * ptab(iju,ipjm1)
+            END DO
+         END SELECT
+         !
+      ENDIF   ! c_NFtype == 'F'
+      !
+   END SUBROUTINE lbc_nfd_ext_/**/PRECISION
+

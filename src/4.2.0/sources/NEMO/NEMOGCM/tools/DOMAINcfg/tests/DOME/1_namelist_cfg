@@ -1,0 +1,94 @@
+!! NEMO/OCE :   Configuration namelist_cfg used to overwrite defaults value defined in namelist_ref
+!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+!! NEMO/OCE  :  1 - Domain & run manager (namrun, namcfg, namdom, namzgr, namzgr_sco )
+!!              2 - diagnostics      (namnc4)
+!!              3 - miscellaneous    (nammpp, namctl)
+!!
+!! namelist skeleton : egrep -E '(^/ *$|^! *$|^ *$|&nam.*|!---.*|!! .*|!!==.*|!!>>>.*)' namelist_ref > namelist_skl
+!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+!-----------------------------------------------------------------------
+&namrun        !   parameters of the run
+!-----------------------------------------------------------------------
+/
+!-----------------------------------------------------------------------
+&namdom        !   space and time domain (bathymetry, mesh, timestep)
+!-----------------------------------------------------------------------
+   ln_read_cfg = .false.
+   nn_bathy = -1 
+                           !  or compute (2) from external bathymetry
+   jphgr_msh   =       2   !  f-plan 
+   ppgphi0     =      43.7 !  reference latitude
+   ppe1_m      =    5000.0 !  zonal      grid-spacing (degrees)
+   ppe2_m      =    5000.0 !  meridional grid-spacing (degrees)
+   ppkth       =       0.0 ! if =0. assume uniform grid over pphmax meters
+   pphmax      =    3600.0 !  Maximum depth
+   rn_e3zps_min=    99999. !  partial step thickness is set larger than the minimum of
+   rn_e3zps_rat=    0.1    !  rn_e3zps_min and rn_e3zps_rat*e3t, with 0<rn_e3zps_rat<1
+/
+!-----------------------------------------------------------------------
+&namcfg        !   parameters of the configuration
+!-----------------------------------------------------------------------
+   !
+   ln_e3_dep   = .true.    ! =T : e3=dk[depth] in discret sens.
+   !                       !      ===>>> will become the only possibility in v4.0
+   !                       ! =F : e3 analytical derivative of depth function
+   !                       !      only there for backward compatibility test with v3.6
+      !                      ! if ln_e3_dep = T
+      ln_dept_mid = .true.   ! =T : set T points in the middle of cells
+   !                       !
+   cp_cfg = 'DOME'
+   jp_cfg      =       5   !  resolution of the configuration
+   jpidta = 168
+   jpjdta = 104
+   jpkdta      =      31   !  number of levels      ( >= jpk )
+   Ni0glo = 168
+   Nj0glo = 104
+   jpkglo      =      31 
+   jperio = 0
+   ln_use_jattr = .false.  !  use (T) the file attribute: open_ocean_jstart, if present
+                           !  in netcdf input files, as the start j-row for reading
+   ln_domclo = .false.     ! computation of closed sea masks (see namclo)
+/
+!-----------------------------------------------------------------------
+&namzgr        !   vertical coordinate                                  (default: NO selection)
+!-----------------------------------------------------------------------
+!-----------------------------------------------------------------------
+   ln_zco      = .false.   !  z-coordinate - full    steps
+   ln_zps      = .false.   !  z-coordinate - partial steps
+   ln_sco      = .true.    !  s- or hybrid z-s-coordinate
+   ln_isfcav   = .false.   !  ice shelf cavity             (T: see namzgr_isf)
+/
+!-----------------------------------------------------------------------
+&namzgr_isf    !   isf cavity geometry definition
+!-----------------------------------------------------------------------
+/
+!-----------------------------------------------------------------------
+&namzgr_sco    !   s-coordinate or hybrid z-s-coordinate                (default F)
+!-----------------------------------------------------------------------
+   ln_s_sh94   = .true.    !  Song & Haidvogel 1994 hybrid S-sigma   (T)|
+                           !  stretching coefficients for all functions
+   rn_sbot_min =  600.0    !  minimum depth of s-bottom surface (>0) (m)
+   rn_sbot_max = 3600.0    !  maximum depth of s-bottom surface (= ocean depth) (>0) (m)
+                        !!!!!!!  Envelop bathymetry
+   rn_rmax     =    1.0    !  maximum cut-off r-value allowed (0<r_max<1)
+                        !!!!!!!  SH94 stretching coefficients  (ln_s_sh94 = .true.)
+   rn_theta    =    0.0    !  surface control parameter (0<=theta<=20)
+   rn_bb       =    0.8    !  stretching with SH94 s-sigma
+/
+!-----------------------------------------------------------------------
+&namclo ! (closed sea : need ln_domclo = .true. in namcfg)
+!-----------------------------------------------------------------------
+/
+!-----------------------------------------------------------------------
+&namlbc        !   lateral momentum boundary condition                  (default: NO selection)
+!-----------------------------------------------------------------------
+/
+!-----------------------------------------------------------------------
+&namagrif      !  AGRIF zoom                                            ("key_agrif")
+!-----------------------------------------------------------------------
+    ln_vert_remap = .true.
+/
+!-----------------------------------------------------------------------
+&namnc4        !   netcdf4 chunking and compression settings            ("key_netcdf4")
+!-----------------------------------------------------------------------
+/

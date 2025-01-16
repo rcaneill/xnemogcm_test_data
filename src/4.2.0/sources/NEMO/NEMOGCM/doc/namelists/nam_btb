@@ -1,0 +1,11 @@
+!-----------------------------------------------------------------------
+&nam_btb     !   parameters for bioturbation and bioirrigation
+!-----------------------------------------------------------------------
+   dbiot       =  8.        ! Bioturbation coefficient (in cm2/yr)
+   ln_btbz     =  .true.    ! Depth varying bioturbation 
+   dbtbzsc     =  5.0       ! coefficient for btb attenuation. If no variation, depth of the mixed layer
+   adsnh4      =  4.16      ! Adsorption coefficient of NH4
+   adsfe2      =  697.0     ! Adsorption coefficient of Fe2
+   ln_irrig    =  .true.    ! Bioirrigation in sediment
+   xirrzsc     =  2.0       ! Vertical scale of the attentuation of bioirrigation [cm]
+/ 

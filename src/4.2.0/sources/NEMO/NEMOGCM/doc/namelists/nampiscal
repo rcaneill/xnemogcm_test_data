@@ -1,0 +1,6 @@
+!-----------------------------------------------------------------------
+&nampiscal     !   parameters for Calcite chemistry
+!-----------------------------------------------------------------------
+   kdca       =  100.     ! calcite dissolution rate constant (1/time)
+   nca        =  4.7      ! order of dissolution reaction (dimensionless)
+/

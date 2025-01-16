@@ -1,0 +1,5 @@
+&TILE_DATA_DEF
+! both offsets should be of the same sign or equal to zero simulteneously
+ioffset=-2
+joffset=-2
+/
