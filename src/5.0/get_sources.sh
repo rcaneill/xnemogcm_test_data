@@ -57,4 +57,6 @@ mkdir -p NEMO
 cd NEMO
 git clone --branch 5.0 https://forge.nemo-ocean.eu/nemo/nemo.git NEMOGCM
 rm -rf NEMOGCM/.git
+rm NEMOGCM/tools/DOMAINcfg/tests/DOME/make_domain_cfg.exe
+rm NEMOGCM/tools/DOMAINcfg/tests/VORTEX/make_domain_cfg.exe
 cd ..
