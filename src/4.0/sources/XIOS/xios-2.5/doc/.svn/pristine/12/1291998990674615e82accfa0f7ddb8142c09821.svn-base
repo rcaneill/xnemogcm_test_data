@@ -1,0 +1,8037 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass book
+\use_default_options true
+\begin_modules
+logicalmkup
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize a4paper
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+XIOS Fortran Reference Guide
+\end_layout
+
+\begin_layout Author
+Yann Meurdesoif
+\end_layout
+
+\begin_layout Chapter
+Attribute reference
+\end_layout
+
+\begin_layout Section
+Context attribute reference
+\end_layout
+
+\begin_layout Section
+Calendar attribute reference
+\end_layout
+
+\begin_layout Subsection*
+type: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+enumeration { Gregorian, Julian, D360, AllLeap, NoLeap, user_defined }
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: type
+\end_layout
+
+\begin_layout Standard
+Define the calendar used for the current context.
+ This attribute is mandatory and cannot be modified once it has been set.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+When using the Fortran interface, this attribute must be defined using the
+ following subroutine:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_define_calendar(type, timestep, start_date, time_origin,
+\begin_inset Newline newline
+\end_inset
+
+                                day_length, month_lengths, year_length,
+\begin_inset Newline newline
+\end_inset
+
+                                leap_year_month, leap_year_drift,
+\begin_inset Newline newline
+\end_inset
+
+                                leap_year_drift_offset)
+\end_layout
+
+\begin_layout Subsection*
+start_date: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+date
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+TYPE(xios_date) :: start_date
+\end_layout
+
+\begin_layout Standard
+Define the start date of the simulation for the current context.
+ This attribute is optional, the default value is 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+
+\series bold
+0000-01-01 00:00:00
+\end_layout
+
+\end_inset
+
+.
+ The 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+type
+\end_layout
+
+\end_inset
+
+ attribute must always be set at the same time or before this attribute
+ is defined.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+A partial date is allowed in the configuration file as long as the omitted
+ parts are at the end, in which case they are initialized as in the default
+ value.
+ Optionally an offset can be added to the date using the notation "
+\emph on
++ duration
+\emph default
+".
+ 
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+When using the Fortran interface, this attribute can be defined at the same
+ time as the calendar 
+\series bold
+type
+\series default
+:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_define_calendar(type, timestep, start_date, time_origin,
+\begin_inset Newline newline
+\end_inset
+
+                                day_length, month_lengths, year_length,
+\begin_inset Newline newline
+\end_inset
+
+                                leap_year_month, leap_year_drift,
+\begin_inset Newline newline
+\end_inset
+
+                                leap_year_drift_offset)
+\end_layout
+
+\begin_layout Standard
+or later using the following subroutine:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_set_start_date(start_date)
+\end_layout
+
+\begin_layout Subsection*
+time_origin: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+date
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+TYPE(xios_date) :: time_origin
+\end_layout
+
+\begin_layout Standard
+Define the time origin of the time axis.
+ It will appear as metadata attached to the time axis in the output file.
+ This attribute is optional, the default value is 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+
+\series bold
+0000-01-01 00:00:00
+\end_layout
+
+\end_inset
+
+.
+ The 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+type
+\end_layout
+
+\end_inset
+
+ attribute must always be set at the same time or before this attribute
+ is defined.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+A partial date is allowed in the configuration file as long as the omitted
+ parts are at the end, in which case they are initialized as in the default
+ value.
+ Optionally an offset can be added to the date using the notation "
+\emph on
++ duration
+\emph default
+".
+ 
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+When using the Fortran interface, this attribute can be defined at the same
+ time as the calendar 
+\series bold
+type
+\series default
+:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_define_calendar(type, timestep, start_date, time_origin,
+\begin_inset Newline newline
+\end_inset
+
+                                day_length, month_lengths, year_length,
+\begin_inset Newline newline
+\end_inset
+
+                                leap_year_month, leap_year_drift,
+\begin_inset Newline newline
+\end_inset
+
+                                leap_year_drift_offset)
+\end_layout
+
+\begin_layout Standard
+or later using the following subroutine:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_set_time_origin(time_origin)
+\end_layout
+
+\begin_layout Subsection*
+timestep: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+duration
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran: 
+\end_layout
+
+\begin_layout LyX-Code
+TYPE(xios_duration) :: timestep
+\end_layout
+
+\begin_layout Standard
+Define the time step of the simulation for the current context.
+ This attribute is mandatory.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+When using the Fortran interface, this attribute can be defined at the same
+ time as the calendar 
+\series bold
+type
+\series default
+:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_define_calendar(type, timestep, start_date, time_origin,
+\begin_inset Newline newline
+\end_inset
+
+                                day_length, month_lengths, year_length,
+\begin_inset Newline newline
+\end_inset
+
+                                leap_year_month, leap_year_drift,
+\begin_inset Newline newline
+\end_inset
+
+                                leap_year_drift_offset)
+\end_layout
+
+\begin_layout Standard
+or using the following subroutine:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_set_timestep(timestep)
+\end_layout
+
+\begin_layout Subsection*
+day_length: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+integer
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran: 
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: day_length
+\end_layout
+
+\begin_layout Standard
+Define the duration of a day, in seconds, when using a custom calendar.
+ This attribute is mandatory if the calendar 
+\series bold
+type
+\series default
+ is set to "
+\emph on
+user_defined
+\emph default
+", otherwise it must not be defined.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+When using the Fortran interface, this attribute must be defined at the
+ same time as the calendar 
+\series bold
+type
+\series default
+:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_define_calendar(type, timestep, start_date, time_origin,
+\begin_inset Newline newline
+\end_inset
+
+                                day_length, month_lengths, year_length,
+\begin_inset Newline newline
+\end_inset
+
+                                leap_year_month, leap_year_drift,
+\begin_inset Newline newline
+\end_inset
+
+                                leap_year_drift_offset)
+\end_layout
+
+\begin_layout Subsection*
+month_lengths: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+1D-array of integer
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran: 
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: month_lengths(:)
+\end_layout
+
+\begin_layout Standard
+Define the duration of each month, in days, when using a custom calendar.
+ The number of elements in the array defines the number of months in a year
+ and the sum of all elements is the total number of days in a year.
+ This attribute is mandatory if the calendar 
+\series bold
+type
+\series default
+ is set to 
+\series bold
+\emph on
+user_defined
+\series default
+\emph default
+ and the 
+\series bold
+year_length
+\series default
+ attribute is not used, otherwise it must not be defined.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+When using the Fortran interface, this attribute must be defined at the
+ same time as the calendar 
+\series bold
+type
+\series default
+:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_define_calendar(type, timestep, start_date, time_origin,
+\begin_inset Newline newline
+\end_inset
+
+                                day_length, month_lengths, year_length,
+\begin_inset Newline newline
+\end_inset
+
+                                leap_year_month, leap_year_drift,
+\begin_inset Newline newline
+\end_inset
+
+                                leap_year_drift_offset)
+\end_layout
+
+\begin_layout Subsection*
+year_length: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+integer
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran: 
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: year_length
+\end_layout
+
+\begin_layout Standard
+Define the duration of a year, in seconds, when using a custom calendar.
+ This attribute is mandatory if the calendar 
+\series bold
+type
+\series default
+ is set to 
+\series bold
+\emph on
+user_defined
+\series default
+\emph default
+ and the 
+\series bold
+month_lengths
+\series default
+ attribute is not used, otherwise it must not be defined.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Note that the date format is modified when using this attribute: the month
+ must be always be omitted and the day must also be omitted if 
+\begin_inset Formula $year\_length\leq day\_length$
+\end_inset
+
+.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+When using the Fortran interface, this attribute must be defined at the
+ same time as the calendar 
+\series bold
+type
+\series default
+:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_define_calendar(type, timestep, start_date, time_origin,
+\begin_inset Newline newline
+\end_inset
+
+                                day_length, month_lengths, year_length,
+\begin_inset Newline newline
+\end_inset
+
+                                leap_year_month, leap_year_drift,
+\begin_inset Newline newline
+\end_inset
+
+                                leap_year_drift_offset)
+\end_layout
+
+\begin_layout Subsection*
+leap_year_month: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+integer
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran: 
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: leap_year_month
+\end_layout
+
+\begin_layout Standard
+Define the month to which the extra day will be added in case of leap year,
+ when using a custom calendar.
+ This attribute is optional if the calendar 
+\series bold
+type
+\series default
+ is set to 
+\series bold
+\emph on
+user_defined
+\series default
+\emph default
+ and the 
+\series bold
+month_lengths
+\series default
+ attribute is used, otherwise it must not be defined.
+ The default behaviour is not to have any leap year.
+ If defined, this attribute must comply with the following constraint: 
+\begin_inset Formula $1\leq leap\_year\_month\leq size(month\_lengths)$
+\end_inset
+
+ and the 
+\series bold
+leap_year_drift
+\series default
+ attribute must also be defined.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+When using the Fortran interface, this attribute must be defined at the
+ same time as the calendar 
+\series bold
+type
+\series default
+:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_define_calendar(type, timestep, start_date, time_origin,
+\begin_inset Newline newline
+\end_inset
+
+                                day_length, month_lengths, year_length,
+\begin_inset Newline newline
+\end_inset
+
+                                leap_year_month, leap_year_drift,
+\begin_inset Newline newline
+\end_inset
+
+                                leap_year_drift_offset)
+\end_layout
+
+\begin_layout Subsection*
+leap_year_drift: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+double
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran: 
+\end_layout
+
+\begin_layout LyX-Code
+DOUBLE PRECISION :: leap_year_drift
+\end_layout
+
+\begin_layout Standard
+Define the yearly drift, expressed as a fraction of a day, between the calendar
+ year and the astronomical year, when using a custom calendar.
+ This attribute is optional if the calendar 
+\series bold
+type
+\series default
+ is set to 
+\series bold
+\emph on
+user_defined
+\series default
+\emph default
+ and the 
+\series bold
+month_lengths
+\series default
+ attribute is used, otherwise it must not be defined.
+ The default behaviour is not to have any leap year, i.e.
+ the default value is 
+\begin_inset Formula $\mathbf{0}$
+\end_inset
+
+.
+ If defined, this attribute must comply with the following constraint: 
+\begin_inset Formula $0\leq leap\_year\_drift<1$
+\end_inset
+
+ and the 
+\series bold
+leap_year_month
+\series default
+ attribute must also be defined.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+When using the Fortran interface, this attribute must be defined at the
+ same time as the calendar 
+\series bold
+type
+\series default
+:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_define_calendar(type, timestep, start_date, time_origin,
+\begin_inset Newline newline
+\end_inset
+
+                                day_length, month_lengths, year_length,
+\begin_inset Newline newline
+\end_inset
+
+                                leap_year_month, leap_year_drift,
+\begin_inset Newline newline
+\end_inset
+
+                                leap_year_drift_offset)
+\end_layout
+
+\begin_layout Subsection*
+leap_year_drift_offset: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+double
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran: 
+\end_layout
+
+\begin_layout LyX-Code
+DOUBLE PRECISION :: leap_year_drift_offset
+\end_layout
+
+\begin_layout Standard
+Define the initial drift between the calendar year and the astronomical
+ year, expressed as a fraction of a day, at the beginning of the time origin's
+ year, when using a custom calendar.
+ This attribute is optional if the 
+\series bold
+leap_year_month
+\series default
+ and 
+\series bold
+leap_year_drift
+\series default
+ attributes are used, otherwise it must not be defined.
+ The default value is 
+\begin_inset Formula $\mathbf{0}$
+\end_inset
+
+.
+ If defined, this attribute must comply with the following constraint: 
+\begin_inset Formula $0\leq leap\_year\_drift\_offset<1$
+\end_inset
+
+.
+ If 
+\begin_inset Formula $leap\_yeap\_drift\_offset+leap\_yeap\_drift$
+\end_inset
+
+ is greater or equal to 1, then the first year will be a leap year.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+When using the Fortran interface, this attribute must be defined at the
+ same time as the calendar 
+\series bold
+type
+\series default
+:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_define_calendar(type, timestep, start_date, time_origin,
+\begin_inset Newline newline
+\end_inset
+
+                                day_length, month_lengths, year_length,
+\begin_inset Newline newline
+\end_inset
+
+                                leap_year_month, leap_year_drift,
+\begin_inset Newline newline
+\end_inset
+
+                                leap_year_drift_offset)
+\end_layout
+
+\begin_layout Section
+Axis attribute reference
+\end_layout
+
+\begin_layout Subsection*
+name: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+string
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran: 
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: name
+\end_layout
+
+\begin_layout Standard
+Define the name of the vertical axis, as it will appear in a file.
+ If not defined, a name is self generated from the id.
+ If multiple vertical axis are defined in a same file, each name must be
+ different.
+ 
+\end_layout
+
+\begin_layout Subsection*
+standard_name: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+string
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran: 
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: standard_name
+\end_layout
+
+\begin_layout Standard
+Define the standard name of the vertical axis, as it will appear in the
+ metadata attached to the axis of the output file.
+ 
+\end_layout
+
+\begin_layout Subsection*
+long_name: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+string
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran: 
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: long_name
+\end_layout
+
+\begin_layout Standard
+Define the long name of the vertical axis, as it will appear in the metadata
+ attached to the axis of the output file.
+ 
+\end_layout
+
+\begin_layout Subsection*
+unit: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+string
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran: 
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: unit
+\end_layout
+
+\begin_layout Standard
+Define the unit of the axis as it will appear in the metadata attached to
+ the axis in the output file.
+\end_layout
+
+\begin_layout Subsection*
+n_glo: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+integer
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: n_glo
+\end_layout
+
+\begin_layout Standard
+Define the global size of the axis.
+ This attribute is mandatory.
+\end_layout
+
+\begin_layout Subsection*
+begin: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+integer
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: begin
+\end_layout
+
+\begin_layout Standard
+Define the the beginning index of the local domain.
+ This attribute is optional.
+ This must be an index between 0 and 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+n_glo-1
+\end_layout
+
+\end_inset
+
+.
+ If not specified the default value is 0.
+\end_layout
+
+\begin_layout Subsection*
+n: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+integer
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: zoom_size
+\end_layout
+
+\begin_layout Standard
+Define the the local size of the axis.
+ This attribute is optional.
+ This must be an integer between 1 and 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+n_glo
+\end_layout
+
+\end_inset
+
+.
+ If not specified the default value is 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+n_glo
+\end_layout
+
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Subsection*
+value: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+1D-array of double
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+DOUBLE PRECISION :: value(:)
+\end_layout
+
+\begin_layout Standard
+Define the value of each level of a vertical axis.
+ The size of the array must be equal to the 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+size
+\end_layout
+
+\end_inset
+
+ attribute.
+ If not defined the default values are filled with values from 1 to 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+size
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+bounds: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+2D-array of double
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+DOUBLE PRECISION :: value(:,:)
+\end_layout
+
+\begin_layout Standard
+Define the boundaries of each level of a the vertical axis.
+ The dimensions of the array must be 
+\begin_inset Formula $2\times n$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+data_begin:
+\emph on
+ integer
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: data_begin
+\end_layout
+
+\begin_layout Standard
+Define the beginning index of the field data for the axis.
+ This attribute is an offset regarding the local axis, so the value can
+ be negative.
+ A negative value indicates that only some valid part of the data will extracted
+, for example in the case of a ghost cell.
+ A positive value indicates that the local domain is greater than the data
+ stored in memory.
+ A 0-value means that the local domain matches the data in memory.
+ This attribute is optional and the default value is 0.
+ Otherwise 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+data_begin
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+data_n
+\end_layout
+
+\end_inset
+
+ must be defined together.
+\end_layout
+
+\begin_layout Subsection*
+data_n: 
+\emph on
+integer
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: data_n
+\end_layout
+
+\begin_layout Standard
+Define the size of the field data for the first axis.
+ This attribute is optional and the default value is 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+n
+\end_layout
+
+\end_inset
+
+.
+ Otherwise 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+data_begin
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+data_n
+\end_layout
+
+\end_inset
+
+ must be defined together.
+\end_layout
+
+\begin_layout Subsection*
+data_index: 
+\emph on
+integer
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: data_index
+\end_layout
+
+\begin_layout Standard
+In case of a compressed vertical axis, this attribute define the number
+ of points stored in memory on the local axis.
+\end_layout
+
+\begin_layout Subsection*
+mask: 
+\emph on
+1D-array of bool
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+LOGICAL :: mask(:)
+\end_layout
+
+\begin_layout Standard
+Define the mask of the local axis.
+ The masked value will be replaced by the value of the field attribute 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+default_value
+\end_layout
+
+\end_inset
+
+ in the output file.
+\end_layout
+
+\begin_layout Subsection*
+n_distributed_partition: 
+\emph on
+integer
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: n_distributed_partition
+\end_layout
+
+\begin_layout Standard
+Define the number of local axis in case axis is auto-generated.
+ This attribute is optional and the default value is 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+positive: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+enumeration { up, down }
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: positive
+\end_layout
+
+\begin_layout Standard
+Define the direction of vertical axis.
+\end_layout
+
+\begin_layout Subsection*
+axis_ref: string
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: axis_ref
+\end_layout
+
+\begin_layout Standard
+Define the reference of the axis.
+ All attributes are inherited from the referenced axis with the classical
+ inheritance mechanism.
+ The value assigned to the referenced axis is transmitted to to current
+ axis.
+ This attribute is optional.
+\end_layout
+
+\begin_layout Subsection*
+index: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+1D-array of double
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+DOUBLE PRECISION :: index(:)
+\end_layout
+
+\begin_layout Standard
+Define the global index of axis which the local axis holds.
+ This attribute is optional and the size of the array is equal to 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+n
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+Domain attribute reference
+\end_layout
+
+\begin_layout Subsection*
+name: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+string
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: name
+\end_layout
+
+\begin_layout Standard
+Define the name of the horizontal domain.
+ This attribute may be used in case of multiple domains defined in the same
+ file.
+ In this case, the 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+name
+\end_layout
+
+\end_inset
+
+ attribute will be suffixed to the longitude and latitude dimensions and
+ axis name.
+ Otherwise, a suffix will be self-generated.
+\end_layout
+
+\begin_layout Subsection*
+standard_name: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+string
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran: 
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: standard_name
+\end_layout
+
+\begin_layout Standard
+Define the standard name of the domain, as it will appear in the metadata
+ attached to the domain of the output file.
+ 
+\end_layout
+
+\begin_layout Subsection*
+long_name: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+string
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran: 
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: long_name
+\end_layout
+
+\begin_layout Standard
+Define the long name of the domain, as it will appear in the metadata attached
+ to the domain of the output file.
+ 
+\end_layout
+
+\begin_layout Subsection*
+type: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+enumeration { rectilinear, curvilinear, unstructured }
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: type
+\end_layout
+
+\begin_layout Standard
+Define the type of the grid.
+ This attribute is mandatory.
+\end_layout
+
+\begin_layout Subsection*
+ni_glo: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+integer
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: ni_glo
+\end_layout
+
+\begin_layout Standard
+Define the first dimension of the global domain.
+ This attribute is mandatory.
+\end_layout
+
+\begin_layout Subsection*
+nj_glo: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+integer
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: nj_glo
+\end_layout
+
+\begin_layout Standard
+Define the second dimension of the global domain.
+ This attribute is mandatory.
+\end_layout
+
+\begin_layout Subsection*
+ibegin: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+integer
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: ibegin
+\end_layout
+
+\begin_layout Standard
+Define the begining index of the first dimension of the local domain.
+ This attribute is optional.
+ This must be an integer between 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+ni_glo-1
+\end_layout
+
+\end_inset
+
+.
+ If not specified the default value is 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+ni: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+integer
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: ni
+\end_layout
+
+\begin_layout Standard
+Define the first dimension of the local domain.
+ This attribute is optional.
+ This must be an integer between 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+
+and 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+ni_glo
+\end_layout
+
+\end_inset
+
+.
+ If not specified the default value is 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+ni_glo
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+jbegin: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+integer
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: jbegin
+\end_layout
+
+\begin_layout Standard
+Define the beginning index of the second dimension of the local domain.
+ This attribute is optional.
+ This must be an integer between 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+nj_glo-1
+\end_layout
+
+\end_inset
+
+.
+ If not specified the default value is 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+nj: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+integer
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: nj
+\end_layout
+
+\begin_layout Standard
+Define the second dimension of the local domain.
+ This attribute is optional.
+ This must be an integer between 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+
+and 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+nj_glo
+\end_layout
+
+\end_inset
+
+.
+ If not specified the default value is 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+nj_glo
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+lonvalue_1d: 
+\emph on
+1D-array of double
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+DOUBLE PRECISION :: lonvalue(:)
+\end_layout
+
+\begin_layout Standard
+Define the value of the longitude on the local domain.
+ For a cartesian grid, the size of the array will be 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+ni
+\end_layout
+
+\end_inset
+
+.
+ For a curvilinear grid, the size of the array will be 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+ni
+\begin_inset Formula $\times$
+\end_inset
+
+nj
+\end_layout
+
+\end_inset
+
+.
+ This attribute is optional.
+\end_layout
+
+\begin_layout Subsection*
+lonvalue_2d: 
+\emph on
+2D-array of double
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+DOUBLE PRECISION :: lonvalue(:,:)
+\end_layout
+
+\begin_layout Standard
+Define the value of the longitude on the local domain.
+ For a cartesian and curvilinear grid, the size of the array will be 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+ni
+\begin_inset Formula $\times$
+\end_inset
+
+nj
+\end_layout
+
+\end_inset
+
+.
+ This attribute is mandatory.
+ Only lonvalue_1d or lonvalue_2d can be defined.
+\end_layout
+
+\begin_layout Subsection*
+latvalue_1d: 
+\emph on
+1D-array of double
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+DOUBLE PRECISION :: latvalue(:)
+\end_layout
+
+\begin_layout Standard
+Define the value of the latitude on the local domain.
+ For a cartesian grid, the size of the array will be nj.
+ For a curvilinear grid, the size of the array will be 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+ni
+\begin_inset Formula $\times$
+\end_inset
+
+nj
+\end_layout
+
+\end_inset
+
+.
+ This attribute is optional.
+\end_layout
+
+\begin_layout Subsection*
+latvalue_2d: 
+\emph on
+2D-array of double
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+DOUBLE PRECISION :: latvalue(:,:)
+\end_layout
+
+\begin_layout Standard
+Define the value of the latitude on the local domain.
+ For a cartesian and a curvilinear grid, the size of the array will be 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+ni
+\begin_inset Formula $\times$
+\end_inset
+
+nj
+\end_layout
+
+\end_inset
+
+.
+ This attribute is mandatory.
+ Only latvalue_1d or latvalue_2d can be defined.
+\end_layout
+
+\begin_layout Subsection*
+nvertex: 
+\emph on
+integer
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: nvertex
+\end_layout
+
+\begin_layout Standard
+Define the the maximum number of vertices for a cell.
+ This is useful to specify the boundaries of cells for an unstructured mesh.
+ This attribute is optional.
+\end_layout
+
+\begin_layout Subsection*
+bounds_lon_1d: 
+\emph on
+2D-array of double
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+DOUBLE PRECISION :: bounds_lon(:,:)
+\end_layout
+
+\begin_layout Standard
+Longitude value of the vertex of the cells.
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+nvertex
+\end_layout
+
+\end_inset
+
+ attribute must also be defined.
+ This attribute is optional.
+\end_layout
+
+\begin_layout Subsection*
+bounds_lon_2d: 
+\emph on
+3D-array of double
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+DOUBLE PRECISION :: bounds_lon(:,:,:)
+\end_layout
+
+\begin_layout Standard
+Longitude value of the vertex of the cells.
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+nvertex
+\end_layout
+
+\end_inset
+
+ attribute must also be defined.
+ This attribute is optional.
+ This attribute is useful when lonvalue_2d is defined.
+ Only bounds_lon_1d or bounds_lon_2d can be defined.
+\end_layout
+
+\begin_layout Subsection*
+bounds_lat_1d: 
+\emph on
+2D-array of double
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+DOUBLE PRECISION :: bounds_lat(:,:)
+\end_layout
+
+\begin_layout Standard
+Latitude value of the vertex of the cells.
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+nvertex
+\end_layout
+
+\end_inset
+
+ attribute must also be defined.
+ This attribute is optional.
+\end_layout
+
+\begin_layout Subsection*
+bounds_lat_2d: 
+\emph on
+3D-array of double
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+DOUBLE PRECISION :: bounds_lat(:,:)
+\end_layout
+
+\begin_layout Standard
+Latitude value of the vertex of the cells.
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+nvertex
+\end_layout
+
+\end_inset
+
+ attribute must also be defined.
+ This attribute is optional.
+ This attribute is useful when latvalue_2d is defined.
+ Only bounds_lat_1d or bounds_lat_2d can be defined.
+\end_layout
+
+\begin_layout Subsection*
+area: 
+\emph on
+2D-array of double
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+DOUBLE PRECISION :: area(:,:)
+\end_layout
+
+\begin_layout Standard
+Area of the cells.
+ The size of the array must be 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+ni
+\begin_inset Formula $\times$
+\end_inset
+
+nj
+\end_layout
+
+\end_inset
+
+.
+ This attribute is optional.
+\end_layout
+
+\begin_layout Subsection*
+data_dim: 
+\emph on
+integer
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: datadim
+\end_layout
+
+\begin_layout Standard
+Define how a field is stored on memory for the client code.
+ 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+datadim
+\end_layout
+
+\end_inset
+
+ value can be 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+
+ or 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+2
+\end_layout
+
+\end_inset
+
+.
+ A value of 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+
+ indicates that the horizontal layer of the field is stored on a 1D array
+ as a vector of points.
+ A value of 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+2
+\end_layout
+
+\end_inset
+
+ indicates that the horizontal layer is stored in a 2D array.
+ This attribute is optional.
+ The default value is 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+data_ibegin:
+\emph on
+ integer
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: data_ibegin
+\end_layout
+
+\begin_layout Standard
+Define the beginning index of the field data for the first dimension.
+ This attribute is an offset regarding the local domain, so the value can
+ be negative.
+ A negative value indicates that only some valid part of the data will extracted
+, for example in the case of a ghost cell.
+ A positive value indicates that the local domain is greater than the data
+ stored in memory.
+ A 0-value means that the local domain matches the data in memory.
+ This attribute is optional and the default value is 0.
+ Otherwise 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+data_ibegin
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+data_ni
+\end_layout
+
+\end_inset
+
+ must be defined together.
+\end_layout
+
+\begin_layout Subsection*
+data_ni: 
+\emph on
+integer
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: data_ni
+\end_layout
+
+\begin_layout Standard
+Define the size of the field data for the first dimension.
+ This attribute is optional and the default value is 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+ni
+\end_layout
+
+\end_inset
+
+.
+ Otherwise 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+data_ibegin
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+data_ni
+\end_layout
+
+\end_inset
+
+ must be defined together.
+\end_layout
+
+\begin_layout Subsection*
+data_jbegin: 
+\emph on
+integer
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: data_jbegin
+\end_layout
+
+\begin_layout Standard
+Define the beginning index of the field data for the second dimension.
+ This attribute is take account only if
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+ data_dim=2
+\end_layout
+
+\end_inset
+
+.
+ This attribute is an offset regarding the local domain, so the value can
+ be negative.
+ A negative value indicate that only some valid part of the data will extracted,
+ for example in case of ghost cell.
+ A positive value indicate that the local domain is greater than the data
+ stored in memory.
+ A 0-value means that the local domain match the data in memory.
+ This attribute is optional and the default value is 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+
+.
+ Otherwise 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+data_jbegin
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+data_nj
+\end_layout
+
+\end_inset
+
+ must be defined together.
+\end_layout
+
+\begin_layout Subsection*
+data_nj: 
+\emph on
+integer
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: data_nj
+\end_layout
+
+\begin_layout Standard
+Define the size of the field data for the second dimension.
+ This attribute is taken account only if 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+data_dim=2
+\end_layout
+
+\end_inset
+
+.
+ This attribute is optional and the default value is 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+nj
+\end_layout
+
+\end_inset
+
+.
+ Otherwise 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+data_jbegin
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+data_nj
+\end_layout
+
+\end_inset
+
+ must be defined together.
+\end_layout
+
+\begin_layout Subsection*
+data_i_index: 
+\emph on
+1D-array of integer
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: data_i_index(:)
+\end_layout
+
+\begin_layout Standard
+In case of a compressed horizontal domain, define the indexation the indexation
+ of the data for the first dimension.
+ The size of the array must be 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+data_nindex
+\end_layout
+
+\end_inset
+
+.
+ This attribute is optional.
+\end_layout
+
+\begin_layout Subsection*
+data_j_index: 
+\emph on
+1D-array of integer
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: data_j_index(:)
+\end_layout
+
+\begin_layout Standard
+In case of a compressed horizontal domain, define the indexation the indexation
+ of the data for the second dimension.
+ This is meaningful only if 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+data_dim=2
+\end_layout
+
+\end_inset
+
+.
+ This attribute is optional.
+\end_layout
+
+\begin_layout Subsection*
+mask_1d: 
+\emph on
+1D-array of bool
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+LOGICAL :: mask(:)
+\end_layout
+
+\begin_layout Standard
+Define the 1-dimension mask of the local domain.
+ The attribute is optional.
+ By default, none value is masked.
+ The masked value will be replaced by the value of the field attribute 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+default_value
+\end_layout
+
+\end_inset
+
+ in the output file.
+ This value is useful in case a field is stored linearly in memory.
+ This attribute is optional.
+\end_layout
+
+\begin_layout Subsection*
+mask_2d: 
+\emph on
+2D-array of bool
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+LOGICAL :: mask(:,:)
+\end_layout
+
+\begin_layout Standard
+Define the mask of the local domain.
+ The attribute is optional.
+ By default, none value is masked.
+ The masked value will be replaced by the value of the field attribute 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+default_value
+\end_layout
+
+\end_inset
+
+ in the output file.
+ Only mask_2d or mask_1d can be defined.
+\end_layout
+
+\begin_layout Subsection*
+domain_ref: string
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: domain_ref
+\end_layout
+
+\begin_layout Standard
+Define the reference of the domain.
+ All attributes are inherited from the referenced domain with the classic
+ inheritance mechanism.
+ The value assigned to the referenced domain is transmitted to to current
+ domain.
+ This attribute is optional.
+\end_layout
+
+\begin_layout Subsection*
+i_index: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+1D-array of double
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+DOUBLE PRECISION :: i_index(:)
+\end_layout
+
+\begin_layout Standard
+Define the global index of the first dimension of domain which the local
+ domain holds.
+ This attribute is optional and by default, the size of the array is equal
+ to 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+ni*nj
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+j_index: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+1D-array of double
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+DOUBLE PRECISION :: j_index(:)
+\end_layout
+
+\begin_layout Standard
+Define the global index of the second dimension of domain which the local
+ domain holds.
+ This attribute is optional and by default, the size of the array is equal
+ to 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+ni*nj
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+Grid attribute reference
+\end_layout
+
+\begin_layout Subsection*
+name: string
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: name
+\end_layout
+
+\begin_layout Standard
+Define the name of the grid.
+ This attribute is actually not used internally.
+ Optional attribute.
+\end_layout
+
+\begin_layout Subsection*
+description: string
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: description
+\end_layout
+
+\begin_layout Standard
+Define the description of the grid.
+ This attribute is optional.
+\end_layout
+
+\begin_layout Subsection*
+mask_1d: 
+\emph on
+1D-array of bool
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+LOGICAL :: mask_1d(:)
+\end_layout
+
+\begin_layout Standard
+Define the mask of the local 1-dimension grid.
+ Masked value will be replaced by the value of the field attribute 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+default_value
+\end_layout
+
+\end_inset
+
+ in the output file.
+ This attribute is optional.
+ By default, none value is masked.
+\end_layout
+
+\begin_layout Subsection*
+mask_2d: 
+\emph on
+2D-array of bool
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+LOGICAL :: mask_2d(:,:)
+\end_layout
+
+\begin_layout Standard
+Define the mask of the local 2-dimension grid.
+ Masked value will be replaced by the value of the field attribute 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+default_value
+\end_layout
+
+\end_inset
+
+ in the output file.
+ This attribute is optional.
+ By default, none value is masked.
+\end_layout
+
+\begin_layout Subsection*
+mask_3d: 
+\emph on
+3D-array of bool
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+LOGICAL :: mask_3d(:,:,:)
+\end_layout
+
+\begin_layout Standard
+Define the mask of the local 3-dimension grid.
+ Masked value will be replaced by the value of the field attribute 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+default_value
+\end_layout
+
+\end_inset
+
+ in the output file.
+ This attribute is optional.
+ By default, none value is masked.
+ Only one mask can be defined.
+\end_layout
+
+\begin_layout Section
+Field attribute reference
+\end_layout
+
+\begin_layout Subsection*
+name: 
+\emph on
+string
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: name
+\end_layout
+
+\begin_layout Standard
+Define the 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+name
+\end_layout
+
+\end_inset
+
+ of the field as it will appear in an output file.
+ This attribute is optional.
+ If not present, the identifier 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+id
+\end_layout
+
+\end_inset
+
+ will be substituted.
+\end_layout
+
+\begin_layout Subsection*
+standard_name: 
+\emph on
+string
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: standard_name
+\end_layout
+
+\begin_layout Standard
+Define the 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+standard_name
+\end_layout
+
+\end_inset
+
+ attribute as it will appear in the metadata of an output file.
+ This attribute is optional.
+\end_layout
+
+\begin_layout Subsection*
+long_name: 
+\emph on
+string
+\end_layout
+
+\begin_layout Standard
+Fortran: 
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: long_name
+\end_layout
+
+\begin_layout Standard
+Define the 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+long_name
+\end_layout
+
+\end_inset
+
+ attribute as it will appear in the metadata of an output file.
+ This attribute is optional.
+\end_layout
+
+\begin_layout Subsection*
+unit: 
+\emph on
+string
+\end_layout
+
+\begin_layout Standard
+Fortran: 
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: unit
+\end_layout
+
+\begin_layout Standard
+Define the 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+unit
+\end_layout
+
+\end_inset
+
+ of the field.
+ This attribute is optional.
+\end_layout
+
+\begin_layout Subsection*
+operation: enumeration
+\emph on
+ { once, instant, average, maximum, minimum, accumulate }
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: operation
+\end_layout
+
+\begin_layout Standard
+Define the temporal operation applied on the field.
+ This attribute is optional, by default no operation is applied.
+\end_layout
+
+\begin_layout Subsection*
+freq_op: 
+\emph on
+duration
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+TYPE(xios_duration) :: freq_op
+\end_layout
+
+\begin_layout Standard
+Define the frequency of the sampling for the temporal operation, so a field
+ value will be used for temporal averaging every 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+freq_op
+\end_layout
+
+\end_inset
+
+ time step.
+ It is very useful for sub-processes called at different frequency in a
+ model.
+ This attribute is optional, the default value is 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+1ts
+\end_layout
+
+\end_inset
+
+(1 time step).
+\end_layout
+
+\begin_layout Subsection*
+freq_offset: 
+\emph on
+duration
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+TYPE(xios_duration) :: freq_offset
+\end_layout
+
+\begin_layout Standard
+Define the offset when 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+freq_op
+\end_layout
+
+\end_inset
+
+ is defined.
+ This attribute is optional, the default value is 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+0ts
+\end_layout
+
+\end_inset
+
+(0 time step).
+\end_layout
+
+\begin_layout Standard
+\begin_inset Formula $0\leq freq\_offset<freq\_op$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+level: 
+\emph on
+integer
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: level
+\end_layout
+
+\begin_layout Standard
+Define the level of output of the field.
+ A field will be output only if the file attribute
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+ output_level 
+\begin_inset Formula $\geq$
+\end_inset
+
+level
+\end_layout
+
+\end_inset
+
+.
+ This attribute is optional, the default value is 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+prec: 
+\emph on
+integer
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: prec
+\end_layout
+
+\begin_layout Standard
+Define the precision in byte of a field in an output file.
+ Available value are: 2 (integer), 4 (float single precision) and 8 (float
+ double precision).
+\end_layout
+
+\begin_layout Subsection*
+enabled: 
+\emph on
+bool
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+LOGICAL :: enabled
+\end_layout
+
+\begin_layout Standard
+Define if a field must be output or not.
+ This attribute is optional, the default value is 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+true
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+read_access: 
+\emph on
+bool
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+LOGICAL :: read_access
+\end_layout
+
+\begin_layout Standard
+Define whether a field can be read from the model or not.
+ This attribute is optional, the default value is 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+false
+\end_layout
+
+\end_inset
+
+.
+ Note that for fields belonging to a file in 
+\series bold
+\emph on
+read
+\series default
+\emph default
+ 
+\series bold
+mode
+\series default
+, this attribute is always 
+\series bold
+true
+\series default
+.
+\end_layout
+
+\begin_layout Subsection*
+field_ref: 
+\emph on
+string
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: field_ref
+\end_layout
+
+\begin_layout Standard
+Define a field reference.
+ All attributes are inherited from the referenced field after the classical
+ inheritance mechanism.
+ The value assigned to the referenced field is transmitted to to current
+ field to perform temporal operation.
+ This attribute is optional.
+\end_layout
+
+\begin_layout Subsection*
+grid_ref: 
+\emph on
+string
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: grid_ref
+\end_layout
+
+\begin_layout Standard
+Define on which grid the current field is defined.
+ This attribute is optional, if missing, domain_ref and axis_ref must be
+ defining.
+\end_layout
+
+\begin_layout Subsection*
+domain_ref: 
+\emph on
+string
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: domain_ref
+\end_layout
+
+\begin_layout Standard
+Define on which horizontal domain the current field is defined.
+ This attribute is optional, but if this attribute is defined, 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+grid_ref
+\end_layout
+
+\end_inset
+
+ must not be.
+\end_layout
+
+\begin_layout Subsection*
+axis_ref: 
+\emph on
+string
+\end_layout
+
+\begin_layout Standard
+Fortran: 
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: axis_ref
+\end_layout
+
+\begin_layout Standard
+Define on which vertical axis the current field is defined.
+ This attribute is optional, but if this attribute is defined, 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+domain_ref
+\end_layout
+
+\end_inset
+
+ must be too and 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+grid_ref
+\end_layout
+
+\end_inset
+
+ must not.
+\end_layout
+
+\begin_layout Subsection*
+grid_path: 
+\emph on
+string
+\end_layout
+
+\begin_layout Standard
+Fortran: 
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: grid_path
+\end_layout
+
+\begin_layout Standard
+Define the way operations passing from a grid to others.
+ This attribute is optional.
+\end_layout
+
+\begin_layout Subsection*
+default_value: 
+\emph on
+double
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+DOUBLE PRECISION :: default_value
+\end_layout
+
+\begin_layout Standard
+Define the value which should be used in place of the missing data of a
+ field.
+ This attribute is optional.
+ If no value was defined, the missing data will be replaced by uninitialized
+ values which can lead to undefined behaviors.
+\end_layout
+
+\begin_layout Subsection*
+valid_min: 
+\emph on
+double
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+DOUBLE PRECISION :: valid_min
+\end_layout
+
+\begin_layout Standard
+All field values below 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+valid_min
+\end_layout
+
+\end_inset
+
+ attribute value are set to missing value.
+\end_layout
+
+\begin_layout Subsection*
+valid_max: 
+\emph on
+double
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+DOUBLE PRECISION :: valid_max
+\end_layout
+
+\begin_layout Standard
+All field values above 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+valid_max
+\end_layout
+
+\end_inset
+
+ attribute value are set to missing value.
+\end_layout
+
+\begin_layout Subsection*
+detect_missing_value: 
+\emph on
+bool
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+LOGICAL: detect_missing_value
+\end_layout
+
+\begin_layout Standard
+When XIOS detect a default value in a field, it does not include the value
+ in the statistic of the operation, like averaging, minimum, maximum...
+\end_layout
+
+\begin_layout Subsection*
+add_offset: 
+\emph on
+double
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+DOUBLE PRECISION: add_offset
+\end_layout
+
+\begin_layout Standard
+Set the 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+add_offset
+\end_layout
+
+\end_inset
+
+ metadata CF attribute in the output file.
+ In output, the 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+add_offset
+\end_layout
+
+\end_inset
+
+ value is subtracted to the field values.
+\end_layout
+
+\begin_layout Subsection*
+scale_factor: 
+\emph on
+double
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+DOUBLE PRECISION: scale_factor
+\end_layout
+
+\begin_layout Standard
+Set the 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+scale_factor
+\end_layout
+
+\end_inset
+
+ metadata CF attribute in the output file.
+ In output, the field values are divided by the 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+scale_factor
+\end_layout
+
+\end_inset
+
+ value.
+\end_layout
+
+\begin_layout Subsection*
+compression_level: 
+\emph on
+integer
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: compression_level
+\end_layout
+
+\begin_layout Standard
+Define whether the field should be compressed using NetCDF-4 built-in compressio
+n.
+ The compression level must range from 0 to 9.
+ An higher compression level means a better compression at the cost of using
+ more processing power.
+ This attribute is optional, the default value is inherited from the file
+ attribute 
+\series bold
+compression_level
+\series default
+.
+\end_layout
+
+\begin_layout Subsection*
+indexed_output: 
+\emph on
+bool
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+LOGICAL :: indexed_output
+\end_layout
+
+\begin_layout Standard
+Define whether the field data must be outputted as an indexed grid instead
+ of a full grid whenever possible.
+ This attribute is optional, the default value is 
+\series bold
+\emph on
+false
+\series default
+\emph default
+.
+\end_layout
+
+\begin_layout Subsection*
+ts_enabled: 
+\emph on
+bool
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+LOGICAL :: ts_enabled
+\end_layout
+
+\begin_layout Standard
+Define whether the field can be outputted as a timeserie if requested.
+ This attribute is optional, the default value is 
+\series bold
+\emph on
+false
+\series default
+\emph default
+.
+\end_layout
+
+\begin_layout Subsection*
+ts_split_freq: 
+\emph on
+duration
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+TYPE(xios_duration) :: ts_split_freq
+\end_layout
+
+\begin_layout Standard
+Define the splitting frequency that should be used for the timeserie if
+ it has been requested.
+ This attribute is optional, by default this value is inherited from the
+ file 
+\series bold
+split_freq
+\series default
+.
+\end_layout
+
+\begin_layout Section
+Variable attribute reference
+\end_layout
+
+\begin_layout Subsection*
+name: 
+\emph on
+string
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: name
+\end_layout
+
+\begin_layout Standard
+Define the 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+name
+\end_layout
+
+\end_inset
+
+ of the variable as it will appear in an output file.
+ This attribute is optional.
+ If not present, the 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+id
+\end_layout
+
+\end_inset
+
+ will be used instead.
+\end_layout
+
+\begin_layout Subsection*
+type: enumeration { bool, int, int32, int16, int64, float, double, string
+ }
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: type
+\end_layout
+
+\begin_layout Standard
+Define the 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+type
+\end_layout
+
+\end_inset
+
+ of the variable.
+ Note that the 
+\series bold
+\emph on
+int
+\series default
+\emph default
+ type is a synonym for 
+\series bold
+\emph on
+int32
+\series default
+\emph default
+.
+ This attribute is mandatory.
+\end_layout
+
+\begin_layout Section
+File attribute reference
+\end_layout
+
+\begin_layout Subsection*
+name: 
+\emph on
+string
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: name
+\end_layout
+
+\begin_layout Standard
+Define the name of the file.
+ This attribute is mandatory.
+\end_layout
+
+\begin_layout Subsection*
+description: 
+\emph on
+string
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: description
+\end_layout
+
+\begin_layout Standard
+Define the description of the file.
+ This attribute is optional.
+\end_layout
+
+\begin_layout Subsection*
+name_suffix: 
+\emph on
+string
+\end_layout
+
+\begin_layout Standard
+Fortran: 
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: name_suffix
+\end_layout
+
+\begin_layout Standard
+Define a suffix to add to the name of the file.
+ This attribute is optional.
+\end_layout
+
+\begin_layout Subsection*
+min_digits: 
+\emph on
+integer
+\end_layout
+
+\begin_layout Standard
+Fortran: 
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: min_digits
+\end_layout
+
+\begin_layout Standard
+For multiple_file, define the minimum digits composing the suffix defining
+ the rank of the server, which will be happened to the name of the file.
+ This attribute is optional and the default value is 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+output_freq: 
+\emph on
+duration
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+TYPE(xios_duration) :: output_freq
+\end_layout
+
+\begin_layout Standard
+Define the output frequency for the current file.
+ This attribute is mandatory.
+\end_layout
+
+\begin_layout Subsection*
+output_level: 
+\emph on
+integer
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: output_level
+\end_layout
+
+\begin_layout Standard
+Define an output level for the field defining inside the current file.
+ Field is output only if the field attribute 
+\begin_inset Formula $level\leq output\_level$
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+sync_freq: 
+\emph on
+duration
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+TYPE(xios_duration) :: sync_freq
+\end_layout
+
+\begin_layout Standard
+Define the frequency for flushing the current file onto disk.
+ It may result bad performance but data are wrote even if the file will
+ not be closed.
+ This attribute is optional.
+\end_layout
+
+\begin_layout Subsection*
+split_freq: 
+\emph on
+duration
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+TYPE(xios_duration) :: split_freq
+\end_layout
+
+\begin_layout Standard
+Define the time frequency for splitting the current file.
+ In that case, the start and end dates are added to the file 
+\series bold
+name
+\series default
+ (see 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+
+\series bold
+\emph on
+split_freq_format
+\end_layout
+
+\end_inset
+
+ attribute).
+ This attribute is optional, by default no splitting is done.
+\end_layout
+
+\begin_layout Subsection*
+split_freq_format: 
+\emph on
+string
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: split_freq_format
+\end_layout
+
+\begin_layout Standard
+Define the format of the split date suffixed to the file.
+ Can contain any character, 
+\emph on
+
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+%y
+\end_layout
+
+\end_inset
+
+
+\emph default
+ will be replaced by the year (4 characters), 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+%mo
+\end_layout
+
+\end_inset
+
+ by the month (2 char), 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+%d
+\end_layout
+
+\end_inset
+
+ by the day (2 char), 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+%h
+\end_layout
+
+\end_inset
+
+ by the hour (2 char), 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+%mi
+\end_layout
+
+\end_inset
+
+ by the minute (2 char), 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+%s
+\end_layout
+
+\end_inset
+
+ by the second (2 char), 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+%S
+\end_layout
+
+\end_inset
+
+ by the number of seconds since the time origin and 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+%D
+\end_layout
+
+\end_inset
+
+ by the number of full days since the time origin.
+ This attribute is optional and the default behavior is to create a suffix
+ with the date until the smaller non zero unit.
+ For example, in one day split frequency, the hour, minute and second will
+ not appear in the suffix, only year, month and day.
+\end_layout
+
+\begin_layout Subsection*
+enabled: 
+\emph on
+bool
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+LOGICAL :: enabled
+\end_layout
+
+\begin_layout Standard
+Define if a file must be written/read or not.
+ This attribute is optional, the default value is 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+true
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+mode: 
+\emph on
+enumeration { read, write }
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: mode
+\end_layout
+
+\begin_layout Standard
+Define whether the file will be read or written.
+ This attribute is optional, the default value is 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+write
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+type: 
+\emph on
+enumeration { one_file, multiple_file }
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: type
+\end_layout
+
+\begin_layout Standard
+Define the type of the file: 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+
+\emph on
+multiple_file
+\end_layout
+
+\end_inset
+
+: one file by server using sequential netcdf writing, 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+
+\emph on
+one_file
+\end_layout
+
+\end_inset
+
+: one single global file is wrote using netcdf4 parallel access.
+ This attribute is mandatory.
+\end_layout
+
+\begin_layout Subsection*
+format: 
+\emph on
+enumeration { netcdf4, netcdf4_classic }
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: type
+\end_layout
+
+\begin_layout Standard
+Define the format of the file: 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+
+\emph on
+netcdf4
+\end_layout
+
+\end_inset
+
+: the HDF5 format will be used, 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+
+\emph on
+netcdf4
+\emph default
+_
+\emph on
+classic
+\end_layout
+
+\end_inset
+
+: the classic NetCDF format will be used.
+ The attribute is optional, the default value is 
+\series bold
+\emph on
+netcdf4
+\series default
+\emph default
+.
+ Note that the 
+\series bold
+\emph on
+netcdf4
+\emph default
+_
+\emph on
+classic
+\series default
+\emph default
+ format can be used with the attribute 
+\series bold
+type
+\series default
+ set to 
+\series bold
+\emph on
+one_file
+\series default
+\emph default
+ only if the NetCDF4 library was compiled with Parallel NetCDF support (--enable
+-pnetcdf).
+\end_layout
+
+\begin_layout Subsection*
+par_access: 
+\emph on
+enumeration { collective, independent }
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: par_access
+\end_layout
+
+\begin_layout Standard
+For parallel writing, define which type of MPI calls will be used.
+ This attribute is optional, the default value is 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+
+\emph on
+collective
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+append: 
+\emph on
+bool
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+LOGICAL :: append
+\end_layout
+
+\begin_layout Standard
+Define whether the output data is to be appended at the end of the file
+ if it already exists or if the existing file is to be overwritten.
+ This attribute is optional, the default value is 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+
+\emph on
+false
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+compression_level: 
+\emph on
+integer
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: compression_level
+\end_layout
+
+\begin_layout Standard
+Define whether the fields should be compressed using NetCDF-4 built-in compressi
+on by default.
+ The compression level must range from 0 to 9.
+ An higher compression level means a better compression at the cost of using
+ more processing power.
+ This attribute is optional, the default value is 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+
+\emph on
+0
+\end_layout
+
+\end_inset
+
+ (no compression).
+\end_layout
+
+\begin_layout Subsection*
+time_counter: 
+\emph on
+enumeration { centered, instant, record, none }
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: time_counter
+\end_layout
+
+\begin_layout Standard
+Define how the 
+\begin_inset Quotes eld
+\end_inset
+
+time_counter
+\begin_inset Quotes erd
+\end_inset
+
+ variable will be outputted:
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\emph on
+centered
+\series default
+\emph default
+: use centered times
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\emph on
+instant
+\series default
+\emph default
+: use instant times
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\emph on
+record
+\series default
+\emph default
+: use record indexes
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\emph on
+none
+\series default
+\emph default
+: do not output the variable.
+\end_layout
+
+\begin_layout Standard
+This attribute is optional, the default value is 
+\series bold
+\emph on
+centered
+\series default
+\emph default
+.
+\end_layout
+
+\begin_layout Subsection*
+time_counter_name: 
+\emph on
+string
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: time_counter_name
+\end_layout
+
+\begin_layout Standard
+Define the name of the time counter.
+ This attribute is optional.
+\end_layout
+
+\begin_layout Subsection*
+timeseries: 
+\emph on
+enumeration { none, only, both, exclusive }
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: time_series
+\end_layout
+
+\begin_layout Standard
+Define whether the timeseries must be outputted:
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\emph on
+none
+\series default
+\emph default
+: no timeseries are outputted, only the regular file
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\emph on
+only
+\series default
+\emph default
+: only the timeseries are outputted, the regular file is not created
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\emph on
+both
+\series default
+\emph default
+: both the timeseries and the regular file are outputted.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\emph on
+exclusive
+\series default
+\emph default
+: the timeseries are outputted and a regular file is created with only the
+ fields which were not marked for output as a timeserie (if any).
+\end_layout
+
+\begin_layout Standard
+This attribute is optional, the default value is 
+\series bold
+\emph on
+none
+\series default
+\emph default
+.
+\end_layout
+
+\begin_layout Subsection*
+ts_prefix: 
+\emph on
+string
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: ts_prefix
+\end_layout
+
+\begin_layout Standard
+Define the prefix to use for the name of the timeseries files.
+ This attribute is optional, by default the file 
+\series bold
+name
+\series default
+ will be used.
+\end_layout
+
+\begin_layout Subsection*
+record_offset: 
+\emph on
+integer
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: record_offset
+\end_layout
+
+\begin_layout Standard
+Define offset of record from the beginning record.
+ This attribute is optional, by default, its value is 0.
+\end_layout
+
+\begin_layout Section
+Transformation attribute reference
+\end_layout
+
+\begin_layout Subsection
+interpolate_axis
+\end_layout
+
+\begin_layout Subsection*
+type: 
+\emph on
+string
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: type
+\end_layout
+
+\begin_layout Standard
+Define the type of interpolation on an axis.
+ This attribute is optional.
+\end_layout
+
+\begin_layout Subsection*
+order: 
+\emph on
+integer
+\end_layout
+
+\begin_layout Standard
+Fortran: 
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: order
+\end_layout
+
+\begin_layout Standard
+Define a order of interpolation.
+ This attribute is optional.
+ The default value is 2.
+\end_layout
+
+\begin_layout Subsection
+inverse_axis
+\end_layout
+
+\begin_layout Subsection
+zoom_axis
+\end_layout
+
+\begin_layout Subsection*
+begin: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+integer
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: begin
+\end_layout
+
+\begin_layout Standard
+Define the begining index of the zoomed region on global axis.
+ This attribute is optional.
+ This must be an integer between 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+ni_glo-1
+\end_layout
+
+\end_inset
+
+ of associated axis.
+ If not specified the default value is 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+n: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+integer
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: n
+\end_layout
+
+\begin_layout Standard
+Define the size of zoomed region on global axis.
+ This attribute is optional.
+ This must be an integer between 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+
+and 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+nj_glo
+\end_layout
+
+\end_inset
+
+ of the associated axis.
+ If not specified the default value is 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+nj_glo
+\end_layout
+
+\end_inset
+
+ of the associated axis.
+\end_layout
+
+\begin_layout Subsection
+interpolate_domain
+\end_layout
+
+\begin_layout Subsection*
+file: 
+\emph on
+string
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*) :: type
+\end_layout
+
+\begin_layout Standard
+Define the file which contains the weight value to interpolate from domain
+ source to domain destination.
+ This attribute is optional.
+ If not specified, the internal interpolation module will be used.
+\end_layout
+
+\begin_layout Subsection*
+order: 
+\emph on
+integer
+\end_layout
+
+\begin_layout Standard
+Fortran: 
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: order
+\end_layout
+
+\begin_layout Standard
+Define a order of interpolation.
+ This attribute is only for internal interoplation module.
+ This attribute is optional.
+ The default value is 2.
+\end_layout
+
+\begin_layout Subsection
+zoom_domain
+\end_layout
+
+\begin_layout Subsection*
+ibegin: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+integer
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: ibegin
+\end_layout
+
+\begin_layout Standard
+Define the begining index of the zoomed region on the first dimension of
+ the global domain.
+ This attribute is optional.
+ This must be an integer between 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+ni_glo-1
+\end_layout
+
+\end_inset
+
+ of the associated dimension of domain.
+ If not specified the default value is 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+ni: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+integer
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: ni
+\end_layout
+
+\begin_layout Standard
+Define the size of zoomed region on the first dimension of the global domain.
+ This attribute is optional.
+ This must be an integer between 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+
+and 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+ni_glo
+\end_layout
+
+\end_inset
+
+ of the associated dimension of domain.
+ If not specified the default value is 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+ni_glo
+\end_layout
+
+\end_inset
+
+ of the dimension of domain.
+\end_layout
+
+\begin_layout Subsection*
+jbegin: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+integer
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: jbegin
+\end_layout
+
+\begin_layout Standard
+Define the begining index of the zoomed region on the second dimension of
+ the global domain.
+ This attribute is optional.
+ This must be an integer between 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+nj_glo-1
+\end_layout
+
+\end_inset
+
+ of the associated dimension of domain.
+ If not specified the default value is 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+0
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+nj: 
+\begin_inset Flex Emph
+status collapsed
+
+\begin_layout Plain Layout
+integer
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Fortran:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER :: nj
+\end_layout
+
+\begin_layout Standard
+Define the size of zoomed region on the second dimension of the global domain.
+ This attribute is optional.
+ This must be an integer between 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+
+and 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+nj_glo
+\end_layout
+
+\end_inset
+
+ of the associated dimension of domain.
+ If not specified the default value is 
+\begin_inset Flex Strong
+status collapsed
+
+\begin_layout Plain Layout
+nj_glo
+\end_layout
+
+\end_inset
+
+ of the dimension of domain.
+\end_layout
+
+\begin_layout Subsection
+generate_rectilinear_domain
+\end_layout
+
+\begin_layout Standard
+
+\end_layout
+
+\begin_layout Chapter
+Fortran interface reference
+\end_layout
+
+\begin_layout Section*
+Initialization
+\end_layout
+
+\begin_layout Subsection*
+XIOS initialization
+\end_layout
+
+\begin_layout Subsubsection*
+Synopsis:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_initialize(client_id, local_comm, return_comm)
+\end_layout
+
+\begin_layout LyX-Code
+  CHARACTER(LEN=*),INTENT(IN)         :: client_id
+\end_layout
+
+\begin_layout LyX-Code
+  INTEGER,INTENT(IN),OPTIONAL         :: local_comm
+\end_layout
+
+\begin_layout LyX-Code
+  INTEGER,INTENT(OUT),OPTIONAL        :: return_comm
+\end_layout
+
+\begin_layout Subsubsection*
+Argument:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+client_id
+\end_layout
+
+\end_inset
+
+: client identifier
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+local_comm
+\end_layout
+
+\end_inset
+
+: MPI communicator of the client
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+return_comm
+\end_layout
+
+\end_inset
+
+: split return MPI communicator
+\end_layout
+
+\begin_layout Subsubsection*
+Description:
+\end_layout
+
+\begin_layout Standard
+This subroutine must be called before any other call of MPI client library.
+ It may be able to initialize MPI library (calling 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+MPI_Init
+\end_layout
+
+\end_inset
+
+) if not already initialized.
+ Since XIOS is able to work in client/server mode (parameter 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+using_server=true
+\end_layout
+
+\end_inset
+
+), the global communicator must be split and a local split communicator
+ is returned to be used by the client model for it own purpose.
+ If more than one model is present, XIOS could be interfaced with the OASIS
+ coupler (compiled with 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+-using_oasis
+\end_layout
+
+\end_inset
+
+ option and parameter 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+using_oasis=true
+\end_layout
+
+\end_inset
+
+), so in this case, the splitting would be done globally by OASIS.
+\end_layout
+
+\begin_layout Itemize
+If MPI is not initialized, XIOS would initialize it calling MPI_Init function.
+ In this case, the MPI finalization would be done by XIOS in the 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+xios_finalize
+\end_layout
+
+\end_inset
+
+ subroutine, and must not be done by the model.
+\end_layout
+
+\begin_layout Itemize
+If OASIS coupler is not used (using_oasis=false)
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+If server mode is not activated (
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+using_server=false
+\end_layout
+
+\end_inset
+
+): if local_comm MPI communicator is specified then it would be used for
+ internal MPI communication otherwise 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+MPI_COMM_WORLD
+\end_layout
+
+\end_inset
+
+ communicator would be used by default.
+ A copy of the communicator (of 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+local_comm
+\end_layout
+
+\end_inset
+
+ or 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+MPI_COMM_WORLD
+\end_layout
+
+\end_inset
+
+) would be returned in return_comm argument.
+ If 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+return_comm
+\end_layout
+
+\end_inset
+
+ is not specified, then 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+local_comm
+\end_layout
+
+\end_inset
+
+ or 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+MPI_COMM_WORLD
+\end_layout
+
+\end_inset
+
+ can be used by the model for it own communication.
+\end_layout
+
+\begin_layout Itemize
+If server mode is activated (
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+using_server=true
+\end_layout
+
+\end_inset
+
+): 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+local_comm
+\end_layout
+
+\end_inset
+
+ must not be specified since the global 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+MPI_COMM_WORLD
+\end_layout
+
+\end_inset
+
+ communicator would be split by XIOS.
+ The split communicator is returned in 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+return_comm
+\end_layout
+
+\end_inset
+
+ argument.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+If OASIS coupler is used (
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+using_oasis=true
+\end_layout
+
+\end_inset
+
+)
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+If server mode is not enabled (
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+using_server=false
+\end_layout
+
+\end_inset
+
+) 
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+If 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+local_comm
+\end_layout
+
+\end_inset
+
+ is specified, it means that OASIS has been initialized by the model and
+ global communicator has been already split previously by OASIS, and passed
+ as 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+local_comm
+\end_layout
+
+\end_inset
+
+ argument.
+ The returned communicator would be a duplicate copy of 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+local_comm
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+Otherwise: if MPI was not initialized, OASIS will be initialized calling
+ 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+prism_init_comp_proto
+\end_layout
+
+\end_inset
+
+ subroutine.
+ In this case, XIOS will call 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+prism_terminate_proto
+\end_layout
+
+\end_inset
+
+ when 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+xios_finalized
+\end_layout
+
+\end_inset
+
+ is called.
+ The split communicator is returned in 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+return_comm
+\end_layout
+
+\end_inset
+
+ argument using 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+prism_get_localcomm_proto
+\end_layout
+
+\end_inset
+
+ return argument.
+\end_layout
+
+\end_deeper
+\begin_layout Itemize
+If server mode is enabled (
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+using_server=true
+\end_layout
+
+\end_inset
+
+)
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+If 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+local_comm
+\end_layout
+
+\end_inset
+
+ is specified, it means that OASIS has been initialized by the model and
+ global communicator has been already split previously by OASIS, and passed
+ as local_comm argument.
+ The returned communicator return_comm would be a split communicator given
+ by OASIS.
+\end_layout
+
+\begin_layout Itemize
+Otherwise: if MPI was not initialized, OASIS will be initialized calling
+ 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+prism_init_comp_proto
+\end_layout
+
+\end_inset
+
+ subroutine.
+ In this case, XIOS will call 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+prism_terminate_proto
+\end_layout
+
+\end_inset
+
+ when 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+xios_finalized
+\end_layout
+
+\end_inset
+
+ is called.
+ The split communicator is returned in 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+return_comm
+\end_layout
+
+\end_inset
+
+ argument using 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+prism_get_localcomm_proto
+\end_layout
+
+\end_inset
+
+ return argument.
+\end_layout
+
+\end_deeper
+\end_deeper
+\begin_layout Section*
+Finalization
+\end_layout
+
+\begin_layout Subsection*
+XIOS finalization
+\end_layout
+
+\begin_layout Subsubsection*
+Synopsis:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_finalize()
+\end_layout
+
+\begin_layout Subsubsection*
+Arguments:
+\end_layout
+
+\begin_layout Standard
+None
+\end_layout
+
+\begin_layout Subsubsection*
+Description:
+\end_layout
+
+\begin_layout Standard
+This call must be done at the end of the simulation for a successful execution.
+ It gives the end signal to the xios server pools to finish it execution.
+ If MPI has been initialize by XIOS the MPI_Finalize will be called.
+ If OASIS coupler has been initialized by XIOS, then finalization will be
+ done calling 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+prism_terminate_proto
+\end_layout
+
+\end_inset
+
+ subroutine.
+\end_layout
+
+\begin_layout Section*
+Tree elements management subroutines
+\end_layout
+
+\begin_layout Standard
+This set of subroutines enable the models to interact, complete or query
+ the XML tree data base.
+ New elements or group of elements can be added as child in the tree, attributes
+ of the elements can be set or query.
+ The type of element actually available are: context, axis, domain, grid,
+ field, variable and file.
+ An element can be identified by a string or by an handle associated to
+ the type of the element.
+ Root element (ex: 
+\begin_inset Quotes eld
+\end_inset
+
+axis_definition
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+field_definition
+\begin_inset Quotes erd
+\end_inset
+
+,....) are considered like a group of element and are identified by a specific
+ string 
+\begin_inset Quotes eld
+\end_inset
+
+element_definition
+\begin_inset Quotes erd
+\end_inset
+
+ where element can be any one of the existing elements.
+\end_layout
+
+\begin_layout Subsection*
+Fortran type of the handles element
+\end_layout
+
+\begin_layout Quotation
+TYPE(xios_element)
+\end_layout
+
+\begin_layout Standard
+where 
+\begin_inset Quotes eld
+\end_inset
+
+element
+\begin_inset Quotes erd
+\end_inset
+
+ can be any one among 
+\begin_inset Quotes eld
+\end_inset
+
+context
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+axis
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+domain
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+grid
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+field
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+variable
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+file
+\begin_inset Quotes erd
+\end_inset
+
+, or the associated group (excepted for context): 
+\begin_inset Quotes eld
+\end_inset
+
+axis_group
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+domain_group
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+grid_group
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+field_group
+\begin_inset Quotes erd
+\end_inset
+
+, 
+\begin_inset Quotes eld
+\end_inset
+
+variable_group
+\begin_inset Quotes erd
+\end_inset
+
+ or 
+\begin_inset Quotes eld
+\end_inset
+
+file_group
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsection*
+Getting handles
+\end_layout
+
+\begin_layout Subsubsection*
+Synopsis:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_get_element_handle(id,handle)
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(len = *) , INTENT(IN) :: id
+\end_layout
+
+\begin_layout LyX-Code
+TYPE(xios_element), INTENT(OUT):: handle
+\end_layout
+
+\begin_layout Standard
+where element is one of the existing element or group of element.
+\end_layout
+
+\begin_layout Subsubsection*
+Arguments:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+id
+\end_layout
+
+\end_inset
+
+: string identifier.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+handle
+\end_layout
+
+\end_inset
+
+: element handle
+\end_layout
+
+\begin_layout Subsubsection*
+Description:
+\end_layout
+
+\begin_layout Standard
+This subroutine return the handle of the specified element identified by
+ its string.
+ The element must be existing otherwise it raise an error.
+\end_layout
+
+\begin_layout Subsection*
+Query for a valid element
+\end_layout
+
+\begin_layout Subsubsection*
+Synopsis:
+\end_layout
+
+\begin_layout LyX-Code
+LOGICAL FUNCTION xios_is_valid_element(id)
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(len = *) , INTENT(IN) :: id
+\end_layout
+
+\begin_layout Standard
+where element is one of the existing element or group of element.
+\end_layout
+
+\begin_layout Subsubsection*
+Arguments:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+id
+\end_layout
+
+\end_inset
+
+: string identifier.
+\end_layout
+
+\begin_layout Subsubsection*
+Description:
+\end_layout
+
+\begin_layout Standard
+This function return .TRUE.
+ if the element defined by the string identifier id is existing in the data
+ base, otherwise it return .FALSE.
+ .
+\end_layout
+
+\begin_layout Subsection*
+Adding child
+\end_layout
+
+\begin_layout Subsubsection*
+Synopsis:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_add_element(parent_handle, child_handle, child_id)
+\end_layout
+
+\begin_layout LyX-Code
+TYPE(xios_element)         , INTENT(IN) :: parent_handle
+\end_layout
+
+\begin_layout LyX-Code
+TYPE(xios_element)         , INTENT(OUT):: child_handle
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(len = *), OPTIONAL, INTENT(IN) :: child_id
+\end_layout
+
+\begin_layout Standard
+where element is one of the existing element or group of element.
+\end_layout
+
+\begin_layout Subsubsection*
+Arguments:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+parent_handle
+\end_layout
+
+\end_inset
+
+: handle of the parent element.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+child_handle
+\end_layout
+
+\end_inset
+
+: handle of the child element.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+child_id
+\end_layout
+
+\end_inset
+
+: string identifier of the child.
+\end_layout
+
+\begin_layout Subsubsection*
+Description:
+\end_layout
+
+\begin_layout Standard
+This subroutine add a child to an existing parent element.
+ The identifier of the child, if existing, can be specified optionally.
+ All group elements can contains child of the same kind, provided generic
+ inheritance.
+ Some elements can contains children of an other kind for a specific behaviour.
+ File element may contains field_group, field, variable and variable_group
+ child elements.
+ Field elements may contains variable_group of variable child element.
+\end_layout
+
+\begin_layout Subsection*
+Query if a value of an element attributes is defined (by handle)
+\end_layout
+
+\begin_layout Subsubsection*
+Synopsis:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_is_defined_attr(handle, attr_1=attribute_1, attr_2=attribute_2,
+ ...)
+\end_layout
+
+\begin_layout LyX-Code
+TYPE(xios_element)         , INTENT(IN) :: handle
+\end_layout
+
+\begin_layout LyX-Code
+LOGICAL, OPTIONAL  , INTENT(OUT) :: attr_1
+\end_layout
+
+\begin_layout LyX-Code
+LOGICAL, OPTIONAL  , INTENT(OUT) :: attr_2
+\end_layout
+
+\begin_layout LyX-Code
+....
+\end_layout
+
+\begin_layout Standard
+where element is one of the existing element or group of element.
+ attribute_x is describing in the chapter dedicated to the attribute description.
+\end_layout
+
+\begin_layout Subsubsection*
+Arguments:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+handle
+\end_layout
+
+\end_inset
+
+: element handle.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+attr_x
+\end_layout
+
+\end_inset
+
+: return true if the attribute as a defined value.
+\end_layout
+
+\begin_layout Subsubsection*
+Description:
+\end_layout
+
+\begin_layout Standard
+This subroutine my be used to query if one or more attributes of an element
+ have a defined value.
+ The list of attributes and their type are described in a specific chapter
+ of the documentation.
+ 
+\end_layout
+
+\begin_layout Subsection*
+Query if a value of an element attributes is defined (by identifier)
+\end_layout
+
+\begin_layout Subsubsection*
+Synopsis:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_is_defined_element_attr(id, attr_1=attribute_1, attr_2=attribute
+_2, ...)
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(len = *) , INTENT(IN) :: id
+\end_layout
+
+\begin_layout LyX-Code
+LOGICAL, OPTIONAL  , INTENT(OUT) :: attr_1
+\end_layout
+
+\begin_layout LyX-Code
+LOGICAL, OPTIONAL  , INTENT(OUT) :: attr_2
+\end_layout
+
+\begin_layout LyX-Code
+....
+\end_layout
+
+\begin_layout Standard
+where element is one of the existing element or group of element.
+ attribute_x is describing in the chapter dedicated to the attribute description.
+\end_layout
+
+\begin_layout Subsubsection*
+Arguments:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+id
+\end_layout
+
+\end_inset
+
+: element identifier.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+attr_x
+\end_layout
+
+\end_inset
+
+: return true if the attribute as a defined value.
+\end_layout
+
+\begin_layout Subsubsection*
+Description:
+\end_layout
+
+\begin_layout Standard
+This subroutine my be used to query if one or more attributes of an element
+ have a defined value.
+ The list of available attributes and their type are described in a specific
+ chapter of the documentation.
+ 
+\end_layout
+
+\begin_layout Subsection*
+Setting element attributes value by handle
+\end_layout
+
+\begin_layout Subsubsection*
+Synopsis:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_set_attr(handle, attr_1=attribute_1, attr_2=attribute_2,
+ ...)
+\end_layout
+
+\begin_layout LyX-Code
+TYPE(xios_element)         , INTENT(IN) :: handle
+\end_layout
+
+\begin_layout LyX-Code
+attribute_type_1, OPTIONAL  , INTENT(IN) :: attr_1
+\end_layout
+
+\begin_layout LyX-Code
+attribute_type_2, OPTIONAL  , INTENT(IN) :: attr_2
+\end_layout
+
+\begin_layout LyX-Code
+....
+\end_layout
+
+\begin_layout Standard
+where element is one of the existing element or group of element.
+ attribute_x and attribute_type_x are describing in the chapter dedicated
+ to the attribute description.
+\end_layout
+
+\begin_layout Subsubsection*
+Arguments:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+handle
+\end_layout
+
+\end_inset
+
+: element handle.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+attr_x
+\end_layout
+
+\end_inset
+
+: value of the attribute to be set.
+\end_layout
+
+\begin_layout Subsubsection*
+Description:
+\end_layout
+
+\begin_layout Standard
+This subroutine my be used to set one or more attribute to an element defined
+ by its handle.
+ The list of available attributes and their type are described in a specific
+ chapter of the documentation.
+ 
+\end_layout
+
+\begin_layout Subsection*
+Setting element attributes value by id
+\end_layout
+
+\begin_layout Subsubsection*
+Synopsis:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_set_element_attr(id, attr_1=attribute_1, attr_2=attribute_2,
+ ...)
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(len = *),  INTENT(IN)          :: id
+\end_layout
+
+\begin_layout LyX-Code
+attribute_type_1, OPTIONAL  , INTENT(IN) :: attr_1
+\end_layout
+
+\begin_layout LyX-Code
+attribute_type_2, OPTIONAL  , INTENT(IN) :: attr_2
+\end_layout
+
+\begin_layout LyX-Code
+....
+\end_layout
+
+\begin_layout Standard
+where element is one of the existing element or group of element.
+ attribute_x and attribute_type_x are describing in the chapter dedicated
+ to the attribute description.
+\end_layout
+
+\begin_layout Subsubsection*
+Arguments:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+id
+\end_layout
+
+\end_inset
+
+: string identifier.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+attr_x
+\end_layout
+
+\end_inset
+
+: value of the attribute to be set.
+\end_layout
+
+\begin_layout Subsubsection*
+Description:
+\end_layout
+
+\begin_layout Standard
+This subroutine my be used to set one or more attribute to an element defined
+ by its string id.
+ The list of available attributes and their type are described in a specific
+ chapter of the documentation.
+\end_layout
+
+\begin_layout Subsection*
+Getting element attributes value (by handle)
+\end_layout
+
+\begin_layout Subsubsection*
+Synopsis:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_get_attr(handle, attr_1=attribute_1, attr_2=attribute_2,
+ ...)
+\end_layout
+
+\begin_layout LyX-Code
+TYPE(xios_element)         , INTENT(IN) :: handle
+\end_layout
+
+\begin_layout LyX-Code
+attribute_type_1, OPTIONAL  , INTENT(OUT) :: attr_1
+\end_layout
+
+\begin_layout LyX-Code
+attribute_type_2, OPTIONAL  , INTENT(OUT) :: attr_2
+\end_layout
+
+\begin_layout LyX-Code
+....
+\end_layout
+
+\begin_layout Standard
+where element is one of the existing element or group of element.
+ attribute_x and attribute_type_x are describing in the chapter dedicated
+ to the attribute description.
+\end_layout
+
+\begin_layout Subsubsection*
+Arguments:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+handle
+\end_layout
+
+\end_inset
+
+: element handle.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+attr_x
+\end_layout
+
+\end_inset
+
+: value of the attribute to be get.
+\end_layout
+
+\begin_layout Subsubsection*
+Description:
+\end_layout
+
+\begin_layout Standard
+This subroutine my be used to get one or more attribute value of an element
+ defined by its handle.
+ All attributes in the arguments list must be defined.
+ The list of available attributes and their type are described in a specific
+ chapter of the documentation.
+ 
+\end_layout
+
+\begin_layout Subsection*
+Getting element attributes value (by identifier)
+\end_layout
+
+\begin_layout Subsubsection*
+Synopsis:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_get_element_attr(id, attr_1=attribute_1, attr_2=attribute_2,
+ ...)
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(len = *),   INTENT(IN)          :: id
+\end_layout
+
+\begin_layout LyX-Code
+attribute_type_1, OPTIONAL  , INTENT(OUT) :: attr_1
+\end_layout
+
+\begin_layout LyX-Code
+attribute_type_2, OPTIONAL  , INTENT(OUT) :: attr_2
+\end_layout
+
+\begin_layout LyX-Code
+....
+\end_layout
+
+\begin_layout Standard
+where element is one of the existing element or group of element.
+ attribute_x is describing in the chapter dedicated to the attribute description.
+\end_layout
+
+\begin_layout Subsubsection*
+Arguments:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+id
+\end_layout
+
+\end_inset
+
+: element string identifier.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+attr_x
+\end_layout
+
+\end_inset
+
+: value of the attribute to be get.
+\end_layout
+
+\begin_layout Subsubsection*
+Description:
+\end_layout
+
+\begin_layout Standard
+This subroutine my be used to get one or more attribute value of an element
+ defined by its handle.
+ All attributes in the arguments list must have a defined value.
+ The list of available attributes and their type are described in a specific
+ chapter of the documentation.
+\end_layout
+
+\begin_layout Section*
+Interface relative to context management
+\end_layout
+
+\begin_layout Subsection*
+XIOS context initialization
+\end_layout
+
+\begin_layout Subsubsection*
+Synopsis:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_context_initialize(context_id, context_comm)
+\end_layout
+
+\begin_layout LyX-Code
+  CHARACTER(LEN=*),INTENT(IN)         :: context_id
+\end_layout
+
+\begin_layout LyX-Code
+  INTEGER,INTENT(IN)                  :: context_comm
+\end_layout
+
+\begin_layout Subsubsection*
+Argument:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+context_id
+\end_layout
+
+\end_inset
+
+: context identifier
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+context_comm
+\end_layout
+
+\end_inset
+
+: MPI communicator of the context
+\end_layout
+
+\begin_layout Subsubsection*
+Description:
+\end_layout
+
+\begin_layout Standard
+This subroutine initialize a context identified by 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+context_id
+\end_layout
+
+\end_inset
+
+ string and must be called before any call related to this context.
+ A context must be associated to a communicator, which can be the returned
+ communicator of the 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+xios_initialize
+\end_layout
+
+\end_inset
+
+ subroutine or a sub-communicator of this.
+ The context initialization is dynamic and can be done at any time before
+ the 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+xios_finalize
+\end_layout
+
+\end_inset
+
+ call.
+\end_layout
+
+\begin_layout Subsection*
+XIOS context finalization
+\end_layout
+
+\begin_layout Subsubsection*
+Synopsis:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_context_finalize()
+\end_layout
+
+\begin_layout Subsubsection*
+Arguments:
+\end_layout
+
+\begin_layout Standard
+None
+\end_layout
+
+\begin_layout Subsubsection*
+Description:
+\end_layout
+
+\begin_layout Standard
+This subroutine must be call to close a context, before the 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+xios_finalize
+\end_layout
+
+\end_inset
+
+ call.
+ It waits until that all pending request sent to the servers will be processed
+ and the opened files will be closed.
+\end_layout
+
+\begin_layout Subsection*
+Setting current active context
+\end_layout
+
+\begin_layout Subsubsection*
+Synopsis:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_set_current_context(context_handle)
+\end_layout
+
+\begin_layout LyX-Code
+TYPE(xios_context),INTENT(IN) :: context_handle
+\end_layout
+
+\begin_layout Standard
+or
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_set_current_context(context_id)
+\end_layout
+
+\begin_layout LyX-Code
+CHARACTER(LEN=*),INTENT(IN) :: context_id
+\end_layout
+
+\begin_layout Subsubsection*
+Arguments:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+context_handle
+\end_layout
+
+\end_inset
+
+: handle of the context
+\end_layout
+
+\begin_layout Standard
+or
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+context_id
+\end_layout
+
+\end_inset
+
+: string context identifier
+\end_layout
+
+\begin_layout Subsubsection*
+Description:
+\end_layout
+
+\begin_layout Standard
+These subroutines set the current active context.
+ All xios calls after will refer to this active context.
+ If only one context is defined, it is automatically set as the active context.
+ 
+\end_layout
+
+\begin_layout Subsection*
+Closing definition
+\end_layout
+
+\begin_layout Subsubsection*
+Synopsis:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_close_context_definition()
+\end_layout
+
+\begin_layout Subsubsection*
+Arguments:
+\end_layout
+
+\begin_layout Standard
+None
+\end_layout
+
+\begin_layout Subsubsection*
+Description:
+\end_layout
+
+\begin_layout Standard
+This subroutine must be call when all definitions of a context is finished
+ at the end of the initialization and before entering to the time loop.
+ A lot of operations are performed internally (inheritance, grid definition,
+ contacting servers,...) so this call is mandatory.
+ Any call related to the tree management definition done after will have
+ an undefined effect.
+\end_layout
+
+\begin_layout Section*
+Interface relative to calendar management
+\end_layout
+
+\begin_layout Subsection*
+Creating the calendar
+\end_layout
+
+\begin_layout Subsubsection*
+Synopsis:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_define_calendar(type, timestep, start_date, time_origin,
+ &
+\begin_inset Newline newline
+\end_inset
+
+                                day_length, month_lengths, year_length,
+ &
+\begin_inset Newline newline
+\end_inset
+
+                                leap_year_month, leap_year_drift, &
+\begin_inset Newline newline
+\end_inset
+
+                                leap_year_drift_offset)
+\begin_inset Newline newline
+\end_inset
+
+CHARACTER(len = *),              INTENT(IN) :: type
+\begin_inset Newline newline
+\end_inset
+
+TYPE(xios_duration),   OPTIONAL, INTENT(IN) :: timestep
+\begin_inset Newline newline
+\end_inset
+
+TYPE(xios_date),       OPTIONAL, INTENT(IN) :: start_date
+\begin_inset Newline newline
+\end_inset
+
+TYPE(xios_date),       OPTIONAL, INTENT(IN) :: time_origin
+\begin_inset Newline newline
+\end_inset
+
+INTEGER,               OPTIONAL, INTENT(IN) :: day_length
+\begin_inset Newline newline
+\end_inset
+
+INTEGER,               OPTIONAL, INTENT(IN) :: month_lengths(:)
+\begin_inset Newline newline
+\end_inset
+
+INTEGER,               OPTIONAL, INTENT(IN) :: year_length
+\begin_inset Newline newline
+\end_inset
+
+DOUBLE PRECISION,      OPTIONAL, INTENT(IN) :: leap_year_drift
+\begin_inset Newline newline
+\end_inset
+
+DOUBLE PRECISION,      OPTIONAL, INTENT(IN) :: leap_year_drift_offset
+\begin_inset Newline newline
+\end_inset
+
+INTEGER,               OPTIONAL, INTENT(IN) :: leap_year_month
+\end_layout
+
+\begin_layout Subsubsection*
+Arguments:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+type
+\end_layout
+
+\end_inset
+
+: the calendar type, one of 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+"Gregorian"
+\end_layout
+
+\end_inset
+
+, 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+"Julian"
+\end_layout
+
+\end_inset
+
+, 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+"D360"
+\end_layout
+
+\end_inset
+
+, 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+"AllLeap"
+\end_layout
+
+\end_inset
+
+, 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+"NoLeap"
+\end_layout
+
+\end_inset
+
+, 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+"user_defined"
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+timestep
+\end_layout
+
+\end_inset
+
+: the time step of the simulation (optional, can be set later)
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+start_date
+\end_layout
+
+\end_inset
+
+: the start date of the simulation (optional, 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+xios_date(0000, 01, 01, 00, 00, 00)
+\end_layout
+
+\end_inset
+
+ is used by default)
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+time_origin
+\end_layout
+
+\end_inset
+
+: the origin of the time axis (optional, 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+xios_date(0000, 01, 01, 00, 00, 00)
+\end_layout
+
+\end_inset
+
+ is used by default)
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+day_length
+\end_layout
+
+\end_inset
+
+: the length of a day in seconds (mandatory when creating an user defined
+ calendar, must not be set otherwise)
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+month_lengths
+\end_layout
+
+\end_inset
+
+: the length of each month of the year in days (either 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+month_lengths
+\end_layout
+
+\end_inset
+
+ or 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+year_length
+\end_layout
+
+\end_inset
+
+ must be set when creating an user defined calendar, must not be set otherwise)
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+year_length
+\end_layout
+
+\end_inset
+
+: the length of a year in seconds (either 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+month_lengths
+\end_layout
+
+\end_inset
+
+ or 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+year_length
+\end_layout
+
+\end_inset
+
+ must be set when creating an user defined calendar, must not be set otherwise)
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+leap_year_drift
+\end_layout
+
+\end_inset
+
+: the yearly drift between the user defined calendar and the astronomical
+ calendar, expressed as a fraction of day (can optionally be set when creating
+ an user defined calendar in which case 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+leap_year_month
+\end_layout
+
+\end_inset
+
+ must be set too)
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+leap_year_drift_offset
+\end_layout
+
+\end_inset
+
+: the initial drift between the user defined calendar and the astronomical
+ calendar at the time origin, expressed as a fraction of day (can optionally
+ be set if 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+leap_year_drift
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+leap_year_month
+\end_layout
+
+\end_inset
+
+ are set)
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+leap_year_month
+\end_layout
+
+\end_inset
+
+: the month to which an extra day must be added in case of leap year (can
+ optionally be set when creating an user defined calendar in which case
+ 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+leap_year_drift
+\end_layout
+
+\end_inset
+
+ must be set too)
+\end_layout
+
+\begin_layout Standard
+For a more detailed description of those arguments, see the description
+ of the corresponding attributes in section 1.2 
+\begin_inset Quotes eld
+\end_inset
+
+Calendar attribute reference
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Subsubsection*
+Description:
+\end_layout
+
+\begin_layout Standard
+This subroutine creates the calendar for the current context.
+ Note that the calendar is created once and for all, either from the XML
+ configuration file or the Fortran interface.
+ If it was not created from the configuration file, then this subroutine
+ must be called once and only once before the context definition is closed.
+ The calendar features can be used immediately after the calendar was created.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+If an user defined calendar is created, the following arguments must also
+ be provided:
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+day_length
+\end_layout
+
+\end_inset
+
+ and either 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+month_lengths
+\end_layout
+
+\end_inset
+
+ or 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+year_length
+\end_layout
+
+\end_inset
+
+.
+ Optionally it is possible to configure the user defined calendar to have
+ leap years.
+ In this case, 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+leap_year_drift
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+leap_year_month
+\end_layout
+
+\end_inset
+
+ must also be provided and 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+leap_year_drift_offset
+\end_layout
+
+\end_inset
+
+ might be used.
+\end_layout
+
+\begin_layout Subsection*
+Accessing the calendar type of the current calendar
+\end_layout
+
+\begin_layout Subsubsection*
+Synopsis:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_get_calendar_type(calendar_type)
+\begin_inset Newline newline
+\end_inset
+
+CHARACTER(len=*), INTENT(OUT) :: calendar_type
+\end_layout
+
+\begin_layout Subsubsection*
+Arguments:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+calendar_type
+\end_layout
+
+\end_inset
+
+: on output, the type of the calendar attached to the current context
+\end_layout
+
+\begin_layout Subsubsection*
+Description:
+\end_layout
+
+\begin_layout Standard
+This subroutine gets the calendar type associated to the current context.
+ It will raise an error if used before the calendar was created.
+\end_layout
+
+\begin_layout Subsection*
+Accessing and defining the time step of the current calendar
+\end_layout
+
+\begin_layout Subsubsection*
+Synopsis:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_get_timestep(timestep)
+\begin_inset Newline newline
+\end_inset
+
+TYPE(xios_duration), INTENT(OUT) :: timestep
+\end_layout
+
+\begin_layout Standard
+and
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_set_timestep(timestep)
+\begin_inset Newline newline
+\end_inset
+
+TYPE(xios_duration), INTENT(IN) :: timestep
+\end_layout
+
+\begin_layout Subsubsection*
+Arguments:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+timestep
+\end_layout
+
+\end_inset
+
+: a duration corresponding to the time step of the simulation
+\end_layout
+
+\begin_layout Subsubsection*
+Description:
+\end_layout
+
+\begin_layout Standard
+Those subroutines respectively gets and sets the time step associated to
+ the calendar of the current context.
+ Note that the time step must always be set before the context definition
+ is closed and that an error will be raised if the getter subroutine is
+ used before the time step is defined.
+\end_layout
+
+\begin_layout Subsection*
+Accessing and defining the start date of the current calendar
+\end_layout
+
+\begin_layout Subsubsection*
+Synopsis:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_get_start_date(start_date)
+\begin_inset Newline newline
+\end_inset
+
+TYPE(xios_date), INTENT(OUT) :: start_date
+\end_layout
+
+\begin_layout Standard
+and
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_set_start_date(start_date)
+\begin_inset Newline newline
+\end_inset
+
+TYPE(xios_date), INTENT(IN) :: start_date
+\end_layout
+
+\begin_layout Subsubsection*
+Arguments:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+start_date
+\end_layout
+
+\end_inset
+
+: a date corresponding to the beginning of the simulation
+\end_layout
+
+\begin_layout Subsubsection*
+Description:
+\end_layout
+
+\begin_layout Standard
+Those subroutines respectively gets and sets the start date associated to
+ the calendar of the current context.
+ They must not be used before the calendar was created.
+\end_layout
+
+\begin_layout Subsection*
+Accessing and defining the time origin of the current calendar
+\end_layout
+
+\begin_layout Subsubsection*
+Synopsis:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_get_time_origin(time_origin)
+\begin_inset Newline newline
+\end_inset
+
+TYPE(xios_date), INTENT(OUT) :: time_origin
+\end_layout
+
+\begin_layout Standard
+and
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_set_time_date(time_origin)
+\begin_inset Newline newline
+\end_inset
+
+TYPE(xios_date), INTENT(IN) :: time_origin
+\end_layout
+
+\begin_layout Subsubsection*
+Arguments:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+start_date
+\end_layout
+
+\end_inset
+
+: a date corresponding to the origin of the time axis
+\end_layout
+
+\begin_layout Subsubsection*
+Description:
+\end_layout
+
+\begin_layout Standard
+Those subroutines respectively gets and sets the origin of time associated
+ to the calendar of the current context.
+ They must not be used before the calendar was created.
+\end_layout
+
+\begin_layout Subsection*
+Updating the current date of the current calendar
+\end_layout
+
+\begin_layout Subsubsection*
+Synopsis:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_update_calendar(step)
+\begin_inset Newline newline
+\end_inset
+
+INTEGER, INTENT(IN) :: step
+\end_layout
+
+\begin_layout Subsubsection*
+Arguments:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+step
+\end_layout
+
+\end_inset
+
+: the current iteration number
+\end_layout
+
+\begin_layout Subsubsection*
+Description:
+\end_layout
+
+\begin_layout Standard
+This subroutine sets the current date associated to the calendar of the
+ current context based on the current iteration number: 
+\begin_inset Formula $current\_date=start\_date+step\times timestep$
+\end_inset
+
+.
+ It must not be used before the calendar was created.
+\end_layout
+
+\begin_layout Subsection*
+Accessing the current date of the current calendar
+\end_layout
+
+\begin_layout Subsubsection*
+Synopsis:
+\end_layout
+
+\begin_layout LyX-Code
+SUBROUTINE xios_get_current_date(current_date)
+\begin_inset Newline newline
+\end_inset
+
+TYPE(xios_date), INTENT(OUT) :: current_date
+\end_layout
+
+\begin_layout Subsubsection*
+Arguments:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+current_date
+\end_layout
+
+\end_inset
+
+: on output, the current date
+\end_layout
+
+\begin_layout Subsubsection*
+Description:
+\end_layout
+
+\begin_layout Standard
+This subroutine gets the current date associated to the calendar of the
+ current context.
+ It must not be used before the calendar was created.
+\end_layout
+
+\begin_layout Subsection*
+Accessing the year length of the current calendar
+\end_layout
+
+\begin_layout Subsubsection*
+Synopsis:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER FUNCTION xios_get_year_length_in_seconds(year)
+\begin_inset Newline newline
+\end_inset
+
+INTEGER, INTENT(IN) :: year
+\end_layout
+
+\begin_layout Subsubsection*
+Arguments:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+year
+\end_layout
+
+\end_inset
+
+: the year whose length is requested
+\end_layout
+
+\begin_layout Subsubsection*
+Description:
+\end_layout
+
+\begin_layout Standard
+This function returns the duration in seconds of the specified year, taking
+ leap years into account based on the calendar of the current context.
+ It must not be used before the calendar was created.
+\end_layout
+
+\begin_layout Subsection*
+Accessing the day length of the current calendar
+\end_layout
+
+\begin_layout Subsubsection*
+Synopsis:
+\end_layout
+
+\begin_layout LyX-Code
+INTEGER FUNCTION xios_get_day_length_in_seconds()
+\end_layout
+
+\begin_layout Subsubsection*
+Arguments: None
+\end_layout
+
+\begin_layout Subsubsection*
+Description:
+\end_layout
+
+\begin_layout Standard
+This function returns the duration in seconds of a day, based on the calendar
+ of the current context.
+ It must not be used before the calendar was created.
+\end_layout
+
+\begin_layout Section*
+Interface relative to duration handling
+\end_layout
+
+\begin_layout Subsection*
+Duration constants
+\end_layout
+
+\begin_layout Standard
+Some duration constants are available to ease duration handling:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+xios_year
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+xios_month
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+xios_day
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+xios_hour
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+xios_minute
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+xios_second
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+xios_timestep
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Arithmetic operations on durations
+\end_layout
+
+\begin_layout Standard
+The following arithmetic operations on durations are available:
+\end_layout
+
+\begin_layout Itemize
+Addition: 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+xios_duration = xios_duration + xios_duration
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Subtraction: 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+xios_duration = xios_duration - xios_duration
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Multiplication by a scalar value: 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+xios_duration = scalar * xios_duration
+\end_layout
+
+\end_inset
+
+ or 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+xios_duration = xios_duration * scalar
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Negation: 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+xios_duration = -xios_duration
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Comparison operations on durations
+\end_layout
+
+\begin_layout Standard
+The following comparison operations on durations are available:
+\end_layout
+
+\begin_layout Itemize
+Equality: 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+LOGICAL = xios_duration == xios_duration
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Inequality: 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+LOGICAL = xios_duration /= xios_duration
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section*
+Interface relative to date handling
+\end_layout
+
+\begin_layout Subsection*
+Arithmetic operations on dates
+\end_layout
+
+\begin_layout Standard
+The following arithmetic operations on dates are available:
+\end_layout
+
+\begin_layout Itemize
+Addition of a duration: 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+xios_date = xios_date + xios_duration
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Subtraction of a duration: 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+xios_date = xios_date - xios_duration
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Subtraction of two dates: 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+xios_duration = xios_date - xios_date
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Comparison operations on dates
+\end_layout
+
+\begin_layout Standard
+The following comparison operations on dates are available:
+\end_layout
+
+\begin_layout Itemize
+Equality: 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+LOGICAL = xios_date == xios_date
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Inequality: 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+LOGICAL = xios_date /= xios_date
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Less than: 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+LOGICAL = xios_date < xios_date
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Less or equal: 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+LOGICAL = xios_date <= xios_date
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Greater than: 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+LOGICAL = xios_date > xios_date
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+Greater or equal: 
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+LOGICAL = xios_date >= xios_date
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Subsection*
+Converting a date to a number of seconds since the time origin
+\end_layout
+
+\begin_layout Subsubsection*
+Synopsis:
+\end_layout
+
+\begin_layout LyX-Code
+FUNCTION INTEGER(kind = 8) xios_date_convert_to_seconds(date)
+\begin_inset Newline newline
+\end_inset
+
+TYPE(xios_date), INTENT(IN) :: date
+\end_layout
+
+\begin_layout Subsubsection*
+Arguments:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+date
+\end_layout
+
+\end_inset
+
+: the date to convert
+\end_layout
+
+\begin_layout Subsubsection*
+Description:
+\end_layout
+
+\begin_layout Standard
+This function returns the number of seconds since the time origin for the
+ specified date, based on the calendar of the current context.
+ It must not be used before the calendar was created.
+\end_layout
+
+\begin_layout Subsection*
+Converting a date to a number of seconds since the beginning of the year
+\end_layout
+
+\begin_layout Subsubsection*
+Synopsis:
+\end_layout
+
+\begin_layout LyX-Code
+FUNCTION INTEGER xios(date_get_second_of_year)(date)
+\begin_inset Newline newline
+\end_inset
+
+TYPE(xios_date), INTENT(IN) :: date
+\end_layout
+
+\begin_layout Subsubsection*
+Arguments:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+date
+\end_layout
+
+\end_inset
+
+: the date to convert
+\end_layout
+
+\begin_layout Subsubsection*
+Description:
+\end_layout
+
+\begin_layout Standard
+This function returns the number of seconds since the beginning of the year
+ for the specified date, based on the calendar of the current context.
+ It must not be used before the calendar was created.
+\end_layout
+
+\begin_layout Subsection*
+Converting a date to a number of days since the beginning of the year
+\end_layout
+
+\begin_layout Subsubsection*
+Synopsis:
+\end_layout
+
+\begin_layout LyX-Code
+FUNCTION DOUBLE_PRECISION xios_date_get_day_of_year(date)
+\begin_inset Newline newline
+\end_inset
+
+TYPE(xios_date), INTENT(IN) :: date
+\end_layout
+
+\begin_layout Subsubsection*
+Arguments:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+date
+\end_layout
+
+\end_inset
+
+: the date to convert
+\end_layout
+
+\begin_layout Subsubsection*
+Description:
+\end_layout
+
+\begin_layout Standard
+This function returns the number of days since the beginning of the year
+ for the specified date, based on the calendar of the current context.
+ It must not be used before the calendar was created.
+\end_layout
+
+\begin_layout Subsection*
+Converting a date to a fraction of the current year
+\end_layout
+
+\begin_layout Subsubsection*
+Synopsis:
+\end_layout
+
+\begin_layout LyX-Code
+FUNCTION DOUBLE_PRECISION xios_date_get_fraction_of_year(date)
+\begin_inset Newline newline
+\end_inset
+
+TYPE(xios_date), INTENT(IN) :: date
+\end_layout
+
+\begin_layout Subsubsection*
+Arguments:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+date
+\end_layout
+
+\end_inset
+
+: the date to convert
+\end_layout
+
+\begin_layout Subsubsection*
+Description:
+\end_layout
+
+\begin_layout Standard
+This function returns the fraction of year corresponding to the specified
+ date, based on the calendar of the current context.
+ It must not be used before the calendar was created.
+\end_layout
+
+\begin_layout Subsection*
+Converting a date to a number of seconds since the beginning of the day
+\end_layout
+
+\begin_layout Subsubsection*
+Synopsis:
+\end_layout
+
+\begin_layout LyX-Code
+FUNCTION INTEGER xios(date_get_second_of_day)(date)
+\begin_inset Newline newline
+\end_inset
+
+TYPE(xios_date), INTENT(IN) :: date
+\end_layout
+
+\begin_layout Subsubsection*
+Arguments:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+date
+\end_layout
+
+\end_inset
+
+: the date to convert
+\end_layout
+
+\begin_layout Subsubsection*
+Description:
+\end_layout
+
+\begin_layout Standard
+This function returns the number of seconds since the beginning of the day
+ for the specified date, based on the calendar of the current context.
+ It must not be used before the calendar was created.
+\end_layout
+
+\begin_layout Subsection*
+Converting a date to a fraction of the current day
+\end_layout
+
+\begin_layout Subsubsection*
+Synopsis:
+\end_layout
+
+\begin_layout LyX-Code
+FUNCTION DOUBLE_PRECISION xios_date_get_fraction_of_day(date)
+\begin_inset Newline newline
+\end_inset
+
+TYPE(xios_date), INTENT(IN) :: date
+\end_layout
+
+\begin_layout Subsubsection*
+Arguments:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status collapsed
+
+\begin_layout Plain Layout
+date
+\end_layout
+
+\end_inset
+
+: the date to convert
+\end_layout
+
+\begin_layout Subsubsection*
+Description:
+\end_layout
+
+\begin_layout Standard
+This function returns the fraction of day corresponding to the specified
+ date, based on the calendar of the current context.
+ It must not be used before the calendar was created.
+\end_layout
+
+\end_body
+\end_document

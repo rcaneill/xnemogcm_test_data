@@ -1,0 +1,5 @@
+!-----------------------------------------------------------------------
+&nam_diatmb    !  Top Middle Bottom Output                              (default: OFF)
+!-----------------------------------------------------------------------
+   ln_diatmb   = .false.   !  Choose Top Middle and Bottom output or not
+/

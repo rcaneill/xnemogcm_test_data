@@ -1,0 +1,21 @@
+!-----------------------------------------------------------------------
+&nambdy_dta    !  open boundaries - external data                       (see nam_bdy)
+!-----------------------------------------------------------------------
+   ln_full_vel = .false.      !  ???
+
+   cn_dir      = 'bdydta/'    !  root directory for the BDY data location
+   !___________!_________________________!___________________!___________!_____________!________!___________!__________________!__________!_______________!
+   !           !  file name              ! frequency (hours) ! variable  ! time interp.!  clim  ! 'yearly'/ ! weights filename ! rotation ! land/sea mask !
+   !           !                         !  (if <0  months)  !   name    !   (logical) !  (T/F) ! 'monthly' !                  ! pairing  !    filename   !
+   bn_ssh      = 'amm12_bdyT_u2d'        ,         24        , 'sossheig',    .true.   , .false.,  'daily'  ,    ''            ,   ''     ,     ''
+   bn_u2d      = 'amm12_bdyU_u2d'        ,         24        , 'vobtcrtx',    .true.   , .false.,  'daily'  ,    ''            ,   ''     ,     ''
+   bn_v2d      = 'amm12_bdyV_u2d'        ,         24        , 'vobtcrty',    .true.   , .false.,  'daily'  ,    ''            ,   ''     ,     ''
+   bn_u3d      = 'amm12_bdyU_u3d'        ,         24        , 'vozocrtx',    .true.   , .false.,  'daily'  ,    ''            ,   ''     ,     ''
+   bn_v3d      = 'amm12_bdyV_u3d'        ,         24        , 'vomecrty',    .true.   , .false.,  'daily'  ,    ''            ,   ''     ,     ''
+   bn_tem      = 'amm12_bdyT_tra'        ,         24        , 'votemper',    .true.   , .false.,  'daily'  ,    ''            ,   ''     ,     ''
+   bn_sal      = 'amm12_bdyT_tra'        ,         24        , 'vosaline',    .true.   , .false.,  'daily'  ,    ''            ,   ''     ,     ''
+!* for si3
+!   bn_a_i     = 'amm12_bdyT_ice'        ,         24        , 'ileadfra',    .true.   , .false.,  'daily'  ,    ''            ,   ''     ,     ''
+!   bn_h_i     = 'amm12_bdyT_ice'        ,         24        , 'iicethic',    .true.   , .false.,  'daily'  ,    ''            ,   ''     ,     ''
+!   bn_h_s     = 'amm12_bdyT_ice'        ,         24        , 'isnowthi',    .true.   , .false.,  'daily'  ,    ''            ,   ''     ,     ''
+/

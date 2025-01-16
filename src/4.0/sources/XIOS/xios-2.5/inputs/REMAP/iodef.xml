@@ -1,0 +1,192 @@
+<?xml version="1.0"?>
+<simulation>
+
+ <context id="test">
+   <calendar type="Gregorian" start_date="2012-03-01 15:00:00" time_origin="2012-02-28 15:00:00 + 1d" />
+   <field_definition level="1" >
+    <field_group id="fields_src" operation="instant">
+       <field id="src_field_2D" domain_ref="src_domain"/>
+       <field id="src_field_2D_clone" domain_ref="src_domain_clone"/>
+       <field id="src_field_3D" domain_ref="src_domain" axis_ref="src_axis"/>       
+       <field id="src_field_3D_pression" grid_ref="src_grid_3D"/>
+       <field id="src_field_4D" grid_ref="grid_4D"/>       
+    </field_group>
+    <field_group  id="fields_dst">
+      <field id="dst_field_2D" field_ref="src_field_2D" domain_ref="dst_domain"/>
+      <field id="dst_field_2D_regular_pole" field_ref="src_field_2D" domain_ref="dst_domain_regular_pole"/>
+      <field id="dst_field_3D" field_ref="src_field_3D" grid_ref="dst_grid_3D"/>
+      <field id="dst_field_3D_interp" field_ref="src_field_3D" axis_ref="dst_axis"/>       
+      <field id="dst_field_4D_extract" field_ref="src_field_4D" grid_ref="grid_4D_extract"/>      
+      <field id="dst_field_2D_clone" field_ref="src_field_2D_clone" domain_ref="dst_domain"/>
+    </field_group>
+    <field_group id="read_fields" operation="instant" enabled="FALSE">
+      <field id="tmp_field_0" domain_ref="src_domain_regular_read" enabled="true"/>
+      <field id="tmp_field_clone" field_ref="tmp_field_0"/>
+      <field id="tmp_field_1" grid_ref="src_grid_curvilinear_read" />
+      <field id="tmp_field_2" grid_ref="src_grid_unstructured_read" />
+      <field id="dst_field_regular" field_ref="tmp_field_2" grid_ref="dst_grid_regular"/>      
+      <field id="dst_field_regular_pole_0" field_ref="tmp_field_0" domain_ref="dst_domain_regular_pole"/>
+      <field id="dst_field_regular_pole_1" field_ref="tmp_field_clone" domain_ref="dst_domain_regular_pole"/>
+    </field_group> 
+   </field_definition>
+
+   <file_definition type="one_file" par_access="collective" output_freq="1ts" output_level="10" enabled=".TRUE.">
+      <file_group id="write_files" >
+        <file id="output_2D" name="output_2D" >
+          <field field_ref="src_field_2D" name="field_src" />
+          <field field_ref="src_field_2D" name="field_dst_regular_0"  domain_ref="dst_domain_regular_pole" default_value="10.e+5"/>
+          <field field_ref="dst_field_2D" name="field_dst_regular_1" />
+          <field field_ref="dst_field_2D_regular_pole" name="field_dst_regular_2" />
+          <field field_ref="dst_field_2D_clone" name="field_dst_regular_3" />
+        </file> 
+       <file id="output_3D" name="output_3D" >
+          <field field_ref="src_field_3D" name="field_src" />
+          <field field_ref="src_field_3D_pression" name="field" />
+          <field field_ref="dst_field_3D_interp" name="field_dst_interp_domain" />
+          <field field_ref="dst_field_3D_interp" name="field_dst_interp_domain_axis" domain_ref="dst_domain_regular_pole"/>  
+       </file>
+       <file id="output_4D" name="output_4D" >
+          <field field_ref="src_field_4D" name="field_4D" />
+          <field field_ref="dst_field_4D_extract" name="field_4D_extract" />
+        </file>
+     </file_group>
+     <file_group id="read_files" >
+       <file id="output_src_regular" name="output_src_regular" mode="read" >
+          <field id="src_field_regular" name="field" grid_ref="src_grid_regular_read" operation="instant"/>
+       </file>
+<!--        <file id="output_src_curvilinear" name="output_src_curvilinear" mode="read" >
+          <field id="src_field_curvilinear" name="field_A" grid_ref="src_grid_curvilinear_read" operation="instant"/>
+       </file>
+       <file id="output_src_unstructured" name="output_src_unstructured" mode="read" >
+          <field id="src_field_unstructured" name="field" grid_ref="src_grid_unstructured_read" operation="instant"/>
+       </file> -->
+      </file_group>
+     <file_group id="read_then_write_files" enabled=".FALSE.">
+<!--        <file id="output_regular_pole" name="output_dst_regular" >
+          <field field_ref="dst_field_regular" name="field_regular" />
+          <field field_ref="dst_field_regular_pole_0" name="field_regular_pole_0" />
+          <field field_ref="dst_field_regular_pole_1" name="field_regular_pole_1" />
+       </file>
+       <file id="output_dst_curvilinear" name="output_dst_curvilinear">
+          <field field_ref="tmp_field_1" operation="instant"/>
+       </file>
+       <file id="output_dst_unstructured" name="output_dst_unstructured" >
+          <field field_ref="tmp_field_2" operation="instant"/>
+       </file> -->
+     </file_group>
+   </file_definition>
+
+   <axis_definition>
+    <axis_group id="axis_src">
+      <axis id="src_axis" positive="down" />
+      <axis id="nq" positive="down" />
+      <axis id="src_axis_curvilinear_read" />
+    </axis_group>
+    <axis_group id="axis_dst">
+     <axis id="dst_axis" positive="down" n_glo="2" value="(0,1)[120 220]">
+       <interpolate_axis type="polynomial" order="1" coordinate="src_field_3D_pression"/>
+       <!-- <interpolate_axis type="polynomial" order="1" />         -->
+     </axis>
+    </axis_group>
+   </axis_definition>
+
+   <domain_definition>
+    <domain_group id="read_domains">
+      <domain id="src_domain_regular_read" type="rectilinear">
+        <generate_rectilinear_domain />
+      </domain>
+      <domain id="src_domain_curvilinear_read" type="curvilinear">
+        <generate_rectilinear_domain />
+      </domain>
+      <domain id="src_domain_unstructured_read" type="unstructured">
+      </domain>
+    </domain_group>
+    <domain_group id="domain_src">
+      <domain id="src_domain" />
+      <domain id="src_domain_clone"/>
+    </domain_group>
+
+    <domain_group id="domain_dst">
+     <domain id="dst_domain">
+       <interpolate_domain/>
+     </domain>
+     <domain id="dst_domain_regular_pole" ni_glo="90" nj_glo="45" type="rectilinear">
+       <generate_rectilinear_domain id="domain_regular_pole"/>
+       <interpolate_domain/>       
+       <zoom_domain ibegin="0" ni="45" jbegin="0" nj="45" />
+     </domain>
+     <domain id="dst_domain_regular" ni_glo="90" nj_glo="45" type="rectilinear">
+       <generate_rectilinear_domain />
+       <interpolate_domain/>       
+     </domain>
+    </domain_group>
+   </domain_definition>
+
+  <grid_definition>
+    <grid_group id="read_grids">
+      <grid id="src_grid_regular_read">
+        <domain domain_ref="src_domain_regular_read"/>
+      </grid>
+      <grid id="src_grid_curvilinear_read">
+        <domain domain_ref="src_domain_curvilinear_read"/>
+        <axis axis_ref="src_axis_curvilinear_read" />
+      </grid>
+      <grid id="src_grid_unstructured_read">
+        <domain domain_ref="src_domain_unstructured_read"/>
+      </grid>
+    </grid_group>
+
+    <grid_group id="grid_src">
+      <grid id="src_grid_3D">
+        <domain domain_ref="src_domain"/>
+        <axis axis_ref="src_axis"/>
+      </grid>
+      <grid id="grid_4D">
+        <domain domain_ref="src_domain"/>
+        <axis axis_ref="src_axis"/>
+        <axis axis_ref="nq"/>
+      </grid>
+    </grid_group>
+
+    <grid_group id="grid_dst">
+      <grid id="dst_grid_regular">
+        <domain domain_ref="dst_domain_regular"/>
+      </grid>
+      <grid id="dst_grid_3D">
+        <domain domain_ref="src_domain"/>
+        <axis axis_ref="dst_axis"/>
+      </grid>
+      <grid id="grid_4D_extract">
+        <domain domain_ref="dst_domain_regular_pole"/>      
+        <axis axis_ref="src_axis"/>        
+        <scalar >
+          <extract_axis position="1"/>
+        </scalar>      
+      </grid>
+    </grid_group>
+  </grid_definition>
+  </context>
+
+  <context id="xios">
+      <variable_definition>
+         <variable_group id="server">
+            <variable id="using_server2" type="bool">true</variable>
+            <variable id="ratio_server2" type="int">50</variable>
+         </variable_group>
+
+        <variable_group id="buffer">
+            <variable id="optimal_buffer_size" type="string">performance</variable>
+            <variable id="buffer_size_factor" type="double">30.0</variable>
+            <variable id="min_buffer_size" type="double">800000</variable>
+         </variable_group>
+
+        <variable_group id="parameters" >
+          <variable id="using_server" type="bool">true</variable>
+          <variable id="info_level" type="int">50</variable>
+          <variable id="print_file" type="bool">true</variable>
+        </variable_group>
+      </variable_definition>
+  </context>
+
+</simulation>
+

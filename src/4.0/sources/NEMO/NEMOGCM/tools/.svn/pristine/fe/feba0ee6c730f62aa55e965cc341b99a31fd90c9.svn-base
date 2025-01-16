@@ -1,0 +1,5 @@
+&namdum
+   cn_dumvar="orca_lon", "orca_lat", "time_instant", "time_centered"
+   cn_dumdim=""
+   cn_dumatt="history"
+/

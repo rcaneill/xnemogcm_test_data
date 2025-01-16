@@ -1,0 +1,407 @@
+\documentclass[../main/NEMO_manual]{subfiles}
+
+\begin{document}
+
+% ================================================================
+% Chapter 2 ——— Time Domain (step.F90)
+% ================================================================
+\chapter{Time Domain (STP)}
+\label{chap:STP}
+\minitoc
+
+% Missing things:
+%	- daymod: definition of the time domain (nit000, nitend andd the calendar)
+
+\gmcomment{STEVEN :maybe a picture of the directory structure in the introduction which could be referred to here,
+  would help  ==> to be added}
+%%%%
+
+\newpage
+
+Having defined the continuous equations in \autoref{chap:PE}, we need now to choose a time discretization,
+a key feature of an ocean model as it exerts a strong influence on the structure of the computer code
+(\ie on its flowchart).
+In the present chapter, we provide a general description of the \NEMO time stepping strategy and
+the consequences for the order in which the equations are solved.
+
+% ================================================================
+% Time Discretisation
+% ================================================================
+\section{Time stepping environment}
+\label{sec:STP_environment}
+
+The time stepping used in \NEMO is a three level scheme that can be represented as follows:
+\begin{equation}
+  \label{eq:STP}
+  x^{t + \rdt} = x^{t - \rdt} + 2 \, \rdt \ \text{RHS}_x^{t - \rdt, \, t, \, t + \rdt}
+\end{equation} 
+where $x$ stands for $u$, $v$, $T$ or $S$;
+RHS is the Right-Hand-Side of the corresponding time evolution equation;
+$\rdt$ is the time step;
+and the superscripts indicate the time at which a quantity is evaluated.
+Each term of the RHS is evaluated at a specific time step depending on the physics with which it is associated.
+
+The choice of the time step used for this evaluation is discussed below as well as
+the implications for starting or restarting a model simulation.
+Note that the time stepping calculation is generally performed in a single operation.
+With such a complex and nonlinear system of equations it would be dangerous to let a prognostic variable evolve in
+time for each term separately.
+
+The three level scheme requires three arrays for each prognostic variable.
+For each variable $x$ there is $x_b$ (before), $x_n$ (now) and $x_a$.
+The third array, although referred to as $x_a$ (after) in the code,
+is usually not the variable at the after time step;
+but rather it is used to store the time derivative (RHS in \autoref{eq:STP}) prior to time-stepping the equation.
+Generally, the time stepping is performed once at each time step in the \mdl{tranxt} and \mdl{dynnxt} modules,
+except when using implicit vertical diffusion or calculating sea surface height in which
+case time-splitting options are used.
+
+% -------------------------------------------------------------------------------------------------------------
+%        Non-Diffusive Part---Leapfrog Scheme
+% -------------------------------------------------------------------------------------------------------------
+\section{Non-diffusive part --- Leapfrog scheme}
+\label{sec:STP_leap_frog}
+
+The time stepping used for processes other than diffusion is the well-known leapfrog scheme
+\citep{Mesinger_Arakawa_Bk76}.
+This scheme is widely used for advection processes in low-viscosity fluids.
+It is a time centred scheme, \ie the RHS in \autoref{eq:STP} is evaluated at time step $t$, the now time step.
+It may be used for momentum and tracer advection, pressure gradient, and Coriolis terms,
+but not for diffusion terms.
+It is an efficient method that achieves second-order accuracy with
+just one right hand side evaluation per time step.
+Moreover, it does not artificially damp linear oscillatory motion nor does it produce instability by
+amplifying the oscillations.
+These advantages are somewhat diminished by the large phase-speed error of the leapfrog scheme,
+and the unsuitability of leapfrog differencing for the representation of diffusion and Rayleigh damping processes.
+However, the scheme allows the coexistence of a numerical and a physical mode due to
+its leading third order dispersive error.
+In other words a divergence of odd and even time steps may occur.
+To prevent it, the leapfrog scheme is often used in association with a Robert-Asselin time filter
+(hereafter the LF-RA scheme).
+This filter, first designed by \citet{Robert_JMSJ66} and more comprehensively studied by \citet{Asselin_MWR72},
+is a kind of laplacian diffusion in time that mixes odd and even time steps:
+\begin{equation}
+  \label{eq:STP_asselin}
+  x_F^t = x^t + \gamma \, \lt[ x_F^{t - \rdt} - 2 x^t + x^{t + \rdt} \rt]
+\end{equation}
+where the subscript $F$ denotes filtered values and $\gamma$ is the Asselin coefficient.
+$\gamma$ is initialized as \np{rn\_atfp} (namelist parameter).
+Its default value is \np{rn\_atfp}~\forcode{= 10.e-3} (see \autoref{sec:STP_mLF}),
+causing only a weak dissipation of high frequency motions (\citep{Farge1987}).
+The addition of a time filter degrades the accuracy of the calculation from second to first order.
+However, the second order truncation error is proportional to $\gamma$, which is small compared to 1.
+Therefore, the LF-RA is a quasi second order accurate scheme.
+The LF-RA scheme is preferred to other time differencing schemes such as predictor corrector or trapezoidal schemes,
+because the user has an explicit and simple control of the magnitude of the time diffusion of the scheme.
+When used with the 2nd order space centred discretisation of the advection terms in
+the momentum and tracer equations, LF-RA avoids implicit numerical diffusion:
+diffusion is set explicitly by the user through the Robert-Asselin 
+filter parameter and the viscosity and diffusion coefficients.
+
+% -------------------------------------------------------------------------------------------------------------
+%        Diffusive Part---Forward or Backward Scheme
+% -------------------------------------------------------------------------------------------------------------
+\section{Diffusive part --- Forward or backward scheme}
+\label{sec:STP_forward_imp}
+
+The leapfrog differencing scheme is unsuitable for the representation of diffusion and damping processes.
+For a tendancy $D_x$, representing a diffusion term or a restoring term to a tracer climatology
+(when present, see \autoref{sec:TRA_dmp}), a forward time differencing scheme is used :
+\[
+  %\label{eq:STP_euler}
+  x^{t + \rdt} = x^{t - \rdt} + 2 \, \rdt \ D_x^{t - \rdt}
+\]
+
+This is diffusive in time and conditionally stable.
+The conditions for stability of second and fourth order horizontal diffusion schemes are \citep{Griffies_Bk04}:
+\begin{equation}
+  \label{eq:STP_euler_stability}
+  A^h <
+  \begin{cases}
+    \frac{e^2}{ 8 \, \rdt} & \text{laplacian diffusion} \\
+    \frac{e^4}{64 \, \rdt} & \text{bilaplacian diffusion}
+  \end{cases}
+\end{equation}
+where $e$ is the smallest grid size in the two horizontal directions and $A^h$ is the mixing coefficient.
+The linear constraint \autoref{eq:STP_euler_stability} is a necessary condition, but not sufficient.
+If it is not satisfied, even mildly, then the model soon becomes wildly unstable.
+The instability can be removed by either reducing the length of the time steps or reducing the mixing coefficient.
+
+For the vertical diffusion terms, a forward time differencing scheme can be used,
+but usually the numerical stability condition imposes a strong constraint on the time step.
+Two solutions are available in \NEMO to overcome the stability constraint:
+$(a)$ a forward time differencing scheme using a time splitting technique (\np{ln\_zdfexp}~\forcode{= .true.}) or
+$(b)$ a backward (or implicit) time differencing scheme                   (\np{ln\_zdfexp}~\forcode{= .false.}).
+In $(a)$, the master time step $\Delta$t is cut into $N$ fractional time steps so that
+the stability criterion is reduced by a factor of $N$.
+The computation is performed as follows:
+\begin{alignat*}{2}
+  % \label{eq:STP_ts}
+  &x_\ast^{t - \rdt}                      &= &x^{t - \rdt} \\
+  &x_\ast^{t - \rdt + L \frac{2 \rdt}{N}} &=   &x_\ast ^{t - \rdt + (L - 1) \frac{2 \rdt}{N}}
+                                             + \frac{2 \rdt}{N} \; DF^{t - \rdt + (L - 1) \frac{2 \rdt}{N}}
+  \quad \text{for $L = 1$ to $N$} \\
+  &x^{t + \rdt}                           &= &x_\ast^{t + \rdt}
+\end{alignat*}
+with DF a vertical diffusion term.
+The number of fractional time steps, $N$, is given by setting \np{nn\_zdfexp}, (namelist parameter).
+The scheme $(b)$ is unconditionally stable but diffusive. It can be written as follows:
+\begin{equation}
+  \label{eq:STP_imp}
+  x^{t + \rdt} = x^{t - \rdt} + 2 \, \rdt \ \text{RHS}_x^{t + \rdt}
+\end{equation}
+
+%%gm
+%%gm   UPDATE the next paragraphs with time varying thickness ...
+%%gm
+
+This scheme is rather time consuming since it requires a matrix inversion,
+but it becomes attractive since a value of 3 or more is needed for N in the forward time differencing scheme.
+For example, the finite difference approximation of the temperature equation is:
+\[
+  % \label{eq:STP_imp_zdf}
+  \frac{T(k)^{t + 1} - T(k)^{t - 1}}{2 \; \rdt}
+  \equiv
+  \text{RHS} + \frac{1}{e_{3t}} \delta_k \lt[ \frac{A_w^{vT}}{e_{3w} } \delta_{k + 1/2} \lt[ T^{t + 1} \rt] \rt]
+\]
+where RHS is the right hand side of the equation except for the vertical diffusion term.
+We rewrite \autoref{eq:STP_imp} as:
+\begin{equation}
+  \label{eq:STP_imp_mat}
+  -c(k + 1) \; T^{t + 1}(k + 1) + d(k) \; T^{t + 1}(k) - \; c(k) \; T^{t + 1}(k - 1) \equiv b(k)
+\end{equation}
+where 
+\begin{align*} 
+  c(k) &= A_w^{vT} (k) \, / \, e_{3w} (k)     \\
+  d(k) &= e_{3t}   (k)       \, / \, (2 \rdt) + c_k + c_{k + 1}    \\
+  b(k) &= e_{3t}   (k) \; \lt( T^{t - 1}(k) \, / \, (2 \rdt) + \text{RHS} \rt)
+\end{align*}
+
+\autoref{eq:STP_imp_mat} is a linear system of equations with an associated matrix which is tridiagonal.
+Moreover,
+$c(k)$ and $d(k)$ are positive and the diagonal term is greater than the sum of the two extra-diagonal terms,
+therefore a special adaptation of the Gauss elimination procedure is used to find the solution
+(see for example \citet{Richtmyer1967}).
+
+% -------------------------------------------------------------------------------------------------------------
+%        Surface Pressure gradient
+% -------------------------------------------------------------------------------------------------------------
+\section{Surface pressure gradient}
+\label{sec:STP_spg_ts}
+
+===>>>>  TO BE written....  :-)
+
+%\gmcomment{ 
+%>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+\begin{figure}[!t]
+  \begin{center}
+    \includegraphics[]{Fig_TimeStepping_flowchart}
+    \caption{
+      \protect\label{fig:TimeStep_flowchart}
+      Sketch of the leapfrog time stepping sequence in \NEMO from \citet{Leclair_Madec_OM09}.
+      The use of a semi -implicit computation of the hydrostatic pressure gradient requires the tracer equation to
+      be stepped forward prior to the momentum equation.
+      The need for knowledge of the vertical scale factor (here denoted as $h$) requires the sea surface height and
+      the continuity equation to be stepped forward prior to the computation of the tracer equation.
+      Note that the method for the evaluation of the surface pressure gradient $\nabla p_s$ is not presented here
+      (see \autoref{sec:DYN_spg}).
+    }
+  \end{center}
+\end{figure}
+%>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+%}
+
+% -------------------------------------------------------------------------------------------------------------
+%        The Modified Leapfrog -- Asselin Filter scheme
+% -------------------------------------------------------------------------------------------------------------
+\section{Modified Leapfrog -- Asselin filter scheme}
+\label{sec:STP_mLF}
+
+Significant changes have been introduced by \cite{Leclair_Madec_OM09} in the LF-RA scheme in order to
+ensure tracer conservation and to allow the use of a much smaller value of the Asselin filter parameter.
+The modifications affect both the forcing and filtering treatments in the LF-RA scheme.
+
+In a classical LF-RA environment, the forcing term is centred in time,
+\ie it is time-stepped over a $2 \rdt$ period:
+$x^t = x^t + 2 \rdt Q^t$ where $Q$ is the forcing applied to $x$,
+and the time filter is given by \autoref{eq:STP_asselin} so that $Q$ is redistributed over several time step.
+In the modified LF-RA environment, these two formulations have been replaced by:
+\begin{gather}
+  \label{eq:STP_forcing}
+  x^{t + \rdt} = x^{t - \rdt} + \rdt \lt( Q^{t - \rdt / 2} + Q^{t + \rdt / 2} \rt)  \\
+  \label{eq:STP_RA}
+  x_F^t       = x^t + \gamma \, \lt( x_F^{t - \rdt} - 2 x^t + x^{t + \rdt} \rt)
+                    - \gamma \, \rdt \, \lt( Q^{t + \rdt / 2} - Q^{t - \rdt / 2} \rt)
+\end{gather}
+The change in the forcing formulation given by \autoref{eq:STP_forcing} (see \autoref{fig:MLF_forcing})
+has a significant effect:
+the forcing term no longer excites the divergence of odd and even time steps \citep{Leclair_Madec_OM09}.
+% forcing seen by the model....
+This property improves the LF-RA scheme in two respects.
+First, the LF-RA can now ensure the local and global conservation of tracers.
+Indeed, time filtering is no longer required on the forcing part.
+The influence of the Asselin filter on the forcing is be removed by adding a new term in the filter
+(last term in \autoref{eq:STP_RA} compared to \autoref{eq:STP_asselin}).
+Since the filtering of the forcing was the source of non-conservation in the classical LF-RA scheme,
+the modified formulation becomes conservative \citep{Leclair_Madec_OM09}.
+Second, the LF-RA becomes a truly quasi -second order scheme.
+Indeed, \autoref{eq:STP_forcing} used in combination with a careful treatment of static instability
+(\autoref{subsec:ZDF_evd}) and of the TKE physics (\autoref{subsec:ZDF_tke_ene}),
+the two other main sources of time step divergence,
+allows a reduction by two orders of magnitude of the Asselin filter parameter.
+
+Note that the forcing is now provided at the middle of a time step:
+$Q^{t + \rdt / 2}$ is the forcing applied over the $[t,t + \rdt]$ time interval.
+This and the change in the time filter, \autoref{eq:STP_RA},
+allows an exact evaluation of the contribution due to the forcing term between any two time steps,
+even if separated by only $\rdt$ since the time filter is no longer applied to the forcing term.
+
+%>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+\begin{figure}[!t]
+  \begin{center}
+    \includegraphics[]{Fig_MLF_forcing}
+    \caption{
+      \protect\label{fig:MLF_forcing}
+      Illustration of forcing integration methods.
+      (top) ''Traditional'' formulation:
+      the forcing is defined at the same time as the variable to which it is applied
+      (integer value of the time step index) and it is applied over a $2 \rdt$ period.
+      (bottom)  modified formulation:
+      the forcing is defined in the middle of the time (integer and a half value of the time step index) and
+      the mean of two successive forcing values ($n - 1 / 2$, $n + 1 / 2$) is applied over a $2 \rdt$ period.
+    }
+  \end{center}
+\end{figure}
+%>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+% -------------------------------------------------------------------------------------------------------------
+%        Start/Restart strategy
+% -------------------------------------------------------------------------------------------------------------
+\section{Start/Restart strategy}
+\label{sec:STP_rst}
+
+%--------------------------------------------namrun-------------------------------------------
+\nlst{namrun}
+%--------------------------------------------------------------------------------------------------------------
+
+The first time step of this three level scheme when starting from initial conditions is a forward step
+(Euler time integration):
+\[
+  % \label{eq:DOM_euler}
+  x^1 = x^0 + \rdt \ \text{RHS}^0
+\]
+This is done simply by keeping the leapfrog environment (\ie the \autoref{eq:STP} three level time stepping) but
+setting all $x^0$ (\textit{before}) and $x^1$ (\textit{now}) fields equal at the first time step and
+using half the value of $\rdt$.
+
+It is also possible to restart from a previous computation, by using a restart file.
+The restart strategy is designed to ensure perfect restartability of the code:
+the user should obtain the same results to machine precision either by
+running the model for $2N$ time steps in one go,
+or by performing two consecutive experiments of $N$ steps with a restart.
+This requires saving two time levels and many auxiliary data in the restart files in machine precision.
+
+Note that when a semi -implicit scheme is used to evaluate the hydrostatic pressure gradient
+(see \autoref{subsec:DYN_hpg_imp}), an extra three-dimensional field has to
+be added to the restart file to ensure an exact restartability.
+This is done optionally via the  \np{nn\_dynhpg\_rst} namelist parameter,
+so that the size of the restart file can be reduced when restartability is not a key issue
+(operational oceanography or in ensemble simulations for seasonal forecasting).
+
+Note the size of the time step used, $\rdt$, is also saved in the restart file.
+When restarting, if the the time step has been changed, a restart using an Euler time stepping scheme is imposed.
+Options are defined through the  \ngn{namrun} namelist variables.
+%%%
+\gmcomment{
+add here how to force the restart to contain only one time step for operational purposes
+
+add also the idea of writing several restart for seasonal forecast : how is it done ?
+
+verify that all namelist pararmeters are truly described 
+
+a word on the check of restart  .....
+}
+%%%
+
+\gmcomment{       % add a subsection here  
+
+%-------------------------------------------------------------------------------------------------------------
+%        Time Domain
+% -------------------------------------------------------------------------------------------------------------
+\subsection{Time domain}
+\label{subsec:STP_time}
+%--------------------------------------------namrun-------------------------------------------
+
+\nlst{namdom}         
+%--------------------------------------------------------------------------------------------------------------
+
+Options are defined through the  \ngn{namdom} namelist variables.
+ \colorbox{yellow}{add here a few word on nit000 and nitend}
+
+ \colorbox{yellow}{Write documentation on the calendar and the key variable adatrj}
+
+add a description of daymod, and the model calandar (leap-year and co)
+
+}     	%% end add
+
+
+
+%%
+\gmcomment{       % add implicit in vvl case  and Crant-Nicholson scheme   
+
+Implicit time stepping in case of variable volume thickness.
+
+Tracer case (NB for momentum in vector invariant form take care!)
+
+\begin{flalign*}
+  &\frac{\lt( e_{3t}\,T \rt)_k^{t+1}-\lt( e_{3t}\,T \rt)_k^{t-1}}{2\rdt}
+  \equiv \text{RHS}+ \delta_k \lt[ {\frac{A_w^{vt} }{e_{3w}^{t+1} }\delta_{k + 1/2} \lt[ {T^{t+1}} \rt]}
+  \rt]      \\
+  &\lt( e_{3t}\,T \rt)_k^{t+1}-\lt( e_{3t}\,T \rt)_k^{t-1}
+  \equiv {2\rdt} \ \text{RHS}+ {2\rdt} \ \delta_k \lt[ {\frac{A_w^{vt} }{e_{3w}^{t+1} }\delta_{k + 1/2} \lt[ {T^{t+1}} \rt]}
+  \rt]      \\
+  &\lt( e_{3t}\,T \rt)_k^{t+1}-\lt( e_{3t}\,T \rt)_k^{t-1}
+  \equiv 2\rdt \ \text{RHS}
+  + 2\rdt \ \lt\{ \lt[ \frac{A_w^{vt}}{e_{3w}^{t+1}} \rt]_{k + 1/2} [ T_{k +1}^{t+1} - T_k      ^{t+1} ]
+    - \lt[ \frac{A_w^{vt}}{e_{3w}^{t+1}} \rt]_{k - 1/2} [ T_k       ^{t+1} - T_{k -1}^{t+1} ]  \rt\}     \\
+  &\\
+  &\lt( e_{3t}\,T \rt)_k^{t+1}
+  -  {2\rdt} \           \lt[ \frac{A_w^{vt}}{e_{3w}^{t+1}} \rt]_{k + 1/2}                  T_{k +1}^{t+1}
+  + {2\rdt} \ \lt\{  \lt[ \frac{A_w^{vt}}{e_{3w}^{t+1}} \rt]_{k + 1/2}
+    +  \lt[ \frac{A_w^{vt}}{e_{3w}^{t+1}} \rt]_{k - 1/2}     \rt\}   T_{k    }^{t+1}
+  -  {2\rdt} \           \lt[ \frac{A_w^{vt}}{e_{3w}^{t+1}} \rt]_{k - 1/2}                  T_{k -1}^{t+1}      \\
+  &\equiv \lt( e_{3t}\,T \rt)_k^{t-1} + {2\rdt} \ \text{RHS}    \\
+  %
+\end{flalign*}
+\begin{flalign*}
+  \allowdisplaybreaks
+  \intertext{ Tracer case }
+  %
+  &  \qquad \qquad  \quad   -  {2\rdt}                  \ \lt[ \frac{A_w^{vt}}{e_{3w}^{t+1}} \rt]_{k + 1/2}
+  \qquad \qquad \qquad  \qquad  T_{k +1}^{t+1}   \\
+  &+ {2\rdt} \ \biggl\{  (e_{3t})_{k   }^{t+1}  \bigg. +    \lt[ \frac{A_w^{vt}}{e_{3w}^{t+1}} \rt]_{k + 1/2}
+  +   \lt[ \frac{A_w^{vt}}{e_{3w}^{t+1}} \rt]_{k - 1/2} \bigg. \biggr\}  \ \ \ T_{k   }^{t+1}  &&\\
+  & \qquad \qquad  \qquad \qquad \qquad \quad \ \ -  {2\rdt} \                          \lt[ \frac{A_w^{vt}}{e_{3w}^{t+1}} \rt]_{k - 1/2}                          \quad \ \ T_{k -1}^{t+1}
+  \ \equiv \ \lt( e_{3t}\,T \rt)_k^{t-1} + {2\rdt} \ \text{RHS}  \\
+  %
+\end{flalign*}
+\begin{flalign*}
+  \allowdisplaybreaks
+  \intertext{ Tracer content case }
+  %
+  & -  {2\rdt} \              & \frac{(A_w^{vt})_{k + 1/2}} {(e_{3w})_{k + 1/2}^{t+1}\;(e_{3t})_{k +1}^{t+1}}  && \  \lt( e_{3t}\,T \rt)_{k +1}^{t+1}   &\\
+  & + {2\rdt} \ \lt[ 1  \rt.+ & \frac{(A_w^{vt})_{k + 1/2}} {(e_{3w})_{k + 1/2}^{t+1}\;(e_{3t})_k^{t+1}}
+  + & \frac{(A_w^{vt})_{k - 1/2}} {(e_{3w})_{k - 1/2}^{t+1}\;(e_{3t})_k^{t+1}}  \lt.  \rt]  & \lt( e_{3t}\,T \rt)_{k   }^{t+1}  &\\
+  & -  {2\rdt} \               & \frac{(A_w^{vt})_{k - 1/2}} {(e_{3w})_{k - 1/2}^{t+1}\;(e_{3t})_{k -1}^{t+1}}     &\  \lt( e_{3t}\,T \rt)_{k -1}^{t+1}
+  \equiv \lt( e_{3t}\,T \rt)_k^{t-1} + {2\rdt} \ \text{RHS}  &
+\end{flalign*}
+
+%%
+}
+
+\biblio
+
+\pindex
+
+\end{document}

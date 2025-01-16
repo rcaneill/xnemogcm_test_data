@@ -1,0 +1,350 @@
+\documentclass[../main/NEMO_manual]{subfiles}
+
+\begin{document}
+
+% ================================================================
+% INTRODUCTION
+% ================================================================
+
+\chapter{Introduction}
+
+The Nucleus for European Modelling of the Ocean (\NEMO) is a framework of ocean related engines,
+namely OPA \footnote{OPA: Oc\'{e}an PArall\'{e}lis\'{e} (french)} for the ocean dynamics and thermodynamics,
+SI$^3$ \footnote{SI$^3$: Sea-Ice modelling Integrated Initiative} for the sea-ice dynamics and thermodynamics,
+TOP \footnote{TOP: Tracer in the Ocean Paradigm} for the biogeochemistry 
+(both transport (TRP) and sources minus sinks 
+(PISCES \footnote{PISCES: Pelagic Interactions Scheme for Carbon and Ecosystem Studies})).
+It is intended to be a flexible tool for studying the ocean and its interactions with the other components of
+the earth climate system (atmosphere, sea-ice, biogeochemical tracers, ...) over
+a wide range of space and time scales.
+This manual provides information about the physics represented by the ocean component of \NEMO and
+the rationale for the choice of numerical schemes and the model design.
+For the use of framework, 
+a guide which gathers the \texttt{README} files spread out in the source code can be build and 
+exported in web or printable format (see \path{./doc/rst}).
+An online version of the guide is also available on the 
+\href{http://forge.ipsl.jussieu.fr/nemo}{\NEMO forge platform}.
+
+The ocean component of \NEMO has been developed from the legacy of the OPA model, release 8.2, 
+described in \citet{Madec1998}.
+This model has been used for a wide range of applications, both regional or global, as a forced ocean model and 
+as a model coupled with the sea-ice and/or the atmosphere.
+
+This manual is organised in as follows.
+\autoref{chap:PE} presents the model basics, \ie the equations and their assumptions,
+the vertical coordinates used, and the subgrid scale physics.
+This part deals with the continuous equations of the model
+(primitive equations, with temperature, salinity and an equation of seawater).
+The equations are written in a curvilinear coordinate system, with a choice of vertical coordinates
+($z$, $s$, \zstar, \sstar, \ztilde, \stilde, and a mix of them).
+Momentum equations are formulated in vector invariant or flux form.
+Dimensional units in the meter, kilogram, second (MKS) international system are used throughout.
+
+The following chapters deal with the discrete equations.
+\autoref{chap:STP} presents the time domain.
+The model time stepping environment is a three level scheme in which 
+the tendency terms of the equations are evaluated either centered in time, or forward, or backward depending of 
+the nature of the term.
+\autoref{chap:DOM} presents the space domain.
+The model is discretised on a staggered grid (Arakawa C grid) with masking of land areas.
+Vertical discretisation used depends on both how the bottom topography is represented and whether 
+the free surface is linear or not.
+Full step or partial step $z$-coordinate or $s$- (terrain-following) coordinate is used with linear free surface 
+(level position are then fixed in time).
+In non-linear free surface, the corresponding rescaled height coordinate formulation (\zstar or \sstar) is used
+(the level position then vary in time as a function of the sea surface heigh).
+The following two chapters (\autoref{chap:TRA} and \autoref{chap:DYN}) describe the discretisation of
+the prognostic equations for the active tracers and the momentum.
+Explicit, split-explicit and filtered free surface formulations are implemented.
+A number of numerical schemes are available for momentum advection, 
+for the computation of the pressure gradients, as well as for the advection of tracers 
+(second or higher order advection schemes, including positive ones).
+
+Surface boundary conditions (\autoref{chap:SBC}) can be implemented as prescribed fluxes, or bulk formulations for 
+the surface fluxes (wind stress, heat, freshwater).
+The model allows penetration of solar radiation.
+There is an optional geothermal heating at the ocean bottom.
+Within the \NEMO system the ocean model is interactively coupled with a sea ice model (SI$^3$) and
+a biogeochemistry model (PISCES).
+Interactive coupling to Atmospheric models is possible via the OASIS coupler \citep{OASIS2006}.
+Two-way nesting is also available through an interface to the AGRIF package
+(Adaptative Grid Refinement in \fortran) \citep{Debreu_al_CG2008}.
+% Needs to be reviewed
+%The interface code for coupling to an alternative sea ice model (CICE, \citet{Hunke2008}) has now been upgraded so
+%that it works for both global and regional domains, although AGRIF is still not available.
+
+Other model characteristics are the lateral boundary conditions (\autoref{chap:LBC}).
+Global configurations of the model make use of the ORCA tripolar grid, with special north fold boundary condition.
+Free-slip or no-slip boundary conditions are allowed at land boundaries.
+Closed basin geometries as well as periodic domains and open boundary conditions are possible.
+
+Physical parameterisations are described in \autoref{chap:LDF} and \autoref{chap:ZDF}.
+The model includes an implicit treatment of vertical viscosity and diffusivity.
+The lateral Laplacian and biharmonic viscosity and diffusion can be rotated following
+a geopotential or neutral direction.
+There is an optional eddy induced velocity \citep{Gent1990} with a space and time variable coefficient
+\citet{Treguier1997}.
+The model has vertical harmonic viscosity and diffusion with a space and time variable coefficient,
+with options to compute the coefficients with \citet{Blanke1993}, \citet{Pacanowski_Philander_JPO81}, or 
+\citet{Umlauf_Burchard_JMS03} mixing schemes.
+ 
+%%gm    To be put somewhere else ....
+%%nm    We should consider creating a glossary for all this kind of stuff (terms, acronyms and symbols)
+%%      http://en.wikibooks.org/wiki/LaTeX/Glossary
+\noindent CPP keys and namelists are used as inputs to the code.
+
+\noindent \index{CPP keys} CPP keys
+
+Some CPP keys are implemented in the \fortran code to allow code selection at compiling step.
+This selection of code at compilation time reduces the reliability of the whole platform since
+it changes the code from one set of CPP keys to the other.
+It is used only when the addition/suppression of the part of code highly changes the amount of memory at run time.
+Usual coding looks like: 
+
+\begin{forlines}
+#if defined key_option1
+	! This part of the \fortran code will be active
+	! only if key_option1 is activated at compiling step
+#endif
+\end{forlines}
+
+\noindent \index{Namelist} Namelists
+
+The namelist allows to input variables (character, logical, real and integer) into the code.
+There is one namelist file for each component of NEMO (dynamics, sea-ice, biogeochemistry...)
+containing all the \fortran namelists needed.
+The implementation in NEMO uses a 2-step process. 
+For each \fortran namelist, two files are read:
+
+\begin{enumerate}
+\item
+  A reference namelist (in \path{./cfgs/SHARED/namelist_ref}) is read first.
+  This file contains all the namelist variables which are initialised to default values
+\item
+  A configuration namelist (in \path{./cfgs/CFG_NAME/EXP00/namelist_cfg}) is read aferwards.
+  This file contains only the namelist variables which are changed from default values, and overwrites those.
+\end{enumerate}
+A template can be found in \path{NEMO/OPA_SRC/module.example}.
+The effective namelist, taken in account during the run, is stored at execution time in
+an \texttt{output\_namelist\_dyn} (or \texttt{\_ice} or \texttt{\_top}) file.
+%%gm  end
+
+Model outputs management and specific online diagnostics are described in \autoref{chap:DIA}.
+The diagnostics includes the output of all the tendencies of the momentum and tracers equations,
+the output of tracers tendencies averaged over the time evolving mixed layer,
+the output of the tendencies of the barotropic vorticity equation,
+the computation of on-line floats trajectories...
+\autoref{chap:OBS} describes a tool which reads in observation files
+(profile temperature and salinity, sea surface temperature, sea level anomaly and sea ice concentration) 
+and calculates an interpolated model equivalent value at the observation location and nearest model timestep.
+Originally developed of data assimilation, it is a fantastic tool for model and data comparison.
+\autoref{chap:ASM} describes how increments produced by data assimilation may be applied to the model equations.
+Finally, \autoref{chap:CFG} provides a brief introduction to the pre-defined model configurations
+(water column model, ORCA and GYRE families of configurations).
+
+%%nm: Add some words on the NEMO dependencies
+The model is implemented in \fninety, with preprocessing (C pre-processor).
+It runs under UNIX.
+It is optimized for vector computers and parallelised by domain decomposition with MPI.
+All input and output is done in NetCDF (Network Common Data Format) with a optional direct access format for output.
+To ensure the clarity and readability of the code it is necessary to follow coding rules.
+The coding rules for OPA include conventions for naming variables,
+with different starting letters for different types of variables (real, integer, parameter\ldots).
+Those rules are briefly presented in \autoref{apdx:D} and a more complete document is available .
+
+The model is organized with a high internal modularity based on physics.
+For example, each trend (\ie, a term in the RHS of the prognostic equation) for momentum and tracers
+is computed in a dedicated module.
+To make it easier for the user to find his way around the code, the module names follow a three-letter rule.
+For example, \mdl{traldf} is a module related to the TRAcers equation, computing the Lateral DiFfussion.
+%The complete list of module names is presented in \autoref{apdx:D}.      %====>>>> to be done !
+Furthermore, modules are organized in a few directories that correspond to their category,
+as indicated by the first three letters of their name (\autoref{tab:chapters}).
+
+The manual mirrors the organization of the model.
+After the presentation of the continuous equations (\autoref{chap:PE}),
+the following chapters refer to specific terms of the equations each associated with a group of modules 
+(\autoref{tab:chapters}).
+
+%--------------------------------------------------TABLE--------------------------------------------------
+\begin{table}[!t]	
+  \caption{
+    \protect\label{tab:chapters}
+    Organization of Chapters mimicking the one of the model directories.
+  }
+  \begin{center}
+    \begin{tabular}{|l|l|l|}
+      \hline
+      \autoref{chap:STP}  & -   & model time STePping environment \\
+      \hline
+      \autoref{chap:DOM}  & DOM & model DOMain \\
+      \hline
+      \autoref{chap:TRA}  & TRA & TRAcer equations (potential temperature and salinity) \\
+      \hline
+      \autoref{chap:DYN}  & DYN & DYNamic equations (momentum) \\
+      \hline
+      \autoref{chap:SBC}  & SBC & Surface Boundary Conditions \\
+      \hline
+      \autoref{chap:LBC}  & LBC & Lateral Boundary Conditions (also OBC and BDY)  \\
+      \hline
+      \autoref{chap:LDF}  & LDF & Lateral DiFfusion (parameterisations) \\
+      \hline
+      \autoref{chap:ZDF}  & ZDF & vertical (Z) DiFfusion (parameterisations)  \\
+      \hline
+      \autoref{chap:DIA}  & DIA & I/O and DIAgnostics (also IOM, FLO and TRD) \\
+      \hline
+      \autoref{chap:OBS}  & OBS & OBServation and model comparison  \\
+      \hline
+      \autoref{chap:ASM}  & ASM & ASsiMilation increment  \\
+      \hline
+      \autoref{chap:MISC} & SOL & Miscellaneous  topics (including solvers)  \\
+      \hline
+      \autoref{chap:CFG}  & -   & predefined configurations (including C1D) \\
+      \hline
+    \end{tabular}
+  \end{center}
+\end{table}
+%--------------------------------------------------------------------------------------------------------------
+
+%% nm: the following section has to vastly remodeled to focus only on well-identified versions of NEMO
+%% (3.4, 3.6, 4.0 and further releases). Then its formatting must be improved too.
+\subsubsection{Changes between releases}
+
+NEMO/OPA, like all research tools, is in perpetual evolution.
+The present document describes the OPA version include in the release 3.4 of NEMO.
+This release differs significantly from version 8, documented in \citet{Madec1998}. \\
+
+The main modifications from OPA v8 and NEMO/OPA v3.2 are :
+
+\begin{itemize}
+\item
+  transition to full native \fninety, deep code restructuring and drastic reduction of CPP keys; 
+\item
+  introduction of partial step representation of bottom topography
+  \citep{Barnier_al_OD06, Le_Sommer_al_OM09, Penduff_al_OS07};
+\item
+  partial reactivation of a terrain-following vertical coordinate ($s$- and hybrid $s$-$z$) with
+  the addition of several options for pressure gradient computation
+  \footnote{
+    Partial support of $s$-coordinate: there is presently no support for neutral physics in
+    $s$-coordinate and for the new options for horizontal pressure gradient computation with
+    a non-linear equation of state.
+  }
+  ;
+\item
+  more choices for the treatment of the free surface: full explicit, split-explicit or filtered schemes,
+  and suppression of the rigid-lid option;
+\item
+  non linear free surface associated with the rescaled height coordinate \zstar or $s$;
+\item
+  additional schemes for vector and flux forms of the momentum advection;
+\item
+  additional advection schemes for tracers;
+\item
+  implementation of the AGRIF package (Adaptative Grid Refinement in \fortran) \citep{Debreu_al_CG2008};
+\item
+  online diagnostics : tracers trend in the mixed layer and vorticity balance;
+\item
+  rewriting of the I/O management with the use of an I/O server;
+\item
+  generalized ocean-ice-atmosphere-CO2 coupling interface, interfaced with OASIS 3 coupler;
+\item
+  surface module (SBC) that simplify the way the ocean is forced and include two bulk formulea (CLIO and CORE) and
+  which includes an on-the-fly interpolation of input forcing fields;
+\item
+  RGB light penetration and optional use of ocean color 
+\item
+  major changes in the TKE schemes: it now includes a Langmuir cell parameterization \citep{Axell_JGR02},
+  the \citet{Mellor_Blumberg_JPO04} surface wave breaking parameterization, and has a time discretization which
+  is energetically consistent with the ocean model equations \citep{Burchard_OM02, Marsaleix_al_OM08};
+\item
+  tidal mixing parametrisation (bottom intensification) + Indonesian specific tidal mixing
+  \citep{Koch-Larrouy_al_GRL07};
+\item
+  introduction of LIM-3, the new Louvain-la-Neuve sea-ice model
+  (C-grid rheology and new thermodynamics including bulk ice salinity)
+  \citep{Vancoppenolle_al_OM09a, Vancoppenolle_al_OM09b}
+\end{itemize}
+
+The main modifications from NEMO/OPA v3.2 and v3.3 are:
+
+\begin{itemize}
+\item
+  introduction of a modified leapfrog-Asselin filter time stepping scheme
+  \citep{Leclair_Madec_OM09}; 
+\item
+  additional scheme for iso-neutral mixing \citep{Griffies_al_JPO98}, although it is still a "work in progress";
+\item
+  a rewriting of the bottom boundary layer scheme, following \citet{Campin_Goosse_Tel99};
+\item
+  addition of a Generic Length Scale vertical mixing scheme, following \citet{Umlauf_Burchard_JMS03};
+\item
+  addition of the atmospheric pressure as an external forcing on both ocean and sea-ice dynamics;
+\item
+  addition of a diurnal cycle on solar radiation \citep{Bernie_al_CD07};
+\item
+  river runoffs added through a non-zero depth, and having its own temperature and salinity;
+\item
+  CORE II normal year forcing set as the default forcing of ORCA2-LIM configuration;
+\item
+  generalisation of the use of \mdl{fldread} for all input fields (ocean climatology, sea-ice damping...);
+\item
+  addition of an on-line observation and model comparison (thanks to NEMOVAR project);
+\item
+  optional application of an assimilation increment (thanks to NEMOVAR project);
+\item
+  coupling interface adjusted for WRF atmospheric model;
+\item
+  C-grid ice rheology now available fro both LIM-2 and LIM-3 \citep{Bouillon_al_OM09};
+\item
+  LIM-3 ice-ocean momentum coupling applied to LIM-2;
+\item
+  a deep re-writting and simplification of the off-line tracer component (OFF\_SRC);
+\item
+  the merge of passive and active advection and diffusion modules;
+\item
+  Use of the Flexible Configuration Manager (FCM) to build configurations,
+  generate the Makefile and produce the executable;
+\item
+  Linear-tangent and Adjoint component (TAM) added, phased with v3.0
+\end{itemize}
+
+\vspace{1cm}
+
+In addition, several minor modifications in the coding have been introduced with the constant concern of
+improving the model performance.
+
+The main modifications from NEMO/OPA v3.3 and v3.4 are:
+
+\begin{itemize}
+\item finalisation of above iso-neutral mixing \citep{Griffies_al_JPO98}";
+\item "Neptune effect" parametrisation;
+\item horizontal pressure gradient suitable for s-coordinate;
+\item semi -implicit bottom friction;
+\item finalisation of the merge of passive and active tracers advection-diffusion modules;
+\item a new bulk formulae (so-called MFS);
+\item use fldread for the off-line tracer component (OFF\_SRC);
+\item use MPI point to point communications for north fold;
+\item diagnostic of transport;
+\end{itemize}
+
+The main modifications from NEMO/OPA v3.4 and v3.6 are:
+
+\begin{itemize}
+ \item ...;
+\end{itemize}
+
+The main modifications from NEMO/OPA v3.6 and v4.0 are:
+
+\begin{itemize}
+\item new definition of configurations;
+\item bulk formulation;
+\item NEMO-wave large scale interactions;
+\item ...;
+\end{itemize}
+
+\biblio
+
+\pindex
+
+\end{document}

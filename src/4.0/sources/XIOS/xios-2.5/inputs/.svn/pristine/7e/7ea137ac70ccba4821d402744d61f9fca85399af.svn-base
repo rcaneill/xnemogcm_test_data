@@ -1,0 +1,88 @@
+<?xml version="1.0"?>
+<simulation>
+
+ <context id="test">
+   <calendar type="Gregorian" start_date="2012-03-01 15:00:00" time_origin="2012-02-28 15:00:00 + 1d" />
+
+
+   <field_definition level="1" enabled=".TRUE.">
+     <field id="field_A"  operation="average" freq_op="3600s" grid_ref="grid_A"/>
+     <field id="field_Axis"  operation="average" freq_op="3600s" axis_ref="axis_A"/>
+     <field id="field_Domain"  operation="average" freq_op="3600s" domain_ref="domain_A"/>
+     <field id="field_A_zoom"  operation="average" freq_op="3600s" field_ref="field_A" grid_ref="grid_A_zoom"/>
+     <field id="field_Scalar"  operation="average" freq_op="3600s" grid_ref="grid_Scalar"/>
+   </field_definition>
+
+
+   <file_definition type="one_file" par_access="collective" output_freq="1h" output_level="10" enabled=".FALSE.">
+      <file id="output" name="output" enabled=".TRUE.">
+        <!-- <field field_ref="field_Domain" name="field_A" /> -->
+        <field field_ref="field_A" name="field_A" /> 
+        <field field_ref="field_A_zoom" name="field_B" />
+     </file>
+     <file id="output1" name="output1" enabled=".TRUE.">
+        <!-- <field field_ref="field_Domain" name="field_A" /> -->
+        <field field_ref="field_A" name="field_A" />        
+     </file> 
+     <file id="output2" name="output2" enabled=".TRUE.">
+        <!-- <field field_ref="field_Domain" name="field_A" /> -->
+        <field field_ref="field_Scalar" name="field_A" />        
+     </file>
+ <!--     <file id="output_s" name="output_s" mode="read" >
+       <field id="field" name="field_A" grid_ref="grid_Scalar" operation="instant" />
+     </file> -->
+   </file_definition>
+
+  <scalar_defintion>
+    <scalar id="scalar_A"/>
+  </scalar_defintion>
+
+   <axis_definition>
+     <axis id="axis_A"/>
+     <axis id="axis_A_zoom" axis_ref="axis_A">
+       <zoom_axis index="(0,1)[0 2]" />
+     </axis>
+   </axis_definition>
+
+   <domain_definition>
+     <domain id="domain_A" />
+
+   </domain_definition>
+
+   <grid_definition>
+     <grid id="grid_A">
+       <domain domain_ref="domain_A" />
+       <axis axis_ref="axis_A" />
+     </grid>
+     <grid id="grid_A_zoom">
+       <domain domain_ref="domain_A" />
+       <axis axis_ref="axis_A_zoom" />
+     </grid>
+     <grid id="grid_Scalar">
+      <scalar id="scalar_A"/>
+     </grid>
+   </grid_definition>
+  </context>
+
+  <context id="xios">
+      <variable_definition>
+         <variable_group id="server">
+            <variable id="using_server2" type="bool">true</variable>
+            <variable id="ratio_server2" type="int">50</variable>
+         </variable_group>
+
+        <variable_group id="buffer">
+            <variable id="optimal_buffer_size" type="string">performance</variable>
+            <variable id="buffer_size_factor" type="double">10.0</variable>
+         </variable_group>
+
+        <variable_group id="parameters" >
+          <variable id="using_server" type="bool">false</variable>
+          <variable id="info_level" type="int">50</variable>
+          <variable id="print_file" type="bool">true</variable>
+        </variable_group>
+      </variable_definition>
+  </context>
+
+</simulation>
+

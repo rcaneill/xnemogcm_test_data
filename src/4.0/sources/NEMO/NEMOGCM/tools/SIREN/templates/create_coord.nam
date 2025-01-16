@@ -1,0 +1,34 @@
+&namlog
+   cn_logfile=
+   cn_verbosity=
+   in_maxerror=
+/
+
+&namcfg
+   cn_varcfg=
+   cn_dumcfg=
+/
+
+&namcrs
+   cn_coord0=
+   in_perio0=
+/
+
+&namvar
+   cn_varinfo=
+/
+
+&namnst
+   in_imin0=
+   in_imax0=
+   in_jmin0=
+   in_jmax0=
+
+   in_rhoi=
+   in_rhoj=
+/
+
+&namout
+   cn_fileout=
+/
+

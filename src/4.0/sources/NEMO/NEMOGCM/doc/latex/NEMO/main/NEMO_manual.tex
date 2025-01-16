@@ -1,0 +1,139 @@
+%% ==============================================================================
+%% NEMO Reference Manual
+%% ==============================================================================
+
+
+%% Run ./PDF_creation.sh to generate the manual with latexmk
+
+
+%% Preamble
+%% ==============================================================================
+
+%% Document layout
+\documentclass{book}
+
+%% Custom style (.sty)
+\usepackage{../main/NEMO_manual}
+
+%% Include references and index for single subfile compilation
+\newcommand{\biblio}{\bibliography{../main/NEMO_manual}}
+\newcommand{\pindex}{\printindex}
+
+\newcommand{\rML}[1][i]{\ensuremath{_{\mathrm{ML}\,#1}}}
+\newcommand{\rMLt}[1][i]{\tilde{r}_{\mathrm{ML}\,#1}}
+\newcommand{\triad}[6][]{\ensuremath{{}_{#2}^{#3}{\mathbb{#4}_{#1}}_{#5}^{\,#6}}}
+\newcommand{\triadd}[5]{\ensuremath{{}_{#1}^{#2}{\mathbb{#3}}_{#4}^{\,#5}}}
+\newcommand{\triadt}[5]{\ensuremath{{}_{#1}^{#2}{\tilde{\mathbb{#3}}}_{#4}^{\,#5}}}
+\newcommand{\rtriad}[2][]{\ensuremath{\triad[#1]{i}{k}{#2}{i_p}{k_p}}}
+\newcommand{\rtriadt}[1]{\ensuremath{\triadt{i}{k}{#1}{i_p}{k_p}}}
+
+\makeindex
+
+%% End of common preamble between main and sub-files
+\begin{document}
+
+%% Override custom cmds for full manual compilation
+\renewcommand{\biblio}{}
+\renewcommand{\pindex}{}
+
+
+%% Frontmatter
+%% ==============================================================================
+
+%% Frontpage
+\title{
+  \includegraphics[height=0.05\textheight]{CMCC}\hfill
+  \includegraphics[height=0.05\textheight]{CNRS}\hfill
+  \includegraphics[height=0.05\textheight]{MOI} \hfill
+  \includegraphics[height=0.05\textheight]{UKMO}\hfill
+  \includegraphics[height=0.05\textheight]{NERC}       \\
+  \includegraphics[ width=0.8\textwidth  ]{NEMO_grey}  \\
+  {\Huge NEMO ocean engine}                            \\
+}
+\author{
+  \Large Gurvan Madec and NEMO System Team
+  \thanks{
+    Yevgeny Aksenov, Mirek Andrejczuk, Mike Bell, Romain Bourdalle-Badie, Cl\'{e}ment Bricaud,
+    J\'{e}r\^{o}me Chanut, Stefania Ciliberti, Emanuela Clementi, Andrew Coward, Damiano Delrosso,
+    Massimiliano Drudi, Christian Eth\'{e}, Simona Flavoni, Doroteaciro Iovino, Claire L\'{e}vy, Tomas Lovato,
+    Nicolas Martin, S\'{e}bastien Masson, Pierre Mathiot, Gelsomina Mattia, Francesca Mele, Silvia Mocavero,
+    Simon M\"{u}ller, George Nurser, Enda O'Dea, Julien Paul, Cl\'{e}ment Rousset, Dave Storkey,
+    Martin Vancoppenolle
+  }                                                        \\
+                                                           \\
+  \textit{Issue 27, Notes du P\^{o}le de mod\'{e}lisation} \\
+  \textit{Institut Pierre-Simon Laplace (IPSL)}            \\
+  \textit{ISSN 1288-1619}
+}
+\date{Version 4.0 -- January 2019}
+%\date{\today}
+
+\maketitle
+\frontmatter
+
+
+%% ToC i.e. Table of Contents
+\dominitoc
+\tableofcontents
+
+
+%% Mainmatter
+%% ==============================================================================
+
+\mainmatter
+
+%% Foreword
+\subfile{../subfiles/foreword}
+
+%% Introduction
+\subfile{../subfiles/introduction}
+
+%% Chapters
+\subfile{../subfiles/chap_model_basics}
+\subfile{../subfiles/chap_time_domain}   % Time discretisation (time stepping strategy)
+\subfile{../subfiles/chap_DOM}           % Space discretisation
+\subfile{../subfiles/chap_TRA}           % Tracer advection/diffusion equation
+\subfile{../subfiles/chap_DYN}           % Dynamics : momentum equation
+\subfile{../subfiles/chap_SBC}           % Surface Boundary Conditions
+\subfile{../subfiles/chap_LBC}           % Lateral Boundary Conditions
+\subfile{../subfiles/chap_LDF}           % Lateral diffusion
+\subfile{../subfiles/chap_ZDF}           % Vertical diffusion
+\subfile{../subfiles/chap_DIA}           % Outputs and Diagnostics
+\subfile{../subfiles/chap_OBS}           % Observation operator
+\subfile{../subfiles/chap_ASM}           % Assimilation increments
+\subfile{../subfiles/chap_STO}           % Stochastic param.
+\subfile{../subfiles/chap_misc}          % Miscellaneous topics
+\subfile{../subfiles/chap_CONFIG}        % Predefined configurations
+
+%% Appendix
+\appendix
+\subfile{../subfiles/annex_A}					% Generalised vertical coordinate
+\subfile{../subfiles/annex_B}					% Diffusive operator
+\subfile{../subfiles/annex_C}					% Discrete invariants of the eqs.
+\subfile{../subfiles/annex_iso}				% Isoneutral diffusion using triads
+\subfile{../subfiles/annex_D}					% Coding rules
+
+%% Not included
+%\subfile{../subfiles/chap_conservation}	%
+%\subfile{../subfiles/annex_E}				% Notes on some on going staff
+
+
+%% Backmatter
+%% ==============================================================================
+
+\backmatter
+
+%% Bibliography
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{Bibliography}
+\bibliography{../main/NEMO_manual}
+
+%% Index
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{Index}
+\printindex
+
+
+\end{document}

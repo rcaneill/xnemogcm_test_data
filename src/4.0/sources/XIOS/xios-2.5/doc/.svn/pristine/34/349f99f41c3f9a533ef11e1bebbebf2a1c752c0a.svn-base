@@ -1,0 +1,5449 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass book
+\begin_preamble
+\usepackage{MnSymbol}
+\end_preamble
+\use_default_options true
+\begin_modules
+logicalmkup
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize a4paper
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Title
+XIOS User Guide
+\end_layout
+
+\begin_layout Author
+Draft
+\end_layout
+
+\begin_layout Chapter
+Calendar
+\end_layout
+
+\begin_layout Section
+How to define a calendar
+\end_layout
+
+\begin_layout Standard
+XIOS has an embedded calendar module which needs to be configured before
+ you can run your simulation.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Only the calendar type and the time step used by your simulation are mandatory
+ to have a well defined calendar.
+ For example, a minimal calendar definition could be:
+\end_layout
+
+\begin_layout Itemize
+from the XML configuration file:
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<?xml version="1.0"?>
+\end_layout
+
+\begin_layout Plain Layout
+
+<simulation>
+\end_layout
+
+\begin_layout Plain Layout
+
+	<context id="test">
+\end_layout
+
+\begin_layout Plain Layout
+
+		<calendar type="Gregorian" timestep="1.5h" />
+\end_layout
+
+\begin_layout Plain Layout
+
+	</context>
+\end_layout
+
+\begin_layout Plain Layout
+
+</simulation>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+from the Fortran interface:
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset listings
+lstparams "language=Fortran,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+! ...
+\end_layout
+
+\begin_layout Plain Layout
+
+TYPE(xios_context) :: ctx_hdl
+\end_layout
+
+\begin_layout Plain Layout
+
+! ...
+\end_layout
+
+\begin_layout Plain Layout
+
+! Context initialization ommited, see the corresponding section of this
+ user manual and of the reference manual
+\end_layout
+
+\begin_layout Plain Layout
+
+CALL xios_get_handle("test",ctx_hdl)
+\end_layout
+
+\begin_layout Plain Layout
+
+CALL xios_set_current_context(ctx_hdl)
+\end_layout
+
+\begin_layout Plain Layout
+
+CALL xios_define_calendar(type="Gregorian", timestep=1.5*xios_hour)
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The calendar type definition is done once and for all, either from the XML
+ configuration file or the Fortran interface, and cannot be modified.
+ However there is no such restriction regarding the time step which can
+ be defined at a different time than the calendar type and even redefined
+ multiple times.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+For example, it is possible to the achieve the same minimal configuration
+ as above by using both the XML configuration file:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<?xml version="1.0"?>
+\end_layout
+
+\begin_layout Plain Layout
+
+<simulation>
+\end_layout
+
+\begin_layout Plain Layout
+
+	<context id="test">
+\end_layout
+
+\begin_layout Plain Layout
+
+		<calendar type="Gregorian" />
+\end_layout
+
+\begin_layout Plain Layout
+
+	</context>
+\end_layout
+
+\begin_layout Plain Layout
+
+</simulation>
+\end_layout
+
+\end_inset
+
+and the Fortran interface:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=Fortran,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+! ...
+\end_layout
+
+\begin_layout Plain Layout
+
+TYPE(xios_context) :: ctx_hdl
+\end_layout
+
+\begin_layout Plain Layout
+
+! ...
+\end_layout
+
+\begin_layout Plain Layout
+
+! Context initialization ommited, see the corresponding section of this
+ user manual and of the reference manual
+\end_layout
+
+\begin_layout Plain Layout
+
+CALL xios_get_handle("test",ctx_hdl)
+\end_layout
+
+\begin_layout Plain Layout
+
+CALL xios_set_current_context(ctx_hdl)
+\end_layout
+
+\begin_layout Plain Layout
+
+! xios_define_calendar cannot be used here because the type was already
+ defined in the configuration file.
+\end_layout
+
+\begin_layout Plain Layout
+
+! Ommiting the following line would lead to an error because the timestep
+ would be undefined.
+\end_layout
+
+\begin_layout Plain Layout
+
+CALL xios_set_timestep(timestep=1.5*xios_hour)
+\end_layout
+
+\end_inset
+
+The calendar also has two optional date parameters:
+\end_layout
+
+\begin_layout Itemize
+the start date which corresponds to the beginning of the simulation
+\end_layout
+
+\begin_layout Itemize
+the time origin which corresponds to the origin of the time axis.
+\end_layout
+
+\begin_layout Standard
+If they are undefined, those parameters are set by default to 
+\begin_inset Quotes eld
+\end_inset
+
+
+\series bold
+\emph on
+0000-01-01 00:00:00
+\series default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ If you are not interested in specific dates, you can ignore those parameters
+ completely.
+ However if you wish to set them, please note that they must not be set
+ before the calendar is defined.
+ Thus the following XML configuration file would be for example invalid:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<?xml version="1.0"?>
+\end_layout
+
+\begin_layout Plain Layout
+
+<simulation>
+\end_layout
+
+\begin_layout Plain Layout
+
+	<context id="test">
+\end_layout
+
+\begin_layout Plain Layout
+
+		<!-- Invalid because the calendar type cannot be known at that point -->
+\end_layout
+
+\begin_layout Plain Layout
+
+		<calendar start_date="2011-11-11 13:37:42" />
+\end_layout
+
+\begin_layout Plain Layout
+
+	</context>
+\end_layout
+
+\begin_layout Plain Layout
+
+</simulation>
+\end_layout
+
+\end_inset
+
+while the following configuration file would be valid:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<?xml version="1.0"?>
+\end_layout
+
+\begin_layout Plain Layout
+
+<simulation>
+\end_layout
+
+\begin_layout Plain Layout
+
+	<context id="test">
+\end_layout
+
+\begin_layout Plain Layout
+
+		<!-- The order of the arguments does not matter so this is valid -->
+\end_layout
+
+\begin_layout Plain Layout
+
+		<calendar time_origin="2011-11-11 13:37:42" type="Gregorian" />
+\end_layout
+
+\begin_layout Plain Layout
+
+	</context>
+\end_layout
+
+\begin_layout Plain Layout
+
+</simulation>
+\end_layout
+
+\end_inset
+
+Of course, it is always possible to define or redefine those parameters
+ from the Fortran interface, directly when defining the calendar:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=Fortran,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+! ...
+\end_layout
+
+\begin_layout Plain Layout
+
+TYPE(xios_context) :: ctx_hdl
+\end_layout
+
+\begin_layout Plain Layout
+
+! ...
+\end_layout
+
+\begin_layout Plain Layout
+
+! Context initialization ommited, see the corresponding section of this
+ user manual and of the reference manual
+\end_layout
+
+\begin_layout Plain Layout
+
+CALL xios_get_handle("test",ctx_hdl)
+\end_layout
+
+\begin_layout Plain Layout
+
+CALL xios_set_current_context(ctx_hdl)
+\end_layout
+
+\begin_layout Plain Layout
+
+CALL xios_define_calendar(type="Gregorian", time_origin=xios_date(1977,
+ 10, 19, 00, 00, 00), start_date=xios_date(2011, 11, 11, 13, 37, 42))
+\end_layout
+
+\end_inset
+
+or at a later time:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=Fortran,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+! ...
+\end_layout
+
+\begin_layout Plain Layout
+
+TYPE(xios_context) :: ctx_hdl
+\end_layout
+
+\begin_layout Plain Layout
+
+! ...
+\end_layout
+
+\begin_layout Plain Layout
+
+! Context initialization ommited, see the corresponding section of this
+ user manual and of the reference manual
+\end_layout
+
+\begin_layout Plain Layout
+
+CALL xios_get_handle("test",ctx_hdl)
+\end_layout
+
+\begin_layout Plain Layout
+
+CALL xios_set_current_context(ctx_hdl)
+\end_layout
+
+\begin_layout Plain Layout
+
+CALL xios_define_calendar(type="Gregorian")
+\end_layout
+
+\begin_layout Plain Layout
+
+CALL xios_set_time_origin(time_origin=xios_date(1977, 10, 19, 00, 00, 00))
+\end_layout
+
+\begin_layout Plain Layout
+
+CALL xios_set_start_date(start_date=xios_date(2011, 11, 11, 13, 37, 42))
+\end_layout
+
+\end_inset
+
+To simplify the use of dates in the XML configuration files, it is possible
+ to partially define a date as long as the omitted parts are the rightmost.
+ In this case the remainder of the date is initialized as in the default
+ date.
+ For example, it would be valid to write: 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+start_date="1977-10-19"
+\end_layout
+
+\end_inset
+
+ instead of 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+start_date="1977-10-19 00:00:00"
+\end_layout
+
+\end_inset
+
+ or even 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+time_origin="1789"
+\end_layout
+
+\end_inset
+
+ instead of 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+time_origin="1789-01-01 00:00:00"
+\end_layout
+
+\end_inset
+
+.
+ Similarly, it is possible to express a date with an optional duration offset
+ in the configuration file by using the 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+date + duration
+\end_layout
+
+\end_inset
+
+ notation, with 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+date
+\end_layout
+
+\end_inset
+
+ potentially partially defined or even completely omitted.
+ Consequently the following examples are all valid in the XML configuration
+ file:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+time_origin="2011-11-11 13:37:00 + 42s"
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+time_origin="2014 + 1y 2d"
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+start_date="+ 36h"
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+How to define a user defined calendar
+\end_layout
+
+\begin_layout Standard
+Predefined calendars might not be enough for your needs if you simulate
+ phenomenons on another planet than the Earth.
+ For this reason, XIOS can let you configure a completely user defined calendar
+ by setting the 
+\series bold
+type
+\series default
+ attribute to 
+\begin_inset Quotes eld
+\end_inset
+
+
+\series bold
+\emph on
+user_defined
+\series default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ In that case, the calendar type alone is not sufficient to define the calendar
+ and other parameters should be provided since the duration of a day or
+ a year are not known in advance.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Two approaches are possible depending on whether you want that your custom
+ calendar to have months or not: either use the 
+\series bold
+month_lengths
+\series default
+ attribute to define the duration of each months in days or use the 
+\series bold
+year_length
+\series default
+ attribute to define the duration of the year in seconds.
+ In both cases, you have to define 
+\series bold
+day_length
+\series default
+, the duration of a day in seconds.
+ Those attributes have to be defined at the same time than the calendar
+ type, either from the XML configuration file or the Fortran interface,
+ for example:
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<?xml version="1.0"?>
+\end_layout
+
+\begin_layout Plain Layout
+
+<simulation>
+\end_layout
+
+\begin_layout Plain Layout
+
+	<context id="test">
+\end_layout
+
+\begin_layout Plain Layout
+
+		<calendar type="user_defined" day_length="86400" month_lengths="(1, 12)
+ [31 28 31 30 31 30 31 31 30 31 30 31]" />
+\end_layout
+
+\begin_layout Plain Layout
+
+	</context>
+\end_layout
+
+\begin_layout Plain Layout
+
+</simulation>
+\end_layout
+
+\end_inset
+
+or
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=Fortran,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+! ...
+\end_layout
+
+\begin_layout Plain Layout
+
+TYPE(xios_context) :: ctx_hdl
+\end_layout
+
+\begin_layout Plain Layout
+
+! ...
+\end_layout
+
+\begin_layout Plain Layout
+
+! Context initialization ommited, see the corresponding section of this
+ user manual and of the reference manual
+\end_layout
+
+\begin_layout Plain Layout
+
+CALL xios_get_handle("test",ctx_hdl)
+\end_layout
+
+\begin_layout Plain Layout
+
+CALL xios_set_current_context(ctx_hdl)
+\end_layout
+
+\begin_layout Plain Layout
+
+CALL xios_define_calendar(type="Gregorian", day_length=86400, year_length=315576
+00)
+\end_layout
+
+\end_inset
+
+Note that if no months are defined, the format of the dates is modified
+ in the XML configuration file since the month must be omitted.
+ For example, 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+"2015-71 13:37:42"
+\end_layout
+
+\end_inset
+
+ would be the correct way to refer to the 71st day of the year 2015 at 13:37:42.
+ If you use the Fortran interface, the month cannot be omitted but you have
+ to make sure to always set it to 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+
+ in that case.
+ For example, use 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+xios_date(2015, 01, 71, 13, 37, 42)
+\end_layout
+
+\end_inset
+
+for 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+"2015-71 13:37:42"
+\end_layout
+
+\end_inset
+
+.
+ Moreover, it is possible that the duration of the day is greater than the
+ duration of the year on some planets.
+ In this case, it obviously not possible to define months so you have to
+ use the 
+\series bold
+year_length
+\series default
+ attribute.
+ Additionally the day must also be omitted from the dates in the configuration
+ file (for example 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+"2015 13:37:42"
+\end_layout
+
+\end_inset
+
+) and must always be set to 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+1
+\end_layout
+
+\end_inset
+
+ when using the Fortran interface (for example 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+xios_date(2015, 01, 01, 13, 37, 42)
+\end_layout
+
+\end_inset
+
+).
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+If months have been defined, you might want to have leap years to correct
+ the drift between the calendar year and the astronomical year.
+ This can be achieved by using the 
+\series bold
+leap_year_drift
+\series default
+ and 
+\series bold
+leap_year_month
+\series default
+ attributes and optionally the 
+\series bold
+leap_year_drift_offset
+\series default
+ attribute.
+ The idea is to define 
+\series bold
+leap_year_drift
+\series default
+, the yearly drift between the calendar year and the astronomical year as
+ a fraction of a day.
+ This yearly drift is summed each year to know the current drift and each
+ time the current drift is greater or equal to one day, the year is considered
+ a leap year.
+ In that case, an extra day is added to the month defined by 
+\series bold
+leap_year_month
+\series default
+ and one day is subtracted to the current drift.
+ The initial drift is null by default but it can be fixed by the 
+\series bold
+leap_year_drift_offset
+\series default
+ attribute.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The following configuration file defines a simplified Gregorian calendar
+ using the user calendar feature:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<?xml version="1.0"?>
+\end_layout
+
+\begin_layout Plain Layout
+
+<simulation>
+\end_layout
+
+\begin_layout Plain Layout
+
+	<context id="test">
+\end_layout
+
+\begin_layout Plain Layout
+
+		<calendar type="user_defined"
+\end_layout
+
+\begin_layout Plain Layout
+
+					day_length="86400"
+\end_layout
+
+\begin_layout Plain Layout
+
+					month_lengths="(1, 12) [31 28 31 30 31 30 31 31 30 31 30 31]"
+\end_layout
+
+\begin_layout Plain Layout
+
+					leap_year_month="2"
+\end_layout
+
+\begin_layout Plain Layout
+
+					leap_year_drift="0.25"
+\end_layout
+
+\begin_layout Plain Layout
+
+					leap_year_drift_offset="0.75"
+\end_layout
+
+\begin_layout Plain Layout
+
+					time_origin="2012-02-29 15:00:00"
+\end_layout
+
+\begin_layout Plain Layout
+
+					start_date="2012-03-01 15:00:00" />
+\end_layout
+
+\begin_layout Plain Layout
+
+	</context>
+\end_layout
+
+\begin_layout Plain Layout
+
+</simulation>
+\end_layout
+
+\end_inset
+
+As you know, the astronomical year on Earth is approximately a quarter of
+ day longer than the Gregorian calendar year so we have to define the yearly
+ drift as 0.25 day.
+ In case of a leap year, an extra day is added at the end of February which
+ is the second month of the year so 
+\series bold
+leap_year_month
+\series default
+ should be set to 2.
+ We start our time axis in 2012 which was a leap year in the Gregorian calendar.
+ This means there was previously three non-leap years in a row so the current
+ drift was (approximately) 
+\begin_inset Formula $3\times0.25$
+\end_inset
+
+ days, hence 
+\series bold
+leap_year_drift_offset
+\series default
+ should be set to 0.75.
+ At the beginning of 2013, the drift would have been 
+\begin_inset Formula $0.75+0.25=1$
+\end_inset
+
+ day so 2012 will be a leap year as expected.
+\end_layout
+
+\begin_layout Section
+How to use the calendar
+\end_layout
+
+\begin_layout Standard
+The calendar is created immediately after the calendar type has been defined
+ and thus can be used even before the context definition has been closed.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Once the calendar is created, you have to keep it updated so that it is
+ in sync with your simulation.
+ To do that, you have to call the 
+\series bold
+xios_update_calendar
+\series default
+ subroutine for each iteration of your code:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=Fortran,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+! ...
+\end_layout
+
+\begin_layout Plain Layout
+
+INTEGER :: ts
+\end_layout
+
+\begin_layout Plain Layout
+
+! ...
+\end_layout
+
+\begin_layout Plain Layout
+
+DO ts=1,end
+\end_layout
+
+\begin_layout Plain Layout
+
+	CALL xios_update_calendar(ts)
+\end_layout
+
+\begin_layout Plain Layout
+
+	! Do useful stuff
+\end_layout
+
+\begin_layout Plain Layout
+
+ENDDO
+\end_layout
+
+\end_inset
+
+The current date is updated to 
+\begin_inset Formula $start\_date+ts\times timestep$
+\end_inset
+
+ after each call.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Many other calendar operations are available, including:
+\end_layout
+
+\begin_layout Itemize
+accessing various calendar related information like the time step, the time
+ origin, the start date, the duration of a day or a year, the current date,
+ etc.
+ 
+\end_layout
+
+\begin_layout Itemize
+doing arithmetic and comparison operations on date:
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset listings
+lstparams "language=Fortran,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+TYPE(xios_date) :: date1, date2
+\end_layout
+
+\begin_layout Plain Layout
+
+TYPE(xios_duration) :: duration
+\end_layout
+
+\begin_layout Plain Layout
+
+LOGICAL :: res
+\end_layout
+
+\begin_layout Plain Layout
+
+! we suppose a calendar is defined
+\end_layout
+
+\begin_layout Plain Layout
+
+CALL xios_get_current_date(date1)
+\end_layout
+
+\begin_layout Plain Layout
+
+duration = xios_duration(0, 0, 1, 0, 0, 0, 0, 0) + 12 * xios_hour
+\end_layout
+
+\begin_layout Plain Layout
+
+date2 = date1 + duration + 0.5 * xios_hour
+\end_layout
+
+\begin_layout Plain Layout
+
+res = date2 > date1
+\end_layout
+
+\begin_layout Plain Layout
+
+duration = date2 - date1
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+converting dates to
+\end_layout
+
+\begin_deeper
+\begin_layout Itemize
+the number of seconds since the time origin, the beginning of the year or
+ the beginning of the day,
+\end_layout
+
+\begin_layout Itemize
+the number of days since the beginning of the year,
+\end_layout
+
+\begin_layout Itemize
+the fraction of the day or the year.
+\end_layout
+
+\end_deeper
+\begin_layout Standard
+For more detailed about the calendar attributes and operations, see the
+ XIOS reference guide.
+\end_layout
+
+\begin_layout Chapter
+Files
+\end_layout
+
+\begin_layout Standard
+Since files are central to an I/O server, the configuration of XIOS is built
+ around file objects.
+ Those objects correspond directly to files on the computer file system
+ which are either to be written or to be read.
+ Although, XIOS currently only supports the NetCDF format, XIOS files are
+ a generic abstraction.
+ Each file can contain one or more fields (each field being defined on a
+ grid) and optionally variables.
+ In the NetCDF nomenclature, fields defined in XIOS correspond to NetCDF
+ variables and XIOS variables are NetCDF attributes.
+ As fields, variables and grids are complex objects, they have their own
+ chapters and we will focus only on files in this section.
+\end_layout
+
+\begin_layout Section
+How to define your first file
+\end_layout
+
+\begin_layout Standard
+If you wish to input or to output data using XIOS, you will need to define
+ at least one file.
+ This can be done from both the XML configuration file and the Fortran interface.
+ Files are usually defined in the configuration file, although their definitions
+ are sometimes amended using the API.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+File objects are defined with the 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+<file>
+\end_layout
+
+\end_inset
+
+ tag and should always be inside the 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+<file_definition>
+\end_layout
+
+\end_inset
+
+ section.
+ Only the output frequency is mandatory to have a well defined file but
+ it is generally a good idea to give it a name.
+ The following example shows a minimal configuration file which defines
+ one file.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<?xml version="1.0"?>
+\end_layout
+
+\begin_layout Plain Layout
+
+<simulation>
+\end_layout
+
+\begin_layout Plain Layout
+
+	<context id="test">
+\end_layout
+
+\begin_layout Plain Layout
+
+		<calendar type="Gregorian" timestep="1h" />
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<file name="output" output_freq="1ts">
+\end_layout
+
+\begin_layout Plain Layout
+
+        		<!-- Content of the file ommited for now -->
+\end_layout
+
+\begin_layout Plain Layout
+
+			</file>
+\end_layout
+
+\begin_layout Plain Layout
+
+		</file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+	</context>
+\end_layout
+
+\begin_layout Plain Layout
+
+</simulation>
+\end_layout
+
+\end_inset
+
+Note that the file extension could depend of the format so it is automatically
+ added to the chosen name by XIOS.
+ Since XIOS only support NetCDF formats for now, the extension is always
+ 
+\begin_inset Quotes eld
+\end_inset
+
+.nc
+\begin_inset Quotes erd
+\end_inset
+
+.
+ If the name is not set, XIOS will use the id of the file object instead.
+ This id is generated automatically by XIOS if it was not set by the user.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The output frequency is particularly important since it defines the interval
+ of time between two consecutive outputs, that is in NetCDF nomenclature
+ the interval between two records.
+ In the example, the data would be written for every timestep (independently
+ of the timestep duration).
+ It is possible to use any duration as the output frequency but be careful
+ if you are not using a duration which is a multiple of the timestep duration
+ since XIOS might not be doing what you want.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The same configuration could be obtained from the Fortran interface as well:
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset listings
+lstparams "language=Fortran,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+! ...
+\end_layout
+
+\begin_layout Plain Layout
+
+TYPE(xios_context)   :: ctx_hdl
+\end_layout
+
+\begin_layout Plain Layout
+
+TYPE(xios_file) 	 :: file_hdl
+\end_layout
+
+\begin_layout Plain Layout
+
+TYPE(xios_filegroup) :: filegroup_hdl
+\end_layout
+
+\begin_layout Plain Layout
+
+! ...
+\end_layout
+
+\begin_layout Plain Layout
+
+! Context and calendar initializations ommited, see the corresponding section
+ of this user manual and of the reference manual
+\end_layout
+
+\begin_layout Plain Layout
+
+CALL xios_get_handle("test", ctx_hdl)
+\end_layout
+
+\begin_layout Plain Layout
+
+CALL xios_set_current_context(ctx_hdl)
+\end_layout
+
+\begin_layout Plain Layout
+
+CALL xios_get_filegroup_handle("file_definition", filegroup_hdl)
+\end_layout
+
+\begin_layout Plain Layout
+
+CALL xios_add_file(filegroup_hdl, file_hdl)
+\end_layout
+
+\begin_layout Plain Layout
+
+CALL xios_set_attr(file_hdl, name="output", output_freq=xios_timestep)
+\end_layout
+
+\end_inset
+
+Another important parameter for file is the 
+\series bold
+mode
+\series default
+ attribute which is set by default to 
+\begin_inset Quotes eld
+\end_inset
+
+
+\series bold
+\emph on
+write
+\series default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ You need to set it to 
+\begin_inset Quotes eld
+\end_inset
+
+
+\series bold
+\emph on
+read
+\series default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ if you want to use XIOS to handle inputs.
+ Note that in this case the 
+\series bold
+output_freq
+\series default
+ attribute must correspond to the output frequency used to create the input
+ file.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+When using the 
+\begin_inset Quotes eld
+\end_inset
+
+
+\series bold
+\emph on
+write
+\series default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ mode, it is possible to append the data to an existing file instead of
+ overwriting it by setting the 
+\series bold
+append
+\series default
+ attribute to 
+\begin_inset Quotes eld
+\end_inset
+
+
+\series bold
+\emph on
+true
+\series default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ In this case, you must be careful not to modify the structure of the file,
+ in particular no fields should be added, modified nor removed, or XIOS
+ will throw an error.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+If you wish to disable a file without having to remove its definition from
+ the configuration file, you can set the 
+\series bold
+enabled
+\series default
+ attribute to 
+\begin_inset Quotes eld
+\end_inset
+
+
+\series bold
+\emph on
+false
+\series default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+How to use parallel I/O
+\end_layout
+
+\begin_layout Standard
+By default XIOS will create one file by server, each file being suffixed
+ with the rank of the server.
+ For example, if the sample configuration used in the previous section was
+ used with two servers, two files named 
+\begin_inset Quotes eld
+\end_inset
+
+output_0.nc
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+output_1.nc
+\begin_inset Quotes erd
+\end_inset
+
+ would be created.
+ Each file would contain only the portion of the fields affected to the
+ corresponding server.
+ This default mode can also be explicitly configured by setting the 
+\series bold
+type
+\series default
+ attribute to 
+\begin_inset Quotes eld
+\end_inset
+
+
+\series bold
+\emph on
+multiple_file
+\series default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Using the 
+\begin_inset Quotes eld
+\end_inset
+
+
+\series bold
+\emph on
+multiple_file
+\series default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ mode is often a reliable way to achieve good performances, particularly
+ if you only have a few servers.
+ However having multiple files also increases the complexity of the post-process
+ing chains and it is often much easier to always get one file regardless
+ of how many servers are used.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+It is possible to achieve such behavior in XIOS by setting the 
+\series bold
+type
+\series default
+ attribute to 
+\begin_inset Quotes eld
+\end_inset
+
+
+\series bold
+\emph on
+one_file
+\series default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This feature depends directly on the NetCDF library capabilities so you
+ need to make sure that XIOS was properly linked with a parallel version
+ of NetCDF.
+ If the library was not compiled with parallel input/output support, XIOS
+ will issue a warning and revert to the 
+\begin_inset Quotes eld
+\end_inset
+
+
+\series bold
+\emph on
+multiple_file
+\series default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ mode.
+\end_layout
+
+\begin_layout Section
+Supported NetCDF formats
+\end_layout
+
+\begin_layout Standard
+XIOS supports only the version 4 or later of NetCDF library.
+ It uses by default the new NetCDF-4 format which relies on HDF5 format
+ as a back-end.
+ This format can also be selected explicitly by setting the 
+\series bold
+format
+\series default
+ attribute to 
+\begin_inset Quotes eld
+\end_inset
+
+
+\series bold
+\emph on
+netcdf4
+\series default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Alternatively, it also possible to force NetCDF-4 to use the classic NetCDF-3
+ binary format by setting the 
+\series bold
+format
+\series default
+ attribute to 
+\begin_inset Quotes eld
+\end_inset
+
+
+\series bold
+\emph on
+netcdf4_classic
+\series default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ When using this older format, some features might be unavailable but current
+ version of XIOS should not be affected much.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Depending on the format, there are some specific requirements on how the
+ NetCDF library should have been compiled:
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+
+\series bold
+\emph on
+netcdf4
+\series default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ format requires that HDF5 support has been enabled in NetCDF using the
+ configuration option 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+-\SpecialChar \nobreakdash-
+-enable-netcdf4
+\end_layout
+
+\end_inset
+
+ and that the HDF5 library has been properly linked.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+
+\series bold
+\emph on
+netcdf4
+\series default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ format used in 
+\begin_inset Quotes eld
+\end_inset
+
+
+\series bold
+\emph on
+one_file
+\series default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ mode requires that the HDF5 library has been compiled with parallel support
+ using the configuration option 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+-\SpecialChar \nobreakdash-
+-enable-parallel
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Itemize
+\begin_inset Quotes eld
+\end_inset
+
+
+\series bold
+\emph on
+netcdf4_classic
+\series default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ format used in 
+\begin_inset Quotes eld
+\end_inset
+
+
+\series bold
+\emph on
+one_file
+\series default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ mode requires that Parallel NetCDF support has been enabled in NetCDF using
+ the configuration option 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+-\SpecialChar \nobreakdash-
+-enable-pnetcdf
+\end_layout
+
+\end_inset
+
+ and that the Parallel NetCDF library has been properly linked.
+\end_layout
+
+\begin_layout Section
+UGRID
+\end_layout
+
+\begin_layout Standard
+In addition to the CF conventions, it is also possible to output data using
+ 
+\begin_inset CommandInset href
+LatexCommand href
+name "UGRID"
+target "https://ugrid-conventions.github.io/ugrid-conventions/"
+
+\end_inset
+
+ metadata conventions developed for unstructured meshes.
+ It allows users to store the topology of an underlying unstructured mesh.
+ Currently XIOS supports 2D unstructured meshes of any shape (triangular,
+ quadrilateral, etc) and their mixture.
+ 
+\end_layout
+
+\begin_layout Standard
+A 2D mesh can be described by a set of nodes, edges and/or faces.
+ XIOS allows one to define data on any of these three types of elements.
+ XIOS will generate a full list of connectivity attributes proposed by the
+ UGRID conventions.
+ For example in case of a mesh comprised of faces the following connectivity
+ parameters will be the calculated:
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+edge_node_connectivity
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+face_node_connectivity 
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+edge_nodes_connectivity 
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+face_nodes_connectivity
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+face_edges_connectivity
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+edge_face_connectivity
+\end_layout
+
+\begin_layout Standard
+
+\family typewriter
+face_face_connectivity
+\end_layout
+
+\begin_layout Standard
+In order to select UGRID output format, one has to set file attribute 
+\series bold
+convention
+\series default
+ to 
+\series bold
+\shape italic
+"UGRID"
+\series default
+\shape default
+ (its default value is 
+\series bold
+\shape italic
+
+\begin_inset Quotes eld
+\end_inset
+
+CF
+\begin_inset Quotes erd
+\end_inset
+
+
+\series default
+\shape default
+).
+ Domain attribute 
+\series bold
+nvertex
+\series default
+ is mandatory for UGRID.
+ It servers for identifying one of three types of mesh elements on which
+ data can be defined: nodes (nvertex=1), edges (nvertex=2), and faces (nvertex
+\begin_inset Formula $\geq$
+\end_inset
+
+3).
+ In order to write fields on the same mesh but on its different elements,
+ one has to assign the same domain name to each of the domains.
+ Example given below illustrates this point for three fields defined on
+ the same mesh but on its different elements: nodes, edges, and faces.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<file_definition> 
+\end_layout
+
+\begin_layout Plain Layout
+
+	<file id="output_UGRID" convention="UGRID"> 
+\end_layout
+
+\begin_layout Plain Layout
+
+		<field id="varOnNodes" ...
+ domain_ref="node"/> 
+\end_layout
+
+\begin_layout Plain Layout
+
+		<field id="varOnEdges" ...
+ domain_ref="edge"/>
+\end_layout
+
+\begin_layout Plain Layout
+
+		<field id="varOnFaces" ...
+ domain_ref="face"/> 
+\end_layout
+
+\begin_layout Plain Layout
+
+	</file>
+\end_layout
+
+\begin_layout Plain Layout
+
+</file_definition> 
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+<domain_definition> 
+\end_layout
+
+\begin_layout Plain Layout
+
+	<domain id="node" name="mesh2D" nvertex="1"/>
+\end_layout
+
+\begin_layout Plain Layout
+
+	<domain id="edge" name="mesh2D" nvertex="2"/> 
+\end_layout
+
+\begin_layout Plain Layout
+
+	<domain id="face" name="mesh2D" nvertex="4"/> 
+\end_layout
+
+\begin_layout Plain Layout
+
+</domain_definition> 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+How to use file splitting
+\end_layout
+
+\begin_layout Standard
+Output files can often be quite huge, particularly if the 
+\begin_inset Quotes eld
+\end_inset
+
+
+\series bold
+\emph on
+one_file
+\series default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ mode is used.
+ In this case, it can be interesting to periodically split the file in order
+ to have a few smaller files containing contiguous temporal portions of
+ the output data.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+This behavior can be achieved in XIOS by setting the 
+\series bold
+split_freq
+\series default
+ attribute to the duration you want, as illustrated in the following example:
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<?xml version="1.0"?>
+\end_layout
+
+\begin_layout Plain Layout
+
+<simulation>
+\end_layout
+
+\begin_layout Plain Layout
+
+	<context id="test">
+\end_layout
+
+\begin_layout Plain Layout
+
+		<calendar type="Gregorian" timestep="1h" />
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<file name="output" output_freq="1d" split_freq="1y">
+\end_layout
+
+\begin_layout Plain Layout
+
+        		<!-- Content of the file ommited for now -->
+\end_layout
+
+\begin_layout Plain Layout
+
+			</file>
+\end_layout
+
+\begin_layout Plain Layout
+
+		</file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+	</context>
+\end_layout
+
+\begin_layout Plain Layout
+
+</simulation>
+\end_layout
+
+\end_inset
+
+With this configuration, some data will be outputted every day and a new
+ file will be created every year.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Note that the split frequency is the duration after which a new file will
+ be created, it does not mean that a new file will be created at the beginning
+ of each period.
+ For example, if you start your simulation the first of June 2014 and run
+ it for two years with a split frequency of one year:
+\end_layout
+
+\begin_layout Itemize
+you will get two files containing respectively the period from June 1st,
+ 2014 to May 31th, 2015 and from June 1st, 2015 to May 31th, 2016.
+\end_layout
+
+\begin_layout Itemize
+you will NOT get three files containing respectively the last six months
+ of 2014, the full year of 2015 and the first six months of 2016.
+\end_layout
+
+\begin_layout Standard
+XIOS automatically suffixes the file names with the start and end dates
+ when using file splitting.
+ By default, it will try to use the shortest date that still enables to
+ distinguish the files.
+ Thus in the above example, the files would be named 
+\begin_inset Quotes eld
+\end_inset
+
+output_2014-2015.nc
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+output_2015-2016.nc
+\begin_inset Quotes erd
+\end_inset
+
+.
+ If you wish to force the date format used to prefix the files, you can
+ define the 
+\series bold
+split_freq_format
+\series default
+ attribute to override the default behavior.
+\end_layout
+
+\begin_layout Section
+A word about file synchronization
+\end_layout
+
+\begin_layout Standard
+File synchronization is usually not something you should worry about.
+ However, it is important to understand that data written by XIOS might
+ not be immediately written on the disk in practice.
+ Input/output libraries like NetCDF and HDF5 and parallel file systems generally
+ use complex caching policies for performance reasons.
+ This means that your data might still be stored in memory after it was
+ supposedly written.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+It might become critical to control this behavior for two main reasons:
+\end_layout
+
+\begin_layout Itemize
+if you want to mitigate the impact of a crash, as all buffered data would
+ be lost ;
+\end_layout
+
+\begin_layout Itemize
+if you want to be able to access the data from the output file immediately
+ after writing it.
+\end_layout
+
+\begin_layout Standard
+By default, XIOS will never force file synchronization but you can require
+ it to do so by setting the 
+\series bold
+sync_freq
+\series default
+ attribute to the wanted duration.
+ In this case, XIOS will regularly instruct NetCDF to synchronize the file
+ on disk by flushing its internal buffers.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Note file synchronization must be used sparingly as it can have a disastrous
+ impact on performance.
+ Make sure to use a reasonably high synchronization frequency to avoid any
+ issue.
+\end_layout
+
+\begin_layout Chapter
+Fields and variables
+\end_layout
+
+\begin_layout Standard
+XIOS outsources the input/output definitions in its XML configuration file.
+ In the last chapter we presented some general points about file objects.
+ This chapter focuses on how to use fields and variables (that is variables
+ and attributes in NetCDF nomenclature) to populate files.
+\begin_inset Newline newline
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+How to define your first field
+\end_layout
+
+\begin_layout Standard
+If you wish to input or to output data using XIOS, you will need to define
+ at least one file with one field.
+ This can be done from both the XML configuration file and the Fortran interface.
+ Fields are often defined in the configuration file, although their definitions
+ are sometimes amended using the API.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Field objects are defined with the 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+<field>
+\end_layout
+
+\end_inset
+
+ tag and should always be inside a 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+<field_definition>
+\end_layout
+
+\end_inset
+
+ or a 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+<file>
+\end_layout
+
+\end_inset
+
+ section.
+ Only the grid and the operation attached to the field are mandatory to
+ have a well defined field but it is generally a good idea to give it an
+ identifier.
+ The following example shows a minimal configuration file which defines
+ one file with one field.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<?xml version="1.0"?>
+\end_layout
+
+\begin_layout Plain Layout
+
+<simulation>
+\end_layout
+
+\begin_layout Plain Layout
+
+	<context id="test">
+\end_layout
+
+\begin_layout Plain Layout
+
+		<calendar type="Gregorian" timestep="1h" />
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<grid_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<grid id="grid_A"><!-- Definition ommited --></grid>
+\end_layout
+
+\begin_layout Plain Layout
+
+		</grid_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<file name="output" type="one_file" output_freq="1ts">
+\end_layout
+
+\begin_layout Plain Layout
+
+        		<field id="field_A" grid_ref="grid_A" operation="instant" />
+\end_layout
+
+\begin_layout Plain Layout
+
+			</file>
+\end_layout
+
+\begin_layout Plain Layout
+
+		</file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+	</context>
+\end_layout
+
+\begin_layout Plain Layout
+
+</simulation>
+\end_layout
+
+\end_inset
+
+It defines one file named 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+output
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ which contains one field 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+field_A
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ defined on a grid 
+\begin_inset Quotes eld
+\end_inset
+
+
+\emph on
+grid_A
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ The file and the field are configured so that the data is written in the
+ file at every timestep (using the 
+\series bold
+output_freq
+\series default
+ file attribute) without any transformation (using the 
+\series bold
+operation
+\series default
+ field attribute set to 
+\begin_inset Quotes eld
+\end_inset
+
+
+\series bold
+\emph on
+instant
+\series default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+).
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The corresponding Fortran simulation loop could be:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=Fortran,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+DO ts=1,numberOfTimestep
+\end_layout
+
+\begin_layout Plain Layout
+
+	! Inform XIOS of the current timestep
+\end_layout
+
+\begin_layout Plain Layout
+
+	CALL xios_update_calendar(ts)
+\end_layout
+
+\begin_layout Plain Layout
+
+	! Compute field_A for current timestep
+\end_layout
+
+\begin_layout Plain Layout
+
+	! ...
+\end_layout
+
+\begin_layout Plain Layout
+
+	! Output the data
+\end_layout
+
+\begin_layout Plain Layout
+
+	CALL xios_send_field("field_A", field_A)
+\end_layout
+
+\begin_layout Plain Layout
+
+ENDDO
+\end_layout
+
+\end_inset
+
+As you can see, the 
+\series bold
+id
+\series default
+ of the field is used in the model to select the field for which data is
+ being provided which makes this attribute extremely important.
+ Note that it must be unique for all fields even if they are defined in
+ different files.
+ By default, the 
+\series bold
+id
+\series default
+ of a field is also used as the name of the corresponding NetCDF variable.
+ It is however possible to override this default name using the field attribute
+ 
+\series bold
+name
+\series default
+.
+ Two fields can share the same 
+\series bold
+name
+\series default
+ as long as they are not used in the same file.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The second argument of the 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+xios_send_field
+\end_layout
+
+\end_inset
+
+ function is an array containing the data.
+ Its shape and content are not described here as they depend directly on
+ the grid.
+ For more information on the data layout, refer to the chapters focusing
+ on grids, domains and axis.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The same configuration could also be obtained using the Fortran interface:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=Fortran,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+! ...
+\end_layout
+
+\begin_layout Plain Layout
+
+TYPE(xios_context)   :: ctx_hdl
+\end_layout
+
+\begin_layout Plain Layout
+
+TYPE(xios_file) 	 :: file_hdl
+\end_layout
+
+\begin_layout Plain Layout
+
+TYPE(xios_filegroup) :: filegroup_hdl
+\end_layout
+
+\begin_layout Plain Layout
+
+TYPE(xios_field) 	:: field_hdl
+\end_layout
+
+\begin_layout Plain Layout
+
+! ...
+\end_layout
+
+\begin_layout Plain Layout
+
+! Context, calendar and grid initializations ommited, see the corresponding
+ section of this user manual and of the reference manual
+\end_layout
+
+\begin_layout Plain Layout
+
+CALL xios_get_handle("test", ctx_hdl)
+\end_layout
+
+\begin_layout Plain Layout
+
+CALL xios_set_current_context(ctx_hdl)
+\end_layout
+
+\begin_layout Plain Layout
+
+CALL xios_get_filegroup_handle("file_definition", filegroup_hdl)
+\end_layout
+
+\begin_layout Plain Layout
+
+CALL xios_add_file(filegroup_hdl, file_hdl)
+\end_layout
+
+\begin_layout Plain Layout
+
+CALL xios_set_attr(file_hdl, name="output", output_freq=xios_timestep)
+\end_layout
+
+\begin_layout Plain Layout
+
+CALL xios_add_field(file_hdl, field_hdl, "field_A")
+\end_layout
+
+\begin_layout Plain Layout
+
+CALL xios_set_attr(field_hdl, grid_ref="grid_A", operation="instant")
+\end_layout
+
+\end_inset
+
+Note that if you want to define a field on a grid with only one domain and/or
+ one axis, it is possible to use the 
+\series bold
+domain_ref
+\series default
+ and 
+\series bold
+axis_ref
+\series default
+ attributes instead of the 
+\series bold
+grid_ref
+\series default
+ attribute.
+ A temporary grid will be created based on the domain and/or axis defined
+ this way.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+If you are using a grid with some masked points (see the relevant sections
+ of this manual), you must set the 
+\series bold
+default_value
+\series default
+ attribute to define the default value that will replace the missing values
+ in the output file.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+If you wish to disable a field without having to remove its definition from
+ the configuration file, you can set the 
+\series bold
+enabled
+\series default
+ attribute to 
+\begin_inset Quotes eld
+\end_inset
+
+
+\series bold
+\emph on
+false
+\series default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+How to use temporal operations
+\end_layout
+
+\begin_layout Standard
+The last section showed a very basic example where the data was outputted
+ at every timestep using the 
+\begin_inset Quotes eld
+\end_inset
+
+
+\series bold
+\emph on
+instant
+\series default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\series bold
+operation
+\series default
+.
+ However in many use cases, it might be more interesting to output only
+ the mean value on a certain period of time for example.
+ This section describes the use of temporal operations available in XIOS.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The field attribute 
+\series bold
+operation
+\series default
+ currently supports six modes:
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\emph on
+instant
+\series default
+\emph default
+: no temporal operation is applied which means the new data always overrides
+ the previous one even if it was not outputted,
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\emph on
+average
+\series default
+\emph default
+: compute and output the mean value,
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\emph on
+accumulate
+\series default
+\emph default
+: compute and output the sum,
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\emph on
+minimum
+\series default
+\emph default
+: compute and output the minimum value,
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\emph on
+maximum
+\series default
+\emph default
+: compute and output the maximum value,
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+\emph on
+once
+\series default
+\emph default
+ : the data is written to the file only the first time it is received from
+ the model, any subsequent data is ignored.
+ The corresponding NetCDF variable does not have a time dimension.
+\end_layout
+
+\begin_layout Standard
+The output frequency of the file defined by the 
+\series bold
+output_freq
+\series default
+ attribute is used as the temporal operation period (except for the 
+\begin_inset Quotes eld
+\end_inset
+
+
+\series bold
+\emph on
+once
+\series default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+ 
+\series bold
+operation
+\series default
+ for which there is no period).
+ This means it is for example not possible to output a daily average and
+ a weekly average in the same file.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+This updated example shows how to output the daily average instead of the
+ instant data for all timesteps:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<?xml version="1.0"?>
+\end_layout
+
+\begin_layout Plain Layout
+
+<simulation>
+\end_layout
+
+\begin_layout Plain Layout
+
+	<context id="test">
+\end_layout
+
+\begin_layout Plain Layout
+
+		<calendar type="Gregorian" timestep="1h" />
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<grid_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<grid id="grid_A"><!-- Definition ommited --></grid>
+\end_layout
+
+\begin_layout Plain Layout
+
+		</grid_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<file name="output" type="one_file" output_freq="1d">
+\end_layout
+
+\begin_layout Plain Layout
+
+        		<field id="field_A" grid_ref="grid_A" operation="average" />
+\end_layout
+
+\begin_layout Plain Layout
+
+			</file>
+\end_layout
+
+\begin_layout Plain Layout
+
+		</file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+	</context>
+\end_layout
+
+\begin_layout Plain Layout
+
+</simulation>
+\end_layout
+
+\end_inset
+
+Compared to the previous example, only the file attribute 
+\series bold
+output_freq
+\series default
+ and the field attribute 
+\series bold
+operation
+\series default
+ have been modified.
+ Computing the weekly minimum instead of the daily average would be as simple
+ as using 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+output_freq="7d"
+\end_layout
+
+\end_inset
+
+and 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+operation="minimum"
+\end_layout
+
+\end_inset
+
+.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Note that if you use a temporal operation and have 
+\series bold
+default_value
+\series default
+ defined, it might be useful to set the attribute
+\series bold
+ detect_missing_value
+\series default
+ to 
+\begin_inset Quotes eld
+\end_inset
+
+
+\series bold
+\emph on
+true
+\series default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+.
+ This way temporal operations will not be applied when a default value is
+ detected.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+For example, we consider the values of a 2x2 domain for three timesteps:
+\begin_inset Formula 
+\[
+\begin{bmatrix}3 & -1\\
+7 & 1
+\end{bmatrix},\qquad\begin{bmatrix}5 & 6\\
+-1 & 2
+\end{bmatrix},\qquad\begin{bmatrix}-1 & 8\\
+3 & 4
+\end{bmatrix}.
+\]
+
+\end_inset
+
+If we suppose that the field is configured to compute the average on three
+ timesteps, the resulting field would be: 
+\begin_inset Formula 
+\[
+\begin{bmatrix}\nicefrac{7}{3} & \nicefrac{13}{3}\\
+3 & \nicefrac{7}{3}
+\end{bmatrix}.
+\]
+
+\end_inset
+
+If 
+\series bold
+default_value
+\series default
+ is set to 
+\emph on
+
+\begin_inset Quotes eld
+\end_inset
+
+-1
+\begin_inset Quotes erd
+\end_inset
+
+
+\emph default
+ and 
+\series bold
+detect_missing_value
+\series default
+ is set to 
+\begin_inset Quotes eld
+\end_inset
+
+
+\series bold
+\emph on
+true
+\series default
+\emph default
+
+\begin_inset Quotes erd
+\end_inset
+
+, the resulting field would be: 
+\begin_inset Formula 
+\[
+\begin{bmatrix}4 & 7\\
+5 & \nicefrac{7}{3}
+\end{bmatrix}.
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+How to use a specific data sampling
+\end_layout
+
+\begin_layout Standard
+It is sometimes useful to have more control on the data sampling.
+ By default, the input data is used at every timestep but sometimes it is
+ not what you want.
+ The following examples illustrate such cases:
+\end_layout
+
+\begin_layout Enumerate
+the model is not computing updated values at the same frequency for all
+ fields (for example, a field is updated every two timesteps).
+\end_layout
+
+\begin_layout Enumerate
+you want to output a specific instant value in the interval between two
+ outputs.
+\end_layout
+
+\begin_layout Enumerate
+you want to compute an average without taking into account all instant values
+ in the interval between two outputs.
+\end_layout
+
+\begin_layout Standard
+Data sampling can be controlled in XIOS using the 
+\series bold
+freq_op
+\series default
+ (one timestep by default) and 
+\series bold
+freq_offset
+\series default
+ (null by default) attributes.
+ Those attributes define respectively how often data from the model must
+ be used and the amount of time before starting to use it.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+For following excerpts of configuration files show you to use those attributes
+ to handle the motivating examples.
+\end_layout
+
+\begin_layout Enumerate
+In this example, we suppose that we get two fields from the model: 
+\begin_inset Quotes eld
+\end_inset
+
+field_A
+\begin_inset Quotes erd
+\end_inset
+
+ which is computed for each timestep and 
+\begin_inset Quotes eld
+\end_inset
+
+field_B
+\begin_inset Quotes erd
+\end_inset
+
+ which is only computed every two timesteps.
+ For both fields, we show how to compute and output the sum of all values
+ received during 6 timesteps:
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+	<file name="output" output_freq="6ts">
+\end_layout
+
+\begin_layout Plain Layout
+
+		<field id="field_A" grid_ref="grid_A" operation="accumulate" />
+\end_layout
+
+\begin_layout Plain Layout
+
+		<field id="field_B" grid_ref="grid_B" operation="accumulate" freq_op="2ts"
+ />
+\end_layout
+
+\begin_layout Plain Layout
+
+	</file>
+\end_layout
+
+\begin_layout Plain Layout
+
+</file_definition>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+In this example, we show how to output the 11th instant value every 12 timesteps
+:
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+	<file name="output" output_freq="12ts">
+\end_layout
+
+\begin_layout Plain Layout
+
+		<field id="field_A" grid_ref="grid_A" operation="instant" freq_op="11ts"
+ freq_offset="12ts" />
+\end_layout
+
+\begin_layout Plain Layout
+
+	</file>
+\end_layout
+
+\begin_layout Plain Layout
+
+</file_definition>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Enumerate
+In this example, we suppose that the timestep is equal to one hour and that
+ the simulation starts at midnight.
+ We show how to compute the weekly average of the field value at midday:
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+	<file name="output" output_freq="1w">
+\end_layout
+
+\begin_layout Plain Layout
+
+		<field id="field_A" grid_ref="grid_A" operation="average" freq_op="1d"
+ freq_offset="12h" />
+\end_layout
+
+\begin_layout Plain Layout
+
+	</file>
+\end_layout
+
+\begin_layout Plain Layout
+
+</file_definition>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+How to use field references
+\end_layout
+
+\begin_layout Standard
+It is quite common that different temporal operations must be applied to
+ the same instant data provided by the model.
+ In theory, the only solution to handle this scenario would be to define
+ a field for each operation, give them different 
+\series bold
+id
+\series default
+ and and call 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+xios_send_field
+\end_layout
+
+\end_inset
+
+ with the same array of data for each of those fields.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The following example illustrates this solution for a field for which we
+ want to compute the average, minimal and maximal values:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<?xml version="1.0"?>
+\end_layout
+
+\begin_layout Plain Layout
+
+<simulation>
+\end_layout
+
+\begin_layout Plain Layout
+
+	<context id="test">
+\end_layout
+
+\begin_layout Plain Layout
+
+		<calendar type="Gregorian" timestep="1h" />
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<grid_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<grid id="grid_A"><!-- Definition ommited --></grid>
+\end_layout
+
+\begin_layout Plain Layout
+
+		</grid_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<file name="output" output_freq="1d">
+\end_layout
+
+\begin_layout Plain Layout
+
+        		<field id="field_A_avg" grid_ref="grid_A" operation="average"
+ />
+\end_layout
+
+\begin_layout Plain Layout
+
+        		<field id="field_A_min" grid_ref="grid_A" operation="min" />
+\end_layout
+
+\begin_layout Plain Layout
+
+        		<field id="field_A_max" grid_ref="grid_A" operation="max" />
+\end_layout
+
+\begin_layout Plain Layout
+
+			</file>
+\end_layout
+
+\begin_layout Plain Layout
+
+		</file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+	</context>
+\end_layout
+
+\begin_layout Plain Layout
+
+</simulation>
+\end_layout
+
+\end_inset
+
+To simplify the handling of such scenarios, XIOS has a 
+\begin_inset Quotes eld
+\end_inset
+
+reference
+\begin_inset Quotes erd
+\end_inset
+
+ feature which allows one field to inherit the attributes (except the 
+\series bold
+id
+\series default
+) and the instant data of another field.
+ The above example can then be rewritten:
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<?xml version="1.0"?>
+\end_layout
+
+\begin_layout Plain Layout
+
+<simulation>
+\end_layout
+
+\begin_layout Plain Layout
+
+	<context id="test">
+\end_layout
+
+\begin_layout Plain Layout
+
+		<calendar type="Gregorian" timestep="1h" />
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<grid_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<grid id="grid_A"><!-- Definition ommited --></grid>
+\end_layout
+
+\begin_layout Plain Layout
+
+		</grid_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<file name="output" output_freq="1d">
+\end_layout
+
+\begin_layout Plain Layout
+
+        		<field id="field_A" name="field_A_avg" grid_ref="grid_A" operation="av
+erage" />
+\end_layout
+
+\begin_layout Plain Layout
+
+        		<field field_ref="field_A" name="field_A_min" operation="min"
+ />
+\end_layout
+
+\begin_layout Plain Layout
+
+        		<field field_ref="field_A" name="field_A_max" operation="max"
+ />
+\end_layout
+
+\begin_layout Plain Layout
+
+			</file>
+\end_layout
+
+\begin_layout Plain Layout
+
+		</file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+	</context>
+\end_layout
+
+\begin_layout Plain Layout
+
+</simulation>
+\end_layout
+
+\end_inset
+
+With this configuration, only one call to 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+xios_send_field(
+\begin_inset Quotes eld
+\end_inset
+
+field_A
+\begin_inset Quotes erd
+\end_inset
+
+, field_A)
+\end_layout
+
+\end_inset
+
+ is needed.
+ Note how inherited attributes (like 
+\series bold
+name
+\series default
+ or 
+\series bold
+operation
+\series default
+ for example) are overwritten to obtain the desired configuration.
+ Additionally, be aware that it is the instant values which are inherited,
+ not the result of the operation on the field.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Similarly, it is sometimes useful to output the result of a temporal operation
+ on a field for different periods.
+ In this case, it does not really make sense to define the field that will
+ be then inherited in one file rather than another.
+ A solution is to make use of the 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+field_definition
+\end_layout
+
+\end_inset
+
+ section so that it is clear that the field can be reused in any file.
+ This is illustrated in the following sample configuration file:
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<?xml version="1.0"?>
+\end_layout
+
+\begin_layout Plain Layout
+
+<simulation>
+\end_layout
+
+\begin_layout Plain Layout
+
+	<context id="test">
+\end_layout
+
+\begin_layout Plain Layout
+
+		<calendar type="Gregorian" timestep="1h" />
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<grid_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<grid id="grid_A"><!-- Definition ommited --></grid>
+\end_layout
+
+\begin_layout Plain Layout
+
+		</grid_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<field_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+        	<field id="field_A" name="field_A" grid_ref="grid_A" operation="average
+" />
+\end_layout
+
+\begin_layout Plain Layout
+
+		</field_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<file name="output_1d" output_freq="1d">
+\end_layout
+
+\begin_layout Plain Layout
+
+        		<field field_ref="field_A" />
+\end_layout
+
+\begin_layout Plain Layout
+
+			</file>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<file name="output_1mo" output_freq="1mo">
+\end_layout
+
+\begin_layout Plain Layout
+
+        		<field field_ref="field_A" />
+\end_layout
+
+\begin_layout Plain Layout
+
+			</file>
+\end_layout
+
+\begin_layout Plain Layout
+
+		</file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+	</context>
+\end_layout
+
+\begin_layout Plain Layout
+
+</simulation>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+How to use arithmetic operations
+\end_layout
+
+\begin_layout Standard
+Since XIOS aims to reduce as much as possible the need for post-processing,
+ it can apply some arithmetic operations on the data it handles (regardless
+ of its provenance).
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+All usual operators (+, -, *, /, ^, that is addition, subtraction, multiplicatio
+n, division and exponentiation) and some common functions (like cos, sin,
+ tan, exp, log, log10, sqrt) are supported.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The following example shows how to use arithmetic operations:
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<?xml version="1.0"?>
+\end_layout
+
+\begin_layout Plain Layout
+
+<simulation>
+\end_layout
+
+\begin_layout Plain Layout
+
+	<context id="test">
+\end_layout
+
+\begin_layout Plain Layout
+
+		<calendar type="Gregorian" timestep="1h" />
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<grid_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<grid id="grid_A"><!-- Definition ommited --></grid>
+\end_layout
+
+\begin_layout Plain Layout
+
+		</grid_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<field_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+        	<field id="field_A" grid_ref="grid_A" operation="average" />
+\end_layout
+
+\begin_layout Plain Layout
+
+		</field_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<file name="output" output_freq="1d">
+\end_layout
+
+\begin_layout Plain Layout
+
+        		<field id="field_B" field_ref="field_A">field_A + 273.15</field>
+\end_layout
+
+\begin_layout Plain Layout
+
+        		<field id="field_C" field_ref="field_A">log10(field_B)</field>
+\end_layout
+
+\begin_layout Plain Layout
+
+			</file>
+\end_layout
+
+\begin_layout Plain Layout
+
+		</file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+	</context>
+\end_layout
+
+\begin_layout Plain Layout
+
+</simulation>
+\end_layout
+
+\end_inset
+
+With this configuration, only one call to 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+xios_send_field(
+\begin_inset Quotes eld
+\end_inset
+
+field_A
+\begin_inset Quotes erd
+\end_inset
+
+, field_A)
+\end_layout
+
+\end_inset
+
+ is needed.
+ In this example 
+\series bold
+field_ref
+\series default
+ is used only to inherit the attributes from 
+\begin_inset Quotes eld
+\end_inset
+
+field_A
+\begin_inset Quotes erd
+\end_inset
+
+, the instant values are not inherited since an expression has been given
+ for 
+\begin_inset Quotes eld
+\end_inset
+
+field_B
+\begin_inset Quotes erd
+\end_inset
+
+ and 
+\begin_inset Quotes eld
+\end_inset
+
+field_C
+\begin_inset Quotes erd
+\end_inset
+
+.
+ Note that it is possible to use fields obtained from an expression in another
+ expression, thus the expression of 
+\begin_inset Quotes eld
+\end_inset
+
+field_C
+\begin_inset Quotes erd
+\end_inset
+
+ is equivalent to 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+log10(field_A + 273.15)
+\end_layout
+
+\end_inset
+
+.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The special keyword 
+\series bold
+this
+\series default
+ can be used in an expression to refer to the instant data received from
+ the model by the current field.
+ For example, the previous configuration file could be rewritten as follow:
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<?xml version="1.0"?>
+\end_layout
+
+\begin_layout Plain Layout
+
+<simulation>
+\end_layout
+
+\begin_layout Plain Layout
+
+	<context id="test">
+\end_layout
+
+\begin_layout Plain Layout
+
+		<calendar type="Gregorian" timestep="1h" />
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<grid_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<grid id="grid_A"><!-- Definition ommited --></grid>
+\end_layout
+
+\begin_layout Plain Layout
+
+		</grid_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<file name="output" output_freq="1d">
+\end_layout
+
+\begin_layout Plain Layout
+
+        		<field id="field_B" grid_ref="grid_A" operation="average">this
+ + 273.15</field>
+\end_layout
+
+\begin_layout Plain Layout
+
+        		<field id="field_C" field_ref="field_B">log10(field_B)</field>
+\end_layout
+
+\begin_layout Plain Layout
+
+			</file>
+\end_layout
+
+\begin_layout Plain Layout
+
+		</file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+	</context>
+\end_layout
+
+\begin_layout Plain Layout
+
+</simulation>
+\end_layout
+
+\end_inset
+
+and the Fortran call would be replaced by 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+xios_send_field(
+\begin_inset Quotes eld
+\end_inset
+
+field_B
+\begin_inset Quotes erd
+\end_inset
+
+, field_A)
+\end_layout
+
+\end_inset
+
+.
+\end_layout
+
+\begin_layout Section
+How to chain multiple temporal operations
+\end_layout
+
+\begin_layout Standard
+By default, all field names appearing in an expression refer to the instant
+ data of those fields.
+ To refer to the result of a temporal operation, the field name must be
+ prefixed with 
+\begin_inset Quotes eld
+\end_inset
+
+@
+\begin_inset Quotes erd
+\end_inset
+
+.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+This feature allows to chain multiple temporal operations as illustrated
+ bellow:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<?xml version="1.0"?>
+\end_layout
+
+\begin_layout Plain Layout
+
+<simulation>
+\end_layout
+
+\begin_layout Plain Layout
+
+	<context id="test">
+\end_layout
+
+\begin_layout Plain Layout
+
+		<calendar type="Gregorian" timestep="1h" />
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<grid_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<grid id="grid_A"><!-- Definition ommited --></grid>
+\end_layout
+
+\begin_layout Plain Layout
+
+		</grid_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<field_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+        	<field id="field_A" grid_ref="grid_A" operation="average" />
+\end_layout
+
+\begin_layout Plain Layout
+
+		</field_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<file name="output" output_freq="7d">
+\end_layout
+
+\begin_layout Plain Layout
+
+        		<field name="field_A_min_of_average" grid_ref="grid_A" operation="min"
+ freq_op="1d">@field_A</field>
+\end_layout
+
+\begin_layout Plain Layout
+
+			</file>
+\end_layout
+
+\begin_layout Plain Layout
+
+		</file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+	</context>
+\end_layout
+
+\begin_layout Plain Layout
+
+</simulation>
+\end_layout
+
+\end_inset
+
+This example shows how to compute the minimum on 7 days of the daily average
+ of 
+\begin_inset Quotes eld
+\end_inset
+
+field_A
+\begin_inset Quotes erd
+\end_inset
+
+.
+ In this context, the 
+\series bold
+freq_op
+\series default
+ attribute defines the period of the temporal operation for all fields pointed
+ with the 
+\begin_inset Quotes eld
+\end_inset
+
+@
+\begin_inset Quotes erd
+\end_inset
+
+ operator in the expression.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Another use of this feature is to do arithmetic operations on the result
+ of temporal operations.
+  The following configuration file for example shows how to output the standard
+ deviation for a field on a one day period: 
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<?xml version="1.0"?>
+\end_layout
+
+\begin_layout Plain Layout
+
+<simulation>
+\end_layout
+
+\begin_layout Plain Layout
+
+	<context id="test">
+\end_layout
+
+\begin_layout Plain Layout
+
+		<calendar type="Gregorian" timestep="1h" />
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<grid_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<grid id="grid_A"><!-- Definition ommited --></grid>
+\end_layout
+
+\begin_layout Plain Layout
+
+		</grid_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<field_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+        	<field id="field_A" grid_ref="grid_A" operation="average" />
+\end_layout
+
+\begin_layout Plain Layout
+
+        	<field id="field_A_square" field_ref="grid_A">field_A * field_A</field>
+\end_layout
+
+\begin_layout Plain Layout
+
+		</field_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<file name="output" output_freq="1d">
+\end_layout
+
+\begin_layout Plain Layout
+
+        		<field name="field_A_std_dev" grid_ref="grid_A" operation="instant"
+ freq_op="1d">sqrt(@field_A_square - @field_A^2)</field>
+\end_layout
+
+\begin_layout Plain Layout
+
+			</file>
+\end_layout
+
+\begin_layout Plain Layout
+
+		</file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+	</context>
+\end_layout
+
+\begin_layout Plain Layout
+
+</simulation>
+\end_layout
+
+\end_inset
+
+Note that since an 
+\series bold
+\emph on
+
+\begin_inset Quotes eld
+\end_inset
+
+instant
+\begin_inset Quotes erd
+\end_inset
+
+
+\series default
+ 
+\emph default
+operation is used, 
+\series bold
+freq_op
+\series default
+ and 
+\series bold
+output_freq
+\series default
+ are identical in this scenario.
+\end_layout
+
+\begin_layout Section
+How to access the data of a field
+\end_layout
+
+\begin_layout Standard
+In order not to waste memory, the instant data of a field can be read from
+ the model only if:
+\end_layout
+
+\begin_layout Itemize
+it is part of a file whose attribute 
+\series bold
+mode
+\series default
+ is 
+\series bold
+\emph on
+
+\begin_inset Quotes eld
+\end_inset
+
+read
+\begin_inset Quotes erd
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+or its attribute 
+\series bold
+read_access
+\series default
+ is set to 
+\series bold
+\emph on
+
+\begin_inset Quotes eld
+\end_inset
+
+true
+\begin_inset Quotes erd
+\end_inset
+
+
+\series default
+\emph default
+.
+\end_layout
+
+\begin_layout Standard
+In any other case, trying to access the field data would cause an error.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The following configuration file:
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<?xml version="1.0"?>
+\end_layout
+
+\begin_layout Plain Layout
+
+<simulation>
+\end_layout
+
+\begin_layout Plain Layout
+
+	<context id="test">
+\end_layout
+
+\begin_layout Plain Layout
+
+		<calendar type="Gregorian" timestep="1h" />
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<grid_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<grid id="grid_A"><!-- Definition ommited --></grid>
+\end_layout
+
+\begin_layout Plain Layout
+
+		</grid_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<file name="input" output_freq="1ts">
+\end_layout
+
+\begin_layout Plain Layout
+
+        		<field id="field_A" grid_ref="grid_A" operation="instant" />
+\end_layout
+
+\begin_layout Plain Layout
+
+			</file>
+\end_layout
+
+\begin_layout Plain Layout
+
+		</file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+	</context>
+\end_layout
+
+\begin_layout Plain Layout
+
+</simulation>
+\end_layout
+
+\end_inset
+
+can be used with this Fortran code:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=Fortran,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+DO ts=1,numberOfTimestep
+\end_layout
+
+\begin_layout Plain Layout
+
+	! Get field_A for current timestep
+\end_layout
+
+\begin_layout Plain Layout
+
+	CALL xios_recv_field("field_A", field_A) ! field_A must be an allocated
+ array with the right size
+\end_layout
+
+\begin_layout Plain Layout
+
+	! Do useful things...
+\end_layout
+
+\begin_layout Plain Layout
+
+	! Inform XIOS of the current timestep
+\end_layout
+
+\begin_layout Plain Layout
+
+	CALL xios_update_calendar(ts)
+\end_layout
+
+\begin_layout Plain Layout
+
+ENDDO
+\end_layout
+
+\end_inset
+
+The call to 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+xios_recv_field
+\end_layout
+
+\end_inset
+
+ might block for a while if the data was not yet received from the server(s)
+ but it should not happen too often thanks to the prefetching done by XIOS.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+Since the 
+\series bold
+read_access
+\series default
+ attribute allows to the access fields which depend directly on data from
+ the model, you must be very careful with the order of the 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+xios_send_field
+\end_layout
+
+\end_inset
+
+ and 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+xios_recv_field
+\end_layout
+
+\end_inset
+
+ calls.
+ For example, consider the following configuration file (just a simple example
+ as in practice it does not make much sense to use it):
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<?xml version="1.0"?>
+\end_layout
+
+\begin_layout Plain Layout
+
+<simulation>
+\end_layout
+
+\begin_layout Plain Layout
+
+	<context id="test">
+\end_layout
+
+\begin_layout Plain Layout
+
+		<calendar type="Gregorian" timestep="1h" />
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<grid_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<grid id="grid_A"><!-- Definition ommited --></grid>
+\end_layout
+
+\begin_layout Plain Layout
+
+		</grid_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<field_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+        	<field id="field_A" grid_ref="grid_A" operation="instant" />
+\end_layout
+
+\begin_layout Plain Layout
+
+		</field_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<file name="output" output_freq="1ts">
+\end_layout
+
+\begin_layout Plain Layout
+
+        		<field id="field_B" grid_ref="grid_A" operation="instant" read_access=
+"true">field_A / 42</field>
+\end_layout
+
+\begin_layout Plain Layout
+
+			</file>
+\end_layout
+
+\begin_layout Plain Layout
+
+		</file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+	</context>
+\end_layout
+
+\begin_layout Plain Layout
+
+</simulation>
+\end_layout
+
+\end_inset
+
+If you call 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+xios_recv_field(
+\begin_inset Quotes eld
+\end_inset
+
+field_B
+\begin_inset Quotes erd
+\end_inset
+
+, field_B)
+\end_layout
+
+\end_inset
+
+ before 
+\begin_inset Flex Code
+status open
+
+\begin_layout Plain Layout
+xios_send_field(
+\begin_inset Quotes eld
+\end_inset
+
+field_A
+\begin_inset Quotes erd
+\end_inset
+
+, field_A)
+\end_layout
+
+\end_inset
+
+, the requested data will never be available and a deadlock could occur.
+ In practice, XIOS will detect the problem and throw an error.
+\end_layout
+
+\begin_layout Section
+How to reduce the size of an output file
+\end_layout
+
+\begin_layout Standard
+The size of the output files can sometimes become a problem.
+ XIOS provides some features which may help to reduce the size of the output
+ files losslessly.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The first solution is to use the compression feature provided by HDF5 which
+ allows a field to be compressed using gzip.
+ Since it depends directly on HDF5, this feature works only when the NetCDF-4
+ format is used.
+ Since HDF5 does not (yet) support compression for parallel output, one
+ has to use two server-level functionality (see Sec.
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "sec:Launching-secondary-server"
+
+\end_inset
+
+) or to engage the 
+\series bold
+\emph on
+
+\begin_inset Quotes eld
+\end_inset
+
+multiple_file
+\begin_inset Quotes erd
+\end_inset
+
+
+\series default
+\emph default
+ mode.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+To enable the gzip compression of a field, you need to set the 
+\series bold
+compression_level
+\series default
+ attribute to any integer between 1 and 9 (by default this attribute is
+ set to 0 which means that compression is disabled).
+ Using an higher compression level should improve the compression ratio
+ at the cost of using more processing power.
+ Generally using a compression level of 2 should be a good trade-off.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The following example illustrates the use of the gzip compression:
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<?xml version="1.0"?>
+\end_layout
+
+\begin_layout Plain Layout
+
+<simulation>
+\end_layout
+
+\begin_layout Plain Layout
+
+	<context id="test">
+\end_layout
+
+\begin_layout Plain Layout
+
+		<calendar type="Gregorian" timestep="1h" />
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<grid_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<grid id="grid_A"><!-- Definition ommited --></grid>
+\end_layout
+
+\begin_layout Plain Layout
+
+		</grid_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+		<file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<file name="output" output_freq="1ts" compression_level="2">
+\end_layout
+
+\begin_layout Plain Layout
+
+        		<field id="field_A" grid_ref="grid_A" operation="average" compression_
+level="4" />
+\end_layout
+
+\begin_layout Plain Layout
+
+        		<field id="field_B" grid_ref="grid_A" operation="average" compression_
+level="0" />
+\end_layout
+
+\begin_layout Plain Layout
+
+        		<field id="field_C" grid_ref="grid_A" operation="average" />
+\end_layout
+
+\begin_layout Plain Layout
+
+			</file>
+\end_layout
+
+\begin_layout Plain Layout
+
+		</file_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+	</context>
+\end_layout
+
+\begin_layout Plain Layout
+
+</simulation>
+\end_layout
+
+\end_inset
+
+Note that the 
+\series bold
+compression_level
+\series default
+ attribute can also be set at a file level, in this case it is inherited
+ by all fields of the file unless they explicitly override the attribute.
+\begin_inset Newline newline
+\end_inset
+
+
+\begin_inset Newline newline
+\end_inset
+
+The second solution is available only if you are using a grid with masked
+ values.
+ In this case, you can choose to output the indexed grid instead of the
+ full grid by setting the 
+\series bold
+indexed_output
+\series default
+ attribute to 
+\series bold
+\emph on
+
+\begin_inset Quotes eld
+\end_inset
+
+true
+\begin_inset Quotes erd
+\end_inset
+
+
+\series default
+\emph default
+.
+ Missing values are then omitted and extra arrays are outputted so that
+ the translation from the 
+\begin_inset Quotes eld
+\end_inset
+
+compressed
+\begin_inset Quotes erd
+\end_inset
+
+ indexes to the true indexes can be done.
+ Due to those arrays of indexes, indexed output should be considered only
+ if there is enough masked values.
+ For more details about this feature, please refer to section 8.2 
+\begin_inset Quotes eld
+\end_inset
+
+Compression by Gathering
+\begin_inset Quotes erd
+\end_inset
+
+ of the Climate and Forecast (CF) Convention.
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset include
+LatexCommand include
+filename "inputs/user/Grid.lyx"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset include
+LatexCommand include
+filename "inputs/user/Domain.lyx"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset CommandInset include
+LatexCommand include
+filename "inputs/user/Axis.lyx"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Chapter
+XIOS parameterization
+\end_layout
+
+\begin_layout Standard
+Some of XIOS behaviors can be configured using options.
+ Those options must be expressed as variables in a specific context whose
+ 
+\series bold
+id
+\series default
+ must be 
+\series bold
+\emph on
+
+\begin_inset Quotes eld
+\end_inset
+
+xios
+\begin_inset Quotes erd
+\end_inset
+
+
+\series default
+\emph default
+ as shown below.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "breaklines=true,frame=tb,language=XML,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}},tabsize=2"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<?xml version="1.0"?>
+\end_layout
+
+\begin_layout Plain Layout
+
+<simulation>
+\end_layout
+
+\begin_layout Plain Layout
+
+	<!-- Actual context(s) used by the simulation ommited -->
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+	<context id="xios">
+\end_layout
+
+\begin_layout Plain Layout
+
+		<variable_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+			<variable id="option_name" type="option_type">option_value</variable>
+\end_layout
+
+\begin_layout Plain Layout
+
+		</variable_definition>
+\end_layout
+
+\begin_layout Plain Layout
+
+	</context>
+\end_layout
+
+\begin_layout Plain Layout
+
+</simulation>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Section
+Launching secondary server
+\begin_inset CommandInset label
+LatexCommand label
+name "sec:Launching-secondary-server"
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+To improve I/O performance and to be able to use HDF5 compression with the
+ 
+\series bold
+\emph on
+
+\begin_inset Quotes eld
+\end_inset
+
+multiple_file
+\begin_inset Quotes erd
+\end_inset
+
+
+\series default
+\emph default
+ mode, it is possible to separate servers into two levels: intermediaries
+ (level one) and writers (level two).
+ A single MPI communicator will be created for the intermediaries, while
+ multiple communicators will be created for the writers according to the
+ number of 
+\begin_inset Quotes eld
+\end_inset
+
+pools
+\begin_inset Quotes erd
+\end_inset
+
+ which can be set by a user.
+ Level-one servers will receive data from clients and will redistribute
+ it to be sent to pools of level-two servers whilst level-two servers will
+ do the I/O (important: for now level-two servers only do writing data).
+ Secondary servers can be launched by means of three parameters:
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+using_server2
+\series default
+ (type: 
+\series bold
+bool
+\series default
+) activates the secondary server
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+ratio_server2
+\series default
+ (type: 
+\series bold
+int
+\series default
+) defines the percentage of servers that will be dedicated to level two.
+ The parameter can take value from 0 to 100 with the default value of 50%.
+ In case if the requested number of level-two servers is not valid (for
+ example, zero or equal to the total number of servers), XIOS will run in
+ its classical server mode with one server level.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+number_pools_server2 
+\series default
+(type: 
+\series bold
+int
+\series default
+) sets the number of server-two pools (i.e.
+ MPI communicators on level two).
+ By default the number of pools is equal to the number of level-two servers,
+ thus permitting one process per communicator.
+\end_layout
+
+\begin_layout Standard
+Shown in Fig.
+ 
+\begin_inset CommandInset ref
+LatexCommand ref
+reference "Fig:server2"
+
+\end_inset
+
+ is the two-level server structure for the following definitions:
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "breaklines=true,frame=tb,language=XML,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}},tabsize=2"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<context id="xios">     
+\end_layout
+
+\begin_layout Plain Layout
+
+...
+       
+\end_layout
+
+\begin_layout Plain Layout
+
+	<variable id="using_server2" type="bool">true</variable>
+\end_layout
+
+\begin_layout Plain Layout
+
+	<variable id="ratio_server2" type="int">75</variable>         
+\end_layout
+
+\begin_layout Plain Layout
+
+	<variable id="number_pools_server2" type="int">3</variable>         
+\end_layout
+
+\begin_layout Plain Layout
+
+...
+\end_layout
+
+\begin_layout Plain Layout
+
+</context> 
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+\begin_inset Float figure
+placement H
+wide false
+sideways false
+status open
+
+\begin_layout Plain Layout
+\begin_inset Graphics
+	filename inputs/images/Server2.pdf
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Plain Layout
+\begin_inset Caption Standard
+
+\begin_layout Plain Layout
+Two levels of servers for the total number of servers of 8 and ratio_server2=75%.
+ The number of level-two servers is 
+\begin_inset Formula $8\times\text{ratio\_server2}=6$
+\end_inset
+
+ and, thus, the remaining 2 servers are of level one.
+ 
+\end_layout
+
+\end_inset
+
+
+\begin_inset CommandInset label
+LatexCommand label
+name "Fig:server2"
+
+\end_inset
+
+
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Note that with one server per pool, the I/O is actually sequential and thus
+ the use of HDF5 compression is possible.
+ 
+\end_layout
+
+\begin_layout Standard
+By default file distribution among server-two pools is optimized for bandwidth.
+ An alternative way of distributing files is possible in order to minimize
+ memory consumption by level-two servers.
+ For this, two additional parameters should be specified:
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+server2_dist_file_memory
+\series default
+ (type: 
+\series bold
+bool
+\series default
+) activates memory optimization.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+server2_dist_file_memory_ratio
+\series default
+ (type: 
+\series bold
+double
+\series default
+) (optional) takes value from 0 (memory optimization) to 1 (bandwidth optimizati
+on).
+ The default value is 0.5.
+\end_layout
+
+\begin_layout Section
+Buffer related options
+\end_layout
+
+\begin_layout Standard
+By default, XIOS tries to guess the required buffers sizes to ensure efficient
+ client-server communications.
+ However it might sometimes be useful to tweak the buffers sizes so XIOS
+ provides the following options:
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+optimal_buffer_size
+\series default
+ (type: 
+\series bold
+string
+\series default
+) can be either 
+\series bold
+\emph on
+
+\begin_inset Quotes eld
+\end_inset
+
+memory
+\begin_inset Quotes erd
+\end_inset
+
+
+\series default
+\emph default
+ or 
+\series bold
+\emph on
+
+\begin_inset Quotes erd
+\end_inset
+
+performance
+\begin_inset Quotes erd
+\end_inset
+
+
+\series default
+\emph default
+.
+ When using the 
+\series bold
+\emph on
+
+\begin_inset Quotes eld
+\end_inset
+
+memory
+\begin_inset Quotes erd
+\end_inset
+
+
+\series default
+\emph default
+ mode, XIOS will try to use buffers as small as possible while still ensuring
+ that the bigger message will fit.
+ When using the 
+\series bold
+\emph on
+
+\begin_inset Quotes erd
+\end_inset
+
+performance
+\begin_inset Quotes erd
+\end_inset
+
+
+\series default
+\emph default
+ mode, XIOS will ensure that all active fields can be buffered without having
+ to flush the buffers.
+ This mode is used by default since it allows more asynchronism and thus
+ better performance at the cost of being quite memory hungry.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+minimum_buffer_size
+\series default
+ (type: 
+\series bold
+int
+\series default
+) defines the minimum buffer size in bytes (8192 by default).
+ This value will be used by XIOS only for buffers whose detected size is
+ smaller than the user defined minimum size.
+\end_layout
+
+\begin_layout Itemize
+
+\series bold
+buffer_size_factor 
+\series default
+(type: 
+\series bold
+int
+\series default
+) allows to modify the buffers sizes by multiplying the detected sizes by
+ an user defined factor (
+\begin_inset Formula $1.0$
+\end_inset
+
+ by default).
+ For each allocated buffers, the used size is defined as 
+\begin_inset Formula 
+\[
+{\scriptstyle used\_size\;=\;\min\left(minimum\_buffer\_size,\; detected\_size\;\times\; buffer\_size\_factor\right)}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\end_body
+\end_document

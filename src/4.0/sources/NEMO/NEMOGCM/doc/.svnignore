@@ -1,0 +1,16 @@
+*.aux
+*.bbl
+*.blg
+*.dvi
+*.fdb*
+*.fls
+*.idx
+*.ilg
+*.ind
+*.log
+*.maf
+*.mtc*
+*.out
+*.pdf
+*.toc
+_minted-*

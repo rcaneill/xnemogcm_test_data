@@ -1,0 +1,69 @@
+&namlog
+   cn_logfile=
+   cn_verbosity=
+   in_maxerror =
+/
+
+&namcfg
+   cn_varcfg=
+   cn_dumcfg=
+/
+
+&namcrs
+   cn_coord0=
+   in_perio0=
+/
+
+&namfin
+   cn_coord1=
+   cn_bathy1=
+   in_perio1=
+/
+
+&namzgr
+   dn_pp_to_be_computed=
+   dn_ppsur    =
+   dn_ppa0     =
+   dn_ppa1     =
+   dn_ppa2     = 
+   dn_ppkth    =
+   dn_ppkth2   =
+   dn_ppacr    =
+   dn_ppacr2   =
+   dn_ppdzmin  =
+   dn_pphmax   =
+   in_nlevel   =
+/
+
+&namzps
+   dn_e3zps_min =
+   dn_e3zps_rat =
+/
+
+&namvar
+   cn_varfile=
+   cn_varinfo=
+/
+
+&namnst
+   in_rhoi=
+   in_rhoj=
+/
+
+&nambdy
+   ln_north = 
+   ln_south = 
+   ln_east  = 
+   ln_west  = 
+   cn_north = 
+   cn_south = 
+   cn_east  = 
+   cn_west  = 
+   ln_oneseg= 
+/
+
+&namout
+   cn_fileout=
+   dn_dayofs=
+   ln_extrap=
+/

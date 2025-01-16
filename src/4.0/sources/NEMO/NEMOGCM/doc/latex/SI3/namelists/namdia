@@ -1,0 +1,9 @@
+!------------------------------------------------------------------------------
+&namdia         !   Diagnostics
+!------------------------------------------------------------------------------
+   ln_icediachk     = .false.         !  check online the heat, mass & salt budgets (T) or not (F)
+   ln_icediahsb     = .false.         !  output the heat, mass & salt budgets (T) or not (F)
+   ln_icectl        = .false.         !  ice points output for debug (T or F)
+   iiceprt          =  10             !  i-index for debug
+   jiceprt          =  10             !  j-index for debug
+/

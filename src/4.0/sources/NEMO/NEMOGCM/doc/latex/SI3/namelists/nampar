@@ -1,0 +1,10 @@
+!------------------------------------------------------------------------------
+&nampar         !   Generic parameters
+!------------------------------------------------------------------------------
+   jpl              =   5             !  number of ice  categories
+   nlay_i           =   2             !  number of ice  layers
+   nlay_s           =   1             !  number of snow layers (only 1 is working)
+   nn_virtual_itd   =   0             !  virtual ITD mono-category parameterizations (1-3 => jpl = 1 only) or not (0)
+                                      !     2: activate enhanced thermal conductivity only --- temporary option
+                                      !     3: activate virtual thin ice melting only      ---  temporary option
+/

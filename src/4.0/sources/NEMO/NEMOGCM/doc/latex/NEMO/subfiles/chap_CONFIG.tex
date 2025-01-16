@@ -1,0 +1,326 @@
+\documentclass[../main/NEMO_manual]{subfiles}
+
+\begin{document}
+% ================================================================
+% Chapter Configurations
+% ================================================================
+\chapter{Configurations}
+\label{chap:CFG}
+
+\minitoc
+
+\newpage
+
+% ================================================================
+% Introduction
+% ================================================================
+\section{Introduction}
+\label{sec:CFG_intro}
+
+The purpose of this part of the manual is to introduce the \NEMO reference configurations.
+These configurations are offered as means to explore various numerical and physical options,
+thus allowing the user to verify that the code is performing in a manner consistent with that we are running.
+This form of verification is critical as one adopts the code for his or her particular research purposes.
+The reference configurations also provide a sense for some of the options available in the code,
+though by no means are all options exercised in the reference configurations.
+
+%------------------------------------------namcfg----------------------------------------------------
+
+\nlst{namcfg}
+%-------------------------------------------------------------------------------------------------------------
+
+% ================================================================
+% 1D model configuration
+% ================================================================
+\section{C1D: 1D Water column model (\protect\key{c1d}) }
+\label{sec:CFG_c1d}
+
+BE careful: to be re-written according to suppression of jpizoom and jpjzoom !!!!
+
+The 1D model option simulates a stand alone water column within the 3D \NEMO system.
+It can be applied to the ocean alone or to the ocean-ice system and can include passive tracers or a biogeochemical model.
+It is set up by defining the position of the 1D water column in the grid
+(see \textit{CONFIG/SHARED/namelist\_ref} ). 
+The 1D model is a very useful tool
+\textit{(a)} to learn about the physics and numerical treatment of vertical mixing processes;
+\textit{(b)} to investigate suitable parameterisations of unresolved turbulence
+(surface wave breaking, Langmuir circulation, ...);
+\textit{(c)} to compare the behaviour of different vertical mixing schemes;
+\textit{(d)} to perform sensitivity studies on the vertical diffusion at a particular point of an ocean domain;
+\textit{(d)} to produce extra diagnostics, without the large memory requirement of the full 3D model.
+
+The methodology is based on the use of the zoom functionality over the smallest possible domain:
+a 3x3 domain centered on the grid point of interest, with some extra routines.
+There is no need to define a new mesh, bathymetry, initial state or forcing,
+since the 1D model will use those of the configuration it is a zoom of.
+The chosen grid point is set in \textit{\ngn{namcfg}} namelist by
+setting the \np{jpizoom} and \np{jpjzoom} parameters to the indices of the location of the chosen grid point.
+
+The 1D model has some specifies. First, all the horizontal derivatives are assumed to be zero,
+and second, the two components of the velocity are moved on a $T$-point. 
+Therefore, defining \key{c1d} changes five main things in the code behaviour: 
+\begin{description}
+\item[(1)]
+  the lateral boundary condition routine (\rou{lbc\_lnk}) set the value of the central column of
+  the 3x3 domain is imposed over the whole domain;
+\item[(3)]
+  a call to \rou{lbc\_lnk} is systematically done when reading input data (\ie in \mdl{iom});
+\item[(3)]
+  a simplified \rou{stp} routine is used (\rou{stp\_c1d}, see \mdl{step\_c1d} module) in which
+  both lateral tendancy terms and lateral physics are not called;
+\item[(4)]
+  the vertical velocity is zero
+  (so far, no attempt at introducing a Ekman pumping velocity has been made);
+\item[(5)]
+  a simplified treatment of the Coriolis term is performed as $U$- and $V$-points are the same
+  (see \mdl{dyncor\_c1d}).
+\end{description}
+All the relevant \textit{\_c1d} modules can be found in the NEMOGCM/NEMO/OPA\_SRC/C1D directory of
+the \NEMO distribution.
+
+% to be added:  a test case on the yearlong Ocean Weather Station (OWS) Papa dataset of Martin (1985)
+
+% ================================================================
+% ORCA family configurations
+% ================================================================
+\section{ORCA family: global ocean with tripolar grid}
+\label{sec:CFG_orca}
+
+The ORCA family is a series of global ocean configurations that are run together with
+the LIM sea-ice model (ORCA-LIM) and possibly with PISCES biogeochemical model (ORCA-LIM-PISCES),
+using various resolutions.
+An appropriate namelist is available in \path{CONFIG/ORCA2_LIM3_PISCES/EXP00/namelist_cfg} for ORCA2.
+The domain of ORCA2 configuration is defined in \ifile{ORCA\_R2\_zps\_domcfg} file,
+this file is available in tar file in the wiki of NEMO: \\
+https://forge.ipsl.jussieu.fr/nemo/wiki/Users/ReferenceConfigurations/ORCA2\_LIM3\_PISCES \\
+In this namelist\_cfg the name of domain input file is set in \ngn{namcfg} block of namelist. 
+
+%>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+\begin{figure}[!t]
+  \begin{center}
+    \includegraphics[width=0.98\textwidth]{Fig_ORCA_NH_mesh}
+    \caption{
+      \protect\label{fig:MISC_ORCA_msh}
+      ORCA mesh conception.
+      The departure from an isotropic Mercator grid start poleward of 20\deg{N}.
+      The two "north pole" are the foci of a series of embedded ellipses (blue curves) which
+      are determined analytically and form the i-lines of the ORCA mesh (pseudo latitudes).
+      Then, following \citet{Madec_Imbard_CD96}, the normal to the series of ellipses (red curves) is computed which
+      provides the j-lines of the mesh (pseudo longitudes).
+    }
+  \end{center}
+\end{figure}
+%>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+% -------------------------------------------------------------------------------------------------------------
+%       ORCA tripolar grid
+% -------------------------------------------------------------------------------------------------------------
+\subsection{ORCA tripolar grid}
+\label{subsec:CFG_orca_grid}
+
+The ORCA grid is a tripolar is based on the semi-analytical method of \citet{Madec_Imbard_CD96}.
+It allows to construct a global orthogonal curvilinear ocean mesh which has no singularity point inside
+the computational domain since two north mesh poles are introduced and placed on lands.
+The method involves defining an analytical set of mesh parallels in the stereographic polar plan,
+computing the associated set of mesh meridians, and projecting the resulting mesh onto the sphere.
+The set of mesh parallels used is a series of embedded ellipses which foci are the two mesh north poles
+(\autoref{fig:MISC_ORCA_msh}).
+The resulting mesh presents no loss of continuity in either the mesh lines or the scale factors,
+or even the scale factor derivatives over the whole ocean domain, as the mesh is not a composite mesh. 
+%>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+\begin{figure}[!tbp]
+  \begin{center}
+    \includegraphics[width=1.0\textwidth]{Fig_ORCA_NH_msh05_e1_e2}
+    \includegraphics[width=0.80\textwidth]{Fig_ORCA_aniso}
+    \caption {
+      \protect\label{fig:MISC_ORCA_e1e2}
+      \textit{Top}: Horizontal scale factors ($e_1$, $e_2$) and
+      \textit{Bottom}: ratio of anisotropy ($e_1 / e_2$)
+      for ORCA 0.5\deg ~mesh.
+      South of 20\deg{N} a Mercator grid is used ($e_1 = e_2$) so that the anisotropy ratio is 1.
+      Poleward of 20\deg{N}, the two "north pole" introduce a weak anisotropy over the ocean areas ($< 1.2$) except in
+      vicinity of Victoria Island (Canadian Arctic Archipelago).
+    }
+  \end{center}
+\end{figure}
+%>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+The method is applied to Mercator grid (\ie same zonal and meridional grid spacing) poleward of 20\deg{N},
+so that the Equator is a mesh line, which provides a better numerical solution for equatorial dynamics.
+The choice of the series of embedded ellipses (position of the foci and variation of the ellipses)
+is a compromise between maintaining the ratio of mesh anisotropy ($e_1 / e_2$) close to one in the ocean
+(especially in area of strong eddy activities such as the Gulf Stream) and keeping the smallest scale factor in
+the northern hemisphere larger than the smallest one in the southern hemisphere.
+The resulting mesh is shown in \autoref{fig:MISC_ORCA_msh} and \autoref{fig:MISC_ORCA_e1e2} for
+a half a degree grid (ORCA\_R05).
+The smallest ocean scale factor is found in along Antarctica,
+while the ratio of anisotropy remains close to one except near the Victoria Island in the Canadian Archipelago. 
+
+% -------------------------------------------------------------------------------------------------------------
+%       ORCA-LIM(-PISCES) configurations
+% -------------------------------------------------------------------------------------------------------------
+\subsection{ORCA pre-defined resolution}
+\label{subsec:CFG_orca_resolution}
+
+The NEMO system is provided with five built-in ORCA configurations which differ in the horizontal resolution.
+The value of the resolution is given by the resolution at the Equator expressed in degrees.
+Each of configuration is set through the \textit{domain\_cfg} domain configuration file,
+which sets the grid size and configuration name parameters.
+The NEMO System Team provides only ORCA2 domain input file "\ifile{ORCA\_R2\_zps\_domcfg}" file
+(Tab. \autoref{tab:ORCA}).
+
+%--------------------------------------------------TABLE--------------------------------------------------
+\begin{table}[!t]
+  \begin{center}
+    \begin{tabular}{p{4cm} c c c c}
+      Horizontal Grid         	             & \np{ORCA\_index} &  \np{jpiglo} & \np{jpjglo} &       \\
+      \hline
+      \hline
+      \~4\deg	   &        4         &         92     &      76      &       \\
+      \~2\deg        &        2         &       182     &    149      &        \\
+      \~1\deg        &        1         &       362     &     292     &        \\
+      \~0.5\deg     &        05       &       722     &     511     &        \\
+      \~0.25\deg   &        025     &      1442    &   1021     &        \\
+      % \key{orca\_r8}       &        8         &      2882    &   2042     &        \\
+      % \key{orca\_r12}     &      12         &      4322    &   3062      &       \\
+      \hline
+      \hline
+    \end{tabular}
+    \caption{
+      \protect\label{tab:ORCA}
+      Domain size of ORCA family configurations.
+      The flag for configurations of ORCA family need to be set in \textit{domain\_cfg} file.
+    }
+  \end{center}
+\end{table}
+%--------------------------------------------------------------------------------------------------------------
+
+
+The ORCA\_R2 configuration has the following specificity: starting from a 2\deg~ORCA mesh,
+local mesh refinements were applied to the Mediterranean, Red, Black and Caspian Seas,
+so that the resolution is 1\deg \time 1\deg there.
+A local transformation were also applied with in the Tropics in order to refine the meridional resolution up to
+0.5\deg at the Equator.
+
+The ORCA\_R1 configuration has only a local tropical transformation to refine the meridional resolution up to
+1/3\deg~at the Equator.
+Note that the tropical mesh refinements in ORCA\_R2 and R1 strongly increases the mesh anisotropy there.
+
+The ORCA\_R05 and higher global configurations do not incorporate any regional refinements.  
+
+For ORCA\_R1 and R025, setting the configuration key to 75 allows to use 75 vertical levels, otherwise 46 are used.
+In the other ORCA configurations, 31 levels are used
+(see \autoref{tab:orca_zgr} %\sfcomment{HERE I need to put new table for ORCA2 values} and \autoref{fig:zgr}).
+
+Only the ORCA\_R2 is provided with all its input files in the \NEMO distribution.
+It is very similar to that used as part of the climate model developed at IPSL for the 4th IPCC assessment of
+climate change (Marti et al., 2009).
+It is also the basis for the \NEMO contribution to the Coordinate Ocean-ice Reference Experiments (COREs)
+documented in \citet{Griffies_al_OM09}. 
+
+This version of ORCA\_R2 has 31 levels in the vertical, with the highest resolution (10m) in the upper 150m
+(see \autoref{tab:orca_zgr} and \autoref{fig:zgr}). 
+The bottom topography and the coastlines are derived from the global atlas of Smith and Sandwell (1997). 
+The default forcing uses the boundary forcing from \citet{Large_Yeager_Rep04} (see \autoref{subsec:SBC_blk_core}), 
+which was developed for the purpose of running global coupled ocean-ice simulations without
+an interactive atmosphere.
+This \citet{Large_Yeager_Rep04} dataset is available through
+the \href{http://nomads.gfdl.noaa.gov/nomads/forms/mom4/CORE.html}{GFDL web site}.
+The "normal year" of \citet{Large_Yeager_Rep04} has been chosen of the \NEMO distribution since release v3.3. 
+
+ORCA\_R2 pre-defined configuration can also be run with an AGRIF zoom over the Agulhas current area
+(\key{agrif} defined) and, by setting the appropriate variables, see \path{CONFIG/SHARED/namelist_ref}.
+A regional Arctic or peri-Antarctic configuration is extracted from an ORCA\_R2 or R05 configurations using
+sponge layers at open boundaries. 
+
+% -------------------------------------------------------------------------------------------------------------
+%       GYRE family: double gyre basin
+% -------------------------------------------------------------------------------------------------------------
+\section{GYRE family: double gyre basin }
+\label{sec:CFG_gyre}
+
+The GYRE configuration \citep{Levy_al_OM10} has been built to
+simulate the seasonal cycle of a double-gyre box model.
+It consists in an idealized domain similar to that used in the studies of \citet{Drijfhout_JPO94} and
+\citet{Hazeleger_Drijfhout_JPO98, Hazeleger_Drijfhout_JPO99, Hazeleger_Drijfhout_JGR00, Hazeleger_Drijfhout_JPO00},
+over which an analytical seasonal forcing is applied.
+This allows to investigate the spontaneous generation of a large number of interacting, transient mesoscale eddies 
+and their contribution to the large scale circulation. 
+
+The domain geometry is a closed rectangular basin on the $\beta$-plane centred at $\sim$ 30\deg{N} and
+rotated by 45\deg, 3180~km long, 2120~km wide and 4~km deep (\autoref{fig:MISC_strait_hand}).
+The domain is bounded by vertical walls and by a flat bottom.
+The configuration is meant to represent an idealized North Atlantic or North Pacific basin.
+The circulation is forced by analytical profiles of wind and buoyancy fluxes.
+The applied forcings vary seasonally in a sinusoidal manner between winter and summer extrema \citep{Levy_al_OM10}. 
+The wind stress is zonal and its curl changes sign at 22\deg{N} and 36\deg{N}.
+It forces a subpolar gyre in the north, a subtropical gyre in the wider part of the domain and
+a small recirculation gyre in the southern corner.
+The net heat flux takes the form of a restoring toward a zonal apparent air temperature profile.
+A portion of the net heat flux which comes from the solar radiation is allowed to penetrate within the water column.
+The fresh water flux is also prescribed and varies zonally.
+It is determined such as, at each time step, the basin-integrated flux is zero.
+The basin is initialised at rest with vertical profiles of temperature and salinity uniformly applied to
+the whole domain.
+
+The GYRE configuration is set like an analytical configuration.
+Through \np{ln\_read\_cfg}\forcode{ = .false.} in \textit{namcfg} namelist defined in
+the reference configuration \path{CONFIG/GYRE/EXP00/namelist_cfg}
+analytical definition of grid in GYRE is done in usrdef\_hrg, usrdef\_zgr routines.
+Its horizontal resolution (and thus the size of the domain) is determined by
+setting \np{nn\_GYRE} in \ngn{namusr\_def}: \\
+\np{jpiglo} $= 30 \times$ \np{nn\_GYRE} + 2   \\
+\np{jpjglo} $= 20 \times$ \np{nn\_GYRE} + 2   \\
+Obviously, the namelist parameters have to be adjusted to the chosen resolution,
+see the Configurations pages on the NEMO web site (Using NEMO\/Configurations).
+In the vertical, GYRE uses the default 30 ocean levels (\jp{jpk}\forcode{ = 31}) (\autoref{fig:zgr}).
+
+The GYRE configuration is also used in benchmark test as it is very simple to increase its resolution and
+as it does not requires any input file.
+For example, keeping a same model size on each processor while increasing the number of processor used is very easy,
+even though the physical integrity of the solution can be compromised.
+Benchmark is activate via \np{ln\_bench}\forcode{ = .true.} in \ngn{namusr\_def} in
+namelist \path{CONFIG/GYRE/EXP00/namelist_cfg}.
+
+%>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+\begin{figure}[!t]
+  \begin{center}
+    \includegraphics[width=1.0\textwidth]{Fig_GYRE}
+    \caption{
+      \protect\label{fig:GYRE}
+      Snapshot of relative vorticity at the surface of the model domain in GYRE R9, R27 and R54.
+      From \citet{Levy_al_OM10}.
+    }
+  \end{center}
+\end{figure}
+%>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+
+% -------------------------------------------------------------------------------------------------------------
+%       AMM configuration
+% -------------------------------------------------------------------------------------------------------------
+\section{AMM: atlantic margin configuration}
+\label{sec:MISC_config_AMM}
+
+The AMM, Atlantic Margins Model, is a regional model covering the Northwest European Shelf domain on
+a regular lat-lon grid at approximately 12km horizontal resolution.
+The appropriate \textit{\&namcfg} namelist  is available in \textit{CONFIG/AMM12/EXP00/namelist\_cfg}.
+It is used to build the correct dimensions of the AMM domain.
+
+This configuration tests several features of NEMO functionality specific to the shelf seas.
+In particular, the AMM uses $S$-coordinates in the vertical rather than $z$-coordinates and
+is forced with tidal lateral boundary conditions using a flather boundary condition from the BDY module.
+The AMM configuration uses the GLS (\key{zdfgls}) turbulence scheme,
+the VVL non-linear free surface(\key{vvl}) and time-splitting (\key{dynspg\_ts}).
+
+In addition to the tidal boundary condition the model may also take open boundary conditions from
+a North Atlantic model.
+Boundaries may be completely omitted by setting \np{ln\_bdy} to false.
+Sample surface fluxes, river forcing and a sample initial restart file are included to test a realistic model run.
+The Baltic boundary is included within the river input file and is specified as a river source.
+Unlike ordinary river points the Baltic inputs also include salinity and temperature data.
+
+\biblio
+
+\pindex
+
+\end{document}

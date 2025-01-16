@@ -1,0 +1,21 @@
+# Environment to compile XIOS on Mac OS X
+#
+# Tested successfully with :
+#   Mac OS X 10.9.5
+#
+#   Prerequisite softwares installed with MacPorts :
+#     gcc8 @8.4.0_0 (active)
+#     hdf5 @1.10.6_0+cxx+gcc8+hl+openmpi+szip (active)
+#     mpi_select @0.0_3 (active)
+#     netcdf @4.7.3_1+cdf5+dap+gcc8+netcdf4+openmpi (active)
+#     netcdf-fortran @4.5.2_0+gcc8+openmpi (active)
+#     openmpi @4.0.1_1 (active)
+#     openmpi-default @4.0.1_1+gcc8 (active)
+#     openmpi-gcc8 @4.0.1_1+fortran+valgrind (active)
+#
+#     $ port select --show mpi
+#     The currently selected version for 'mpi' is 'openmpi-gcc8-fortran'.
+#
+export NETCDF_DIR=/opt/local
+export NETCDF_INC_DIR=${NETCDF_DIR}/include
+export NETCDF_LIB_DIR=${NETCDF_DIR}/lib

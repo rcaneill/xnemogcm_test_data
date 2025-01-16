@@ -1,0 +1,32 @@
+<!-- Context atm -->
+
+<context id="atmosphere">
+
+  <field_definition freq_op="1ts" enabled=".TRUE." operation="instant" domain_ref="atm_face" >
+   <field id="atm_temp1" name="atm_temp1" long_name="Surface Temperature" unit="K" />
+   <field id="atm_temp2" name="atm_temp2" long_name="Surface Temperature" unit="K" /> 
+  </field_definition>
+
+  <file_definition type="one_file" output_freq="3600s" par_access="collective" enabled=".TRUE.">
+   <file id="atm_output9" name="atm_output9" compression_level="9" >
+    <!--  <field field_ref="atm_temp1" />-->
+      <field field_ref="atm_temp2"/>
+    </file> 
+<!--    <file id="atm_output2" name="atm_output2" timeseries="both" ts_prefix="TS" >
+      <field field_ref="atm_temp2" ts_enabled=".TRUE." ts_split_freq="2h"/>
+    </file> -->
+<!--    <file id="atm_output0" name="atm_output0" >
+      <field field_ref="atm_temp1" />
+      <field field_ref="atm_temp2"/>
+    </file> 
+   <file id="atm_output2" name="atm_output2" compression_level="2" >
+      <field field_ref="atm_temp1" />
+      <field field_ref="atm_temp2"/>
+    </file> 
+-->
+ </file_definition>
+
+  <domain_definition>
+   <domain id="atm_face" name="mesh" nvertex="4"/>  
+</domain_definition>
+ </context>

@@ -1,0 +1,511 @@
+#LyX 2.1 created this file. For more info see http://www.lyx.org/
+\lyxformat 474
+\begin_document
+\begin_header
+\textclass book
+\use_default_options true
+\master ../../XIOS_user_guide.lyx
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman default
+\font_sans default
+\font_typewriter default
+\font_math auto
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100
+\font_tt_scale 100
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\float_placement !tph
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize a4paper
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\quotes_language english
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Chapter
+Grid
+\end_layout
+
+\begin_layout Section
+Overview 
+\end_layout
+
+\begin_layout Standard
+Grid plays an important role in XIOS.
+ Same as Field, Grid is one of the basic elements in XIOS, which should
+ be well defined, not only in the configuration file but also in the FORTRAN
+ code.
+ Because, until now, XIOS has mainly served for writing NetCDF data format,
+ most of its components are inspired from NetCDF Data Model, and Grid is
+ not an exception.
+ Grid is a concept describing dimensions that contain the axes of the data
+ arrays.
+ Moreover, Grid always consists of an unlimited dimension whose length can
+ be expanded at any time.
+ Other dimensions can be described with Domain and Axis.
+ The followings describe how to make use of Grid in XIOS.
+ Details of its attributes and operations can be found in XIOS reference
+ guide.
+\end_layout
+
+\begin_layout Section
+Working with configuration file
+\end_layout
+
+\begin_layout Standard
+As mentioned above, a grid contains the axes of the data arrays, which are
+ characterized by Domain and/or Axis.
+ A domain is composed of a 2-dimension array, meanwhile an axis is, as its
+ name, an 1-dimension array.
+ 
+\end_layout
+
+\begin_layout Standard
+Like other components of XIOS, a grid is defined inside its definition part
+ with the tag 
+\series bold
+\color black
+grid_definition
+\series default
+\color inherit
+
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status collapsed
+
+\begin_layout Plain Layout
+
+ <grid_definition>      
+\end_layout
+
+\begin_layout Plain Layout
+
+   <grid_group id="gridGroup">        
+\end_layout
+
+\begin_layout Plain Layout
+
+     <grid id="grid_A">          
+\end_layout
+
+\begin_layout Plain Layout
+
+       <domain domain_ref="domain_A" />
+\end_layout
+
+\begin_layout Plain Layout
+
+       <axis axis_ref="axis_C" />
+\end_layout
+
+\begin_layout Plain Layout
+
+     </grid>
+\end_layout
+
+\begin_layout Plain Layout
+
+	 <grid id="grid_Axis"> 
+\end_layout
+
+\begin_layout Plain Layout
+
+	   <axis axis_ref="axis_D" />
+\end_layout
+
+\begin_layout Plain Layout
+
+	 </grid>
+\end_layout
+
+\begin_layout Plain Layout
+
+	 <grid id="grid_All_Axis">
+\end_layout
+
+\begin_layout Plain Layout
+
+	   <axis axis_ref="axis_A" />
+\end_layout
+
+\begin_layout Plain Layout
+
+       <axis axis_ref="axis_B" />
+\end_layout
+
+\begin_layout Plain Layout
+
+	   <axis axis_ref="axis_C" />
+\end_layout
+
+\begin_layout Plain Layout
+
+	 </grid>
+\end_layout
+
+\begin_layout Plain Layout
+
+   </grid_group>
+\end_layout
+
+\begin_layout Plain Layout
+
+ </grid_definition>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+As XIOS supports netCDF-4/HDF5, it allows user to gather several grids into
+ groups to better organize data.
+ Very often, grids are grouped, basing on the dimensions that they describe.
+ However, there is not a limit for user to group out the grids.
+ The more important thing than grid_group is grid.
+ A grid is defined with the tag 
+\series bold
+\color black
+grid.
+ 
+\end_layout
+
+\begin_layout Standard
+While it is not crucial for a grid group not to have an identification specified
+ by attribute id, a grid must be assigned an id to become useful.
+ Unlike grid group is a way of hierarchically organizing related grid only,
+ a grid itself is referenced by fields with its id.
+ Without the id, a grid can not be made used of by a field.
+ Id is a string of anything but there is one thing to remember: id of a
+ grid as well as id of any component in XIOS are 
+\shape italic
+\color black
+unique
+\shape default
+\color inherit
+ among this kind of components.
+ It is not allowed to have two grids with a same id, but it is permitted
+ a grid and, for example, a domain to share a same one.
+ 
+\end_layout
+
+\begin_layout Standard
+A grid is defined by domain(s) and axis.
+ A domain represents two-dimension data while an axis serves as one-dimension
+ data.
+ They are defined inside the grid definition.
+ One of the convenient and effective way to reuse the definitions in XIOS
+ is to take advantage of attribute *_ref.
+ On using *_ref, the referencing component has all attributes from its reference
+d one.
+ As the example below, grid with id 
+\begin_inset Quotes eld
+\end_inset
+
+grid_A
+\begin_inset Quotes erd
+\end_inset
+
+ (from now one, called grid_A), is composed of one domain whose attributes
+ derived directly from another one-domain_A, and one axis whose attributes
+ are taken from axis axis_C, which are defined previously.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<domain id="domain_A />
+\end_layout
+
+\begin_layout Plain Layout
+
+<axis id="axis_A" />
+\end_layout
+
+\begin_layout Plain Layout
+
+\end_layout
+
+\begin_layout Plain Layout
+
+<grid id="grid_A">          
+\end_layout
+
+\begin_layout Plain Layout
+
+   <domain domain_ref="domain_A" />
+\end_layout
+
+\begin_layout Plain Layout
+
+   <axis axis_ref="axis_C" />
+\end_layout
+
+\begin_layout Plain Layout
+
+ </grid>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The *_ref can only used to reference to a already defined element (e.g domain,
+ axis, grid, etc).
+ If these *_ref have not been defined yet, there will be a runtime error.
+\end_layout
+
+\begin_layout Standard
+Details about domain and axis can be found in other sections but there is
+ one thing to bear in mind: A domain represents two-dimension data and it
+ also contains several special information: longitude, latitude, bound,
+ etc.
+ For the meteorological mind, domain indicates a surface with latitude and
+ longitude, whereas axis represents a vertical level.
+ 
+\end_layout
+
+\begin_layout Standard
+In general cases, there is only a need of writing some multidimensional
+ data to a netCDF without any specific information, then comes the following
+ definition of grid.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+<grid id="grid_All_Axis">
+\end_layout
+
+\begin_layout Plain Layout
+
+  <axis axis_ref="axis_A" />
+\end_layout
+
+\begin_layout Plain Layout
+
+  <axis axis_ref="axis_B" />
+\end_layout
+
+\begin_layout Plain Layout
+
+  <axis axis_ref="axis_C" />
+\end_layout
+
+\begin_layout Plain Layout
+
+</grid>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The grid_All_Axis is similar to grid_A, but with three dimensions defined
+ by 3 axis that can be described in any way on demand of user.
+ For example, the axis_A and the axis_B can have corresponding name latitude
+ and longitude to characterize a two-dimension surface with latitude and
+ longitude.
+\end_layout
+
+\begin_layout Standard
+Very often, one dimensional data needs writing to netCDF, it can be easily
+ done with the following XML code
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+ <grid id="grid_Axis"> 
+\end_layout
+
+\begin_layout Plain Layout
+
+   <axis axis_ref="axis_D" />
+\end_layout
+
+\begin_layout Plain Layout
+
+ </grid>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+As it is discussed more details in the next section, but remember that even
+ the non-distributed one dimensional data can be well processed by XIOS.
+ 
+\end_layout
+
+\begin_layout Standard
+As mentioned above, grid includes by default one unlimited dimension which
+ is often used as time step axis.
+ In order to write only time step to netCDF, XIOS provides a special way
+ to do: empty grid - a grid without any domain or axis.
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+ <grid id="grid_TimeStep"> 
+\end_layout
+
+\begin_layout Plain Layout
+
+ </grid>
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+∆The order of domain and/or in grid definition decides order of data written
+ to netCDF: data on domain or axis appearing firstly in grid definition
+ will vary the most.
+ For example, on using ncdump command on netCDF which contains data written
+ on the grid_A .
+\end_layout
+
+\begin_layout Standard
+\begin_inset listings
+lstparams "language=XML,breaklines=true,tabsize=2,frame=tb,postbreak={\raisebox{0ex}[0ex][0ex]{\ensuremath{\rcurvearrowse\space}}}"
+inline false
+status open
+
+\begin_layout Plain Layout
+
+ float field_A(time_counter, axis_A, y, x) ;
+\end_layout
+
+\begin_layout Plain Layout
+
+	field_A:online_operation = "average" ;
+\end_layout
+
+\begin_layout Plain Layout
+
+	field_A:interval_operation = "3600s" ;
+\end_layout
+
+\begin_layout Plain Layout
+
+	field_A:interval_write = "6h" ;
+\end_layout
+
+\begin_layout Plain Layout
+
+	field_A:coordinates = "time_centered axis_A nav_lat nav_lon" ;
+\end_layout
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+The data vary most quickly on dimension y, x which are two axes of domain_A.
+ These are the default name of these dimension of a domain.
+ The data on axis_C vary slower than on the domain and all the data are
+ written one time step defined by time_counter at a time.
+\end_layout
+
+\begin_layout Standard
+Although a grid can be easily configured in XML file, it also needs defining
+ in the FORTRAN via the definition of domain and axis for a model to work
+ fully and correctly.
+ All these instruction will be detailed in the next section.
+\end_layout
+
+\begin_layout Section
+Working with FORTRAN code
+\end_layout
+
+\begin_layout Standard
+Because grid is composed of domain and axis, all processing are taken grid
+ via Domain and Axis.
+ The next chapters supply the detail of these two sub components.
+ 
+\end_layout
+
+\end_body
+\end_document

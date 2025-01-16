@@ -4,11 +4,12 @@ From: debian:bullseye-20230320-slim
 %files
     arch_xios /nemo/config/arch_xios
     arch_nemo /nemo/config/arch_nemo
+    sources /nemo/sources
 
 %post
     # install what is needed
     apt -y update
-    apt -y install openmpi-bin libmpich-dev libopenmpi-dev gcc g++ gfortran subversion libcurl4-openssl-dev wget make m4 git liburi-perl libxml2-dev
+    apt -y install openmpi-bin libmpich-dev libopenmpi-dev gcc g++ gfortran libcurl4-openssl-dev make m4 liburi-perl libxml2-dev
     # Create some environment variables
     # directories
     export WORKDIR=/nemo/sources
@@ -33,13 +34,7 @@ From: debian:bullseye-20230320-slim
 %post
     # Install zlib
     cd $WORKDIR
-    mkdir -p ZLIB
-    cd ZLIB
-    LIB_VERSION="zlib-1.2.13"
-    LIB_FILE="${LIB_VERSION}.tar.gz"
-    wget https://www.zlib.net/${LIB_FILE}
-    tar xvfz $LIB_FILE
-    cd $LIB_VERSION
+    cd ZLIB/zlib
     ./configure --prefix=$INSTDIR
     make -j1
     #make check
@@ -48,13 +43,7 @@ From: debian:bullseye-20230320-slim
 %post
     # Install hdf5
     cd $WORKDIR
-    mkdir -p HDF5
-    cd HDF5
-    LIB_VERSION="hdf5-1.10.5"
-    LIB_FILE="${LIB_VERSION}.tar.gz"
-    wget http://www.hdfgroup.org/ftp/HDF5/current/src/${LIB_FILE}
-    tar xvfz $LIB_FILE
-    cd $LIB_VERSION
+    cd HDF5/hdf5
     export HDF5_Make_Ignore=yes
     # Configure
     ./configure --prefix=$INSTDIR \
@@ -68,13 +57,7 @@ From: debian:bullseye-20230320-slim
 %post
     # install netcdf-c
     cd $WORKDIR
-    mkdir -p NetCDF-c
-    cd NetCDF-c
-    LIB_VERSION="4.9.2"
-    LIB_FILE="v${LIB_VERSION}.tar.gz"
-    wget https://github.com/Unidata/netcdf-c/archive/${LIB_FILE}
-    tar xvfz $LIB_FILE
-    cd netcdf-c-${LIB_VERSION}
+    cd NetCDF-c/netcdf-c
     export CPPFLAGS="-I$INSTDIR/include -DpgiFortran"
     export LDFLAGS="-Wl,-rpath,$INSTDIR/lib -L$INSTDIR/lib -lhdf5_hl -lhdf5"
     export LIBS="-lmpi"
@@ -87,13 +70,7 @@ From: debian:bullseye-20230320-slim
 %post
     # Install netcdf-fortran
     cd $WORKDIR
-    mkdir -p NetCDF-fortran
-    cd NetCDF-fortran
-    LIB_VERSION="4.6.0"
-    LIB_FILE="v${LIB_VERSION}.tar.gz"
-    wget https://github.com/Unidata/netcdf-fortran/archive/${LIB_FILE}
-    tar xvfz $LIB_FILE
-    cd netcdf-fortran-${LIB_VERSION}
+    cd NetCDF-fortran/netcdf-fortran
     export LD_LIBRARY_PATH=${NCDIR}/lib:${LD_LIBRARY_PATH}
     export CPPFLAGS="-I$INSTDIR/include -DpgiFortran"
     export LDFLAGS="-Wl,-rpath,$INSTDIR/lib -L$INSTDIR/lib -lnetcdf -lhdf5_hl -lhdf5 -lz -lcurl"
@@ -108,10 +85,7 @@ From: debian:bullseye-20230320-slim
 %post
     # Install xios
     cd $WORKDIR
-    mkdir -p XIOS
-    cd XIOS
-    svn co -r 2481 http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5 xios-2.5
-    cd xios-2.5
+    cd XIOS/xios-2.5
     # arch files
     cp /nemo/config/arch_xios/arch-GCC_LINUX_local.env arch/arch-GCC_LINUX.env
     cp /nemo/config/arch_xios/arch-GCC_LINUX_local.path arch/arch-GCC_LINUX.path
@@ -123,10 +97,7 @@ From: debian:bullseye-20230320-slim
 %post
     # Install nemo
     cd $WORKDIR
-    mkdir -p NEMO
-    cd NEMO
-    svn co https://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/release-4.0 NEMOGCM
-    cd NEMOGCM
+    cd NEMO/NEMOGCM
     cp /nemo/config/arch_nemo/arch-local.fcm arch/arch-local.fcm
     # Create GYRE config
     cd cfgs

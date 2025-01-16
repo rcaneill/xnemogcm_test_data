@@ -1,0 +1,53 @@
+==============================================================
+== HOW TO set up user’s configuration in NEMO version 4.0 : ==
+==============================================================
+This document describes how a configuration is set up in NEMO.
+
+In NEMO 4.0 two types of configurations can be build: global/regional and idealized.
+
+- create ./cfgs/your_config
+- case 1: regional or global 
+    => ln_read_cfg = .true. in ./cfgs/your_config/EXP00/namelist_cfg (i.e. read domain_cfg.nc)
+- case 2: idealized 
+    =>in ./cfgs/your_config/EXP00/namelist_cfg :
+      ln_read_cfg = .false. (need to define usrdef_hgr.F90 and usrdef_zgr.F90) 
+      ln_usr = .true.       (need to define usrdef_sbc.F90)    
+    => copy ./src/OCE/USR in ./cfgs/your_config/MY_SRC routines nedeed to set up domain, forcing fields and initial state
+    
+  Routines in NEMOGCM/NEMO/OCE/USR define analytically the domain, the initial state and the surface boundary conditions for the reference configuration GYRE.
+	  •	usrdef_hgr.F90 and usrdef_zgr.F90 : define horizontal and vertical grid
+	  •	usrdef_sbc.F90    : provides at each time-step the surface boundary condition, i.e. the momentum, heat and freshwater fluxes
+	  •	usrdef_istate.F90 : defines initialization of the dynamics and tracers
+	  •	usrdef_fmask.F90  : used just in ORCA CONFIGURATIONS for alteration of f-point land/ocean mask in some straits 
+	  •	usrdef_closea.F90 : used just in ORCA CONFIGURATIONS for specific treatments associated with closed seas
+	  •	usrdef_nam.F90    : set the domain characteristics of a user configuration
+
+  Other analytical examples are given in ./tests.
+
+===========================================
+== The domain_cfg.nc file must contain : ==
+===========================================
+   int ORCA  , ORCA_index            : configuration name, configuration resolution
+   int jpiglo, jpjglo , jpkglo       : global domain sizes 
+   int jperio                        : lateral global domain b.c. 
+   int ln_zco, ln_zps, ln_sco        : flags for z-coordinate, z-coordinate with partial steps and s-coordinate 
+   int ln_isfcav                     : flag  for ice shelf cavities 
+   double glamt, glamu, glamv, glamf : geographic position 
+   double gphit, gphiu, gphiv, gphif : geographic position
+   double iff, ff_f, ff_t            : Coriolis parameter (if not on the sphere)
+   double e1t, e1u, e1v, e1f         : horizontal scale factors
+   double e2t, e2u, e2v, e2f         : horizontal scale factors
+   double ie1e2u_v, e1e2u, e1e2v     : U and V surfaces (if grid size reduction in some straits)
+   double e3t_1d, e3w_1d             : reference vertical scale factors at T and W points
+   double e3t_0, e3u_0, e3v_0, e3f_0, e3w_0 : vertical scale factors 3D coordinate at T,U,V,F and W points
+   double e3uw_0,e3vw_0              : vertical scale factors 3D coordinate at UW and VW points
+   int bottom_level, top_level       : last wet T-points, 1st wet T-points (for ice shelf cavities)
+
+=======================================
+= HOW TO CREATE domain_cfg.nc file : ==
+=======================================
+Two options are possible :
+
+ - users can create with his own tool the domain_cfg.nc with all mandatory fields.  
+
+ - tool is available in ./tools/DOMAINcfg based on NEMO 3.6 version. See ./tools/DOMAINcfg/README.

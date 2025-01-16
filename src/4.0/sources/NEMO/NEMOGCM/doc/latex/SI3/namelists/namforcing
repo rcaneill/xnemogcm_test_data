@@ -1,0 +1,13 @@
+!------------------------------------------------------------------------------
+&namforcing     !   Ice surface forcing
+!------------------------------------------------------------------------------
+   rn_cio           =   5.0e-03       !  ice-ocean drag coefficient (-)
+   rn_blow_s        =   0.66          !  mesure of snow blowing into the leads
+                                      !     = 1 => no snow blowing, < 1 => some snow blowing
+   nn_flxdist       =  -1             !  Redistribute heat flux over ice categories
+                                      !     =-1  Do nothing (needs N(cat) fluxes)
+                                      !     = 0  Average N(cat) fluxes then apply the average over the N(cat) ice
+                                      !     = 1  Average N(cat) fluxes then redistribute over the N(cat) ice using T-ice and albedo sensitivity
+                                      !     = 2  Redistribute a single flux over categories
+   nice_jules       = 0               !  Jules coupling (0=OFF, 1=EMULATED, 2=ACTIVE)
+/
