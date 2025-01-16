@@ -50,11 +50,11 @@ cd ..
 mkdir -p XIOS
 cd XIOS
 svn co -r 2481 http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/branchs/xios-2.5 xios-2.5
-rm -rf xios-2.5/.svn
+rm -rf $(find . -iname .svn)
 cd ..
 
 mkdir -p NEMO
 cd NEMO
 svn co https://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/release-4.0 NEMOGCM
-rm -rf NEMOGCM/.svn
+rm -rf $(find . -iname .svn)
 cd ..
