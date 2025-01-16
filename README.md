@@ -11,3 +11,7 @@ To build the containers, and run nemo, run in a shell
 ```shell
 make all
 ```
+To verify the signature of the containers from the release, run with the proper container file:
+```shell
+apptainer verify container.sif
+```
