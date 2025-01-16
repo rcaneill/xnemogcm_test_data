@@ -1,1 +1,0 @@
-DECLARE_ENUM4(operation, min, max, sum, average)

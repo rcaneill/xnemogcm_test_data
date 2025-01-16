@@ -1,5 +1,0 @@
-namespace sphereRemap {
-
-double cputime();
-
-}

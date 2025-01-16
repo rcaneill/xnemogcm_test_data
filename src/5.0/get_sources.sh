@@ -50,10 +50,11 @@ cd ..
 mkdir -p XIOS
 cd XIOS
 svn co -r 2701 http://forge.ipsl.fr/ioserver/svn/XIOS/trunk xios-trunk
+rm -rf $(find . -iname .svn)
 cd ..
 
 mkdir -p NEMO
 cd NEMO
 git clone --branch 5.0 https://forge.nemo-ocean.eu/nemo/nemo.git NEMOGCM
-rm -rf NEMOGCM/tools
+rm -rf NEMOGCM/.git
 cd ..
