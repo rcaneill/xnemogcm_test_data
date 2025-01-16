@@ -9,7 +9,8 @@ From: debian:bullseye-20230320-slim
 %post
     # install what is needed
     apt -y update
-    apt -y install openmpi-bin libmpich-dev libopenmpi-dev gcc g++ gfortran libcurl4-openssl-dev make m4 liburi-perl libxml2-dev
+    # ssh needed by openmpi
+    apt -y install openmpi-bin libmpich-dev libopenmpi-dev gcc g++ gfortran libcurl4-openssl-dev make m4 liburi-perl libxml2-dev ssh
     # Create some environment variables
     # directories
     export WORKDIR=/nemo/sources

@@ -12,7 +12,8 @@ From: debian:stretch-20220622-slim
     echo "deb http://archive.debian.org/debian/ stretch main non-free contrib" > /etc/apt/sources.list
     echo "deb http://archive.debian.org/debian-security/ stretch/updates main non-free contrib" >> /etc/apt/sources
     apt -y update
-    apt -y install openmpi-bin libmpich-dev libopenmpi-dev gcc g++ gfortran libcurl4-openssl-dev make m4 liburi-perl
+    # ssh needed by openmpy, weird but necessary
+    apt -y install openmpi-bin libmpich-dev libopenmpi-dev gcc g++ gfortran libcurl4-openssl-dev make m4 liburi-perl ssh
     # Create some environment variables
     # directories
     export WORKDIR=/nemo/sources
