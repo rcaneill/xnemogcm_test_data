@@ -58,3 +58,5 @@ cd NEMO
 svn co https://forge.ipsl.jussieu.fr/nemo/svn/NEMO/releases/release-4.0 NEMOGCM
 rm -rf $(find . -iname .svn)
 cd ..
+
+rm $(find . -xtype l)

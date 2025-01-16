@@ -57,6 +57,6 @@ mkdir -p NEMO
 cd NEMO
 git clone --branch 4.2.0 https://forge.nemo-ocean.eu/nemo/nemo.git NEMOGCM
 rm -rf NEMOGCM/.git
-rm -rf NEMOGCM/doc/latex/SI3/figures/albedo_cloud_correction.eps
-rm -rf NEMOGCM/doc/latex/NEMO/main/blocks.idx
 cd ..
+
+rm $(find . -xtype l)
