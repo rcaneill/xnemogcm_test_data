@@ -1,4 +1,0 @@
-/*  GLOBAL   */
-DECLARE_ATTRIBUTE(StdString, type)
-DECLARE_ATTRIBUTE(int, order)
-DECLARE_ATTRIBUTE(StdString, coordinate)
