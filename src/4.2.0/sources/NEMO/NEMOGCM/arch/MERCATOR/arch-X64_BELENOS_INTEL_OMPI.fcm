@@ -1,0 +1,64 @@
+# compiler options for BELENOS/TARANIS (using INTEL compiler)
+#
+# INTEL_OMPI (XIOS-2.5)
+# intel/2018.5.274 openmpi/intel/4.0.2.2 hdf5-1.8.18-ompi netcdf-4.7.1-ompi_V2 xios-2.5_rev1903-ompi
+#
+# INTEL_MVAPICH2 (XIOS-2.5)
+# intel/2018.5.274 mvapich2-2.3.5 hdf5-1.8.18-mvapich2 netcdf-4.7.1-mvapich2 xios-2.5_rev1903-mvapich2
+#
+#
+# NCDF_INC    netcdf4 include file
+# NCDF_LIB    netcdf4 library
+# XIOS_INC    xios include file    (taken into accound only if key_xios is activated)
+# XIOS_LIB    xios library         (taken into accound only if key_xios is activated)
+# OASIS_INC   oasis include file   (taken into accound only if key_oasis3 is activated)
+# OASIS_LIB   oasis library        (taken into accound only if key_oasis3 is activated)
+#
+# FC          Fortran compiler command
+# FCFLAGS     Fortran compiler flags
+# FFLAGS      Fortran 77 compiler flags
+# LD          linker
+# LDFLAGS     linker flags, e.g. -L<lib dir> if you have libraries
+# FPPFLAGS    pre-processing flags
+# AR          assembler
+# ARFLAGS     assembler flags
+# MK          make
+# USER_INC    complete list of include files
+# USER_LIB    complete list of libraries to pass to the linker
+# CC          C compiler used to compile conv for AGRIF
+# CFLAGS      compiler flags used with CC
+#
+# Note that:
+#  - unix variables "$..." are accpeted and will be evaluated before calling fcm.
+#  - fcm variables are starting with a % (and not a $)
+#
+#---------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------
+# All NETCDF and HDF paths are empty as they are automatically defined through environment
+# variables by the load of modules
+#---------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------
+#
+#
+%NCDF_INC            -I${NETCDF_INC}
+%NCDF_LIB            -L${NETCDF_LIB} -lnetcdff -lnetcdf -L${PHDF5_LIB_DIR} -lhdf5_hl -lhdf5
+%XIOS_INC            -I${XIOS_INC}
+%XIOS_LIB            -L${XIOS_LIB} -lxios -lstdc++
+%OASIS_INC           -I${OASIS_DIR}/build/lib/mct -I${OASIS_DIR}/build/lib/psmile.MPI1
+%OASIS_LIB           -L${OASIS_DIR}/lib -lpsmile.MPI1 -lmct -lmpeu -lscrip
+
+%CPP                 cpp
+%FC                  mpifort -c -cpp
+%FCFLAGS             -march=core-avx2 -i4 -r8 -O3 -fp-model strict -fno-alias -align array64byte
+%FFLAGS              %FCFLAGS
+%LD                  mpifort
+%LDFLAGS             
+%FPPFLAGS            -P -traditional
+%AR                  ar
+%ARFLAGS             rs
+%MK                  gmake
+%USER_INC            %XIOS_INC %OASIS_INC %NCDF_INC
+%USER_LIB            %XIOS_LIB %OASIS_LIB %NCDF_LIB
+
+%CC                  mpicc
+%CFLAGS              -O0

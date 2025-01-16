@@ -1,0 +1,123 @@
+<?xml version="1.0"?>
+
+<!-- WARNING: THIS XML FILE IS FOR THE DEPRECATED XMLIO SERVER: IT WILL NOT WORK WITH XIOS! -->
+
+<simulation> 
+  
+  <context id="nemo">
+
+    <!-- $id$ -->
+ 
+    <!-- 
+============================================================================================================
+=                                  definition of all existing variables                                    =
+=                                            DO NOT CHANGE                                                 =
+============================================================================================================
+    -->
+
+  <field_definition level="1" prec="4" operation="ave(X)" enabled=".TRUE."> <!-- time step automaticaly defined -->
+ 
+      <!-- ptrc on T grid -->
+ 
+     <group id="ptrc_T" axis_ref="deptht" grid_ref="grid_T">
+       <field id="CFC11"    description="CFC-11 Concentration"                     unit="umol/L" />
+       <field id="C14B"     description="Bomb C14 Concentration"                   unit="ration" />
+     </group>
+
+      <!-- diad on T grid : variables available with key_diatrc -->
+
+     <group id="diad_T" axis_ref="none" grid_ref="grid_T">
+       <field id="qtr_c11"     description="Air-sea flux of CFC-11"                   unit="mol/m2/s"     />
+       <field id="qint_c11"    description="Cumulative air-sea flux of CFC-11"        unit="mol/m2"     />
+       <field id="qtr_c14"     description="Air-sea flux of Bomb C14"                 unit="mol/m2/s"     />
+       <field id="qint_c14"    description="Cumulative air-sea flux of Bomb C14"      unit="mol/m2"     />
+       <field id="decay"       description="Radiactive decay of Bomb C14"             unit="mol/m3"  axis_ref="deptht"  />
+     </group>         
+
+      <!-- scalar -->
+      
+      <group id="scalar" axis_ref="none" grid_ref="scalarpoint" zoom_ref="1point" >
+      </group>
+
+  </field_definition>
+
+    <!-- 
+============================================================================================================
+=                                           output files definition                                        =
+=                                            Define your own files                                         =
+=                                         put the variables you want...                                    =
+============================================================================================================
+    -->
+
+  <file_definition output_level="10" enabled=".TRUE.">
+   
+      <group id="1d" output_freq="86400"  output_level="10" enabled=".TRUE.">                      <!-- 1d files -->
+      </group>
+
+      <group id="5d" output_freq="432000" output_level="10" enabled=".TRUE.">                      <!-- 5d files -->
+      </group>
+ 
+      <group id="1m" output_freq="-1"     output_level="10" enabled=".TRUE.">                      <!-- real monthly files -->
+
+        <file id="1m_ptrc_T" name="auto" description="pisces sms variables" >
+          <field ref="CFC11"      />
+          <field ref="C14B"      />
+          <field ref="qint_c11"     />
+          <field ref="qint_c14"     />
+       </file>
+      </group>
+
+      <group id="2m" output_freq="-2"     output_level="10" enabled=".TRUE.">                      <!-- real 2m files -->
+      </group>
+
+      <group id="3m" output_freq="-3"     output_level="10" enabled=".TRUE.">                      <!-- real 3m files -->
+      </group>
+
+      <group id="4m" output_freq="-4"     output_level="10" enabled=".TRUE.">                      <!-- real 4m files -->
+      </group>
+
+      <group id="6m" output_freq="-6"     output_level="10" enabled=".TRUE.">                      <!-- real 6m files -->
+      </group>
+
+      <group id="1y" output_freq="-12"    output_level="10" enabled=".TRUE.">                      <!-- real yearly files -->
+      </group>
+
+      <group id="2y"  output_freq="-24"   output_level="10" enabled=".TRUE.">                      <!-- real 2y files -->
+      </group>
+
+      <group id="5y"  output_freq="-60"   output_level="10" enabled=".TRUE.">                      <!-- real 5y files -->
+      </group>
+
+      <group id="10y" output_freq="-120"  output_level="10" enabled=".TRUE.">                      <!-- real 10y files -->
+      </group>
+    
+  </file_definition>
+
+    <!-- 
+============================================================================================================
+=                                           grid definition                                                =
+=                                            DO NOT CHANGE                                                 =
+============================================================================================================
+    -->
+
+  <axis_definition>  
+     <axis id="deptht" description="Vertical T levels" unit="m" positive=".false." />
+     <axis id="depthu" description="Vertical U levels" unit="m" positive=".false." />
+     <axis id="depthv" description="Vertical V levels" unit="m" positive=".false." />
+     <axis id="depthw" description="Vertical W levels" unit="m" positive=".false." />
+     <axis id="none" description="axe non defini" unit="none" size="1" />
+  </axis_definition> 
+
+  <grid_definition>
+    <grid id="grid_T" description="grid T" />
+    <grid id="grid_U" description="grid U" />
+    <grid id="grid_V" description="grid V" />
+    <grid id="grid_W" description="grid W" />
+    <grid id="scalarpoint" description="scalar" >
+      <zoom id="1point" ibegin="1" jbegin="1" ni="1" nj="1" />
+    </grid>
+  </grid_definition>
+
+</context>
+
+</simulation>

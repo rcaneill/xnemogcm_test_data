@@ -1,0 +1,21 @@
+<!-- Context atm -->
+
+<context id="atmosphere">
+
+  <field_definition freq_op="1ts" enabled=".TRUE." operation="instant" >
+   <field id="temp" name="temp" long_name="Surface Temperature" unit="K" domain_ref="face" />
+  </field_definition>
+
+  <file_definition type="one_file" output_freq="1h" par_access="collective" enabled=".TRUE.">
+    <file id="output_cube_CF" name="output_cube_CF" >
+      <field field_ref="temp"/>
+    </file> 
+    <file id="output_cube_UGRID" name="output_cube_UGRID" convention="UGRID">
+      <field field_ref="temp"/>
+   </file>
+ </file_definition>
+
+  <domain_definition>
+   <domain id="face" name="mesh" nvertex="4"/>  
+ </domain_definition>
+ </context>

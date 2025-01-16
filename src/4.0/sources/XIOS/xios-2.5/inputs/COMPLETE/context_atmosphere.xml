@@ -1,0 +1,45 @@
+<!-- Context atm -->
+
+<context id="atmosphere">
+
+  <field_definition level="1" enabled=".FALSE." default_value="9.96921e+36">
+    <field id="field_A_atm"  name="field_A_atm_origin" operation="average" freq_op="1ts" grid_ref="grid_A_atm" />
+    <field id="field_A_atm_zoom"  name="field_A_atm" operation="average" freq_op="1ts" field_ref="field_A_atm" grid_ref="grid_A_atm_zoom" />
+  </field_definition>
+
+  <file_definition type="multiple_file" par_access="collective" output_freq="6h" sync_freq="6h" output_level="10" enabled=".TRUE.">
+    <file id="output_atmosphere" name="output_atmosphere">
+      <field field_ref="field_A_atm" />
+    </file>
+    <file id="output_atmosphere_zoom" name="output_atmosphere_zoom">
+      <field field_ref="field_A_atm_zoom" name="field_A_atm_zoom" />
+    </file>
+  </file_definition>
+
+  <axis_definition>
+    <axis id="axis_atm"/>
+    <axis id="axis_atm_zoom" axis_ref="axis_atm">
+      <zoom_axis id="axis_atm_zoom" n="4"/>
+    </axis>
+  </axis_definition>
+
+  <domain_definition>
+    <domain id="domain_atm" />
+    <domain id="domain_atm_zoom" domain_ref="domain_atm">
+      <zoom_domain id="domain_atm_zoom" />
+    </domain>
+  </domain_definition>
+
+  <grid_definition>
+   <grid id="grid_A_atm">
+     <domain domain_ref="domain_atm" />
+     <axis axis_ref="axis_atm" />
+   </grid>
+   <grid id="grid_A_atm_zoom">
+     <domain domain_ref="domain_atm_zoom" />
+     <axis axis_ref="axis_atm_zoom" />
+   </grid>
+  </grid_definition>
+
+
+</context>

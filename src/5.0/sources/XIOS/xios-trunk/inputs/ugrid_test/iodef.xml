@@ -1,0 +1,55 @@
+<?xml version="1.0"?>
+<simulation>
+
+ <context id="client">
+   <calendar type="Gregorian" start_date="2012-03-01 15:00:00" />
+
+
+   <field_definition>
+     <field id="field_cell"  operation="once" domain_ref="cells" />
+     <field id="field_edge"  operation="once" domain_ref="edges" />
+     <field id="field_node"  operation="once" domain_ref="nodes" />
+   </field_definition>
+
+
+   <file_definition type="one_file" convention="UGRID">
+     <file id="test_ugrid" name="output" output_freq="4h" enabled=".TRUE." >
+       <field field_ref="field_node" enabled="false"/>
+       <field field_ref="field_edge" enabled="false"/>
+       <field field_ref="field_cell" enabled="true"/>
+     </file>
+   </file_definition>
+
+
+   <domain_definition>
+     <domain id="cells" name="cube"/>
+     <domain id="edges" name="cube"/>
+     <domain id="nodes" name="cube"/>
+   </domain_definition>
+
+  </context>
+
+
+
+  <context id="xios">
+      <variable_definition>
+         <variable_group id="server">
+            <variable id="using_server2" type="bool">false</variable>
+            <variable id="ratio_server2" type="int">50</variable>
+         </variable_group>
+
+        <variable_group id="buffer">
+            <variable id="optimal_buffer_size" type="string">performance</variable>
+            <variable id="buffer_size_factor" type="double">10.0</variable>
+         </variable_group>
+
+        <variable_group id="parameters" >
+          <variable id="using_server" type="bool">false</variable>
+          <variable id="info_level" type="int">80</variable>
+          <variable id="print_file" type="bool">true</variable>
+        </variable_group>
+      </variable_definition>
+  </context>
+
+</simulation>
+

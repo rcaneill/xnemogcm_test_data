@@ -1,0 +1,208 @@
+\documentclass[../main/TOP_manual]{subfiles}
+
+\begin{document}
+
+\chapter{ Model Setup}
+
+The usage of TOP is activated i) by including in the configuration definition the component TOP and ii) by adding the macro key\_top in the configuration CPP file (see for more details “Learn more about the model”).
+As an example, the user can refer to already available configurations in the code, ORCA2\_ICE\_PISCES being the NEMO biogeochemical demonstrator and GYRE\_BFM to see the required configuration elements to couple with an external biogeochemical model (see also Section 4).\\
+Note that, since version 4.0, TOP interface core functionalities are activated by means of logical keys and all submodules preprocessing macros from previous versions were removed.\\
+
+Below is the list of preprocessing keys that apply to the TOP interface (beside key\_top):
+\begin{itemize}
+	\item key\_xios use XIOS I/O
+	\item key\_agrif enables AGRIF coupling
+	\item key\_trdtrc and key\_trdmxl\_trc trend computation for tracers
+\end{itemize}
+
+There are only two entry points in the NEMOGCM model for passive tracers :
+\begin{itemize}
+	\item initialization (trcini) : general initialization of global variables and parameters of BGCM
+	\item time-stepping (trcstp) : time-evolution of SMS first, then time evolution of tracers by transport
+\end{itemize}
+
+\section{ Setting up a passive tracer configuration}
+%------------------------------------------namtrc_int----------------------------------------------------
+\nlst{namtrc}
+%--------------------------------------------------------------------------------------------------------
+
+As a reminder, the revisited structure of TOP interface now counts for five different modules handled in namelist\_top :
+
+\begin{itemize}
+        \item \textbf{PISCES}, default BGC model
+        \item \textbf{MY\_TRC}, template for creation of new modules couplings (see section 3.2) or user defined passive tracer dynamics
+        \item \textbf{CFC}, inert tracers dynamics (CFC$_{11}$,CFC$_{12}$,SF$_{6}$) updated based on OMIP-BGC guidelines (Orr et al, 2016)
+        \item \textbf{C14}, radiocarbon passive tracer
+        \item \textbf{AGE}, water age tracking
+\end{itemize}
+
+For inert, C14, and Age tracers, all variables settings (\textit{sn\_tracer} definitions) are hard-coded in \textit{trc\_nam\_*} routines. For instance, for Age tracer:
+%------------------------------------------namtrc_int----------------------------------------------------
+\nlstlocal{nam_trc_age}
+%--------------------------------------------------------------------------------------------------------
+
+The modular approach was also implemented in the definition of the total number of passive tracers (jptra) which is specified by the user in \textit{namtrc}.
+
+\section{ TOP Tracer Initialization}
+
+Two main types of data structure are used within TOP interface to initialize tracer properties and to provide related initial and boundary conditions. 
+In addition to providing name and metadata for tracers, the use of initial and boundary conditions is also defined here (\textit{sn\_tracer}).
+The data structure is internally initialized by the code with dummy names and all initialization/forcing logical fields are set to \textit{false} .
+Below are listed some features/options of the TOP interface accessible through the \textit{namelist\_top\_ref} and modifiable by means of \textit{namelist\_top\_cfg} (as for NEMO physical ones).
+
+There are three options to initialize TOP tracers in the \textit{namelist\_top } file: (1) initialization to hard-coded constant values when \textit{ln\_trcdta} at \textit{false}, (2) initialization from files when \textit{ln\_trcdta} at \textit{true}, and (3) initialisation from restart files by setting \textit{ln\_rsttr} to \textit{true} in \textit{namelist}.
+
+In the following, an example of the full structure definition is given for four tracers (DIC, Fe, NO$_{3}$, PHY) with initial conditions and different surface boundary and coastal forcings for DIC, Fe, and NO$_{3}$: 
+
+%------------------------------------------namtrc_int----------------------------------------------------
+\nlstlocal{namtrc_cfg}
+%--------------------------------------------------------------------------------------------------------
+
+You have to activate which tracers (\textit{sn\_tracer}) you want to initialize by setting them to \texttt{true} in the  column. 
+
+\nlstlocal{namtrc_dta_cfg}
+
+In \textit{namtrc\_dta}, you prescribe from which files the tracer are initialized (\textit{sn\_trcdta}). 
+A multiplicative factor can also be set for each tracer (\textit{rn\_trfac}). 
+
+
+\section{ TOP Boundaries Conditions}
+
+\subsection{Surface and lateral boundaries}
+
+Lateral and surface boundary conditions for passive tracers are prescribed in \textit{namtrc\_bc} as well as whether temporal interpolation of these files is enabled. Here we show the cases of Fe and NO$_{3}$ from dust and rivers with different output frequencies.
+ 
+%------------------------------------------namtrc_bc----------------------------------------------------
+\nlstlocal{namtrc_bc_cfg}
+%---------------------------------------------------------------------------------------------------------
+
+\subsection{Antarctic Ice Sheet tracer supply}
+
+As a reminder, the supply of passive tracers from the AIS is currently implemented only for dissolved Fe. The activation of this Fe source is done by setting \textit{ln\_trcais} to \textit{true} and by adding the Fe tracer (\textit{sn\_tracer(2) = .true.}) in the 'ais' column in \textit{\&namtrc} (see section 2.2). \\
+
+As the external source of Fe from the AIS is represented by associating  a sedimentary Fe content (with a solubility fraction) to the freshwater fluxes of icebergs and ice shelves, these fluxes have to be activated in \textit{namelist\_cfg}. The reading of the freshwater flux file from ice shelves is activated in \textit{namisf} with the namelist parameter \textit{ln\_isf} set to \textit{true}.
+
+You have to choose between two options depending whether the cavities under ice shelves are open or not in your grid configuration:
+\begin{itemize}
+	\item ln\_isfcav\_mlt = .false. (resolved cavities)
+	\item ln\_isfpar\_mlt = .true. (parameterized distribution for unopened cavities)
+\end{itemize}
+
+%------------------------------------------namisf----------------------------------------------------
+\nlstlocal{namisf_cfg_eORCA1}
+%-----------------------------------------------------------------------------------------------------
+
+Runoff from icebergs is activated by setting \textit{ln\_rnf\_icb} to \textit{true} in the \textit{\&namsbc\_rnf} section of \textit{namelist\_cfg}.
+
+%------------------------------------------namsbc_rnf--------------------------------------------------
+\nlstlocal{namsbc_rnf_cfg_eORCA1}
+%---------------------------------------------------------------------------------------------------------
+
+The freshwater flux from ice shelves and icebergs is based on observations and modeled climatologies and is available for eORCA1 and eORCA025 grids :
+\begin{itemize}
+	\item runoff-icb\_DaiTrenberth\_Depoorter\_eORCA1\_JD.nc
+	\item runoff-icb\_DaiTrenberth\_Depoorter\_eORCA025\_JD.nc 
+\end{itemize}
+
+%------------------------------------------namtrc_ais----------------------------------------------------
+\nlstlocal{namtrc_ais_cfg}
+%---------------------------------------------------------------------------------------------------------
+
+Two options for tracer concentrations in iceberg and ice shelf can be set with the namelist parameter \textit{nn\_ais\_tr}:
+\begin{itemize}
+	\item 0 : null concentrations corresponding to dilution of BGC tracers due to freshwater fluxes from icebergs and ice shelves
+	\item 1 : prescribed concentrations set with the \textit{rn\_trafac} factor
+\end{itemize}
+
+The depth until which Fe from melting iceberg is delivered can be set with the namelist parameter \textit{rn\_icbdep}. The value of 120 m is the average underwater depth of the different iceberg size classes modeled by the NEMO iceberg module, which was used to produce the freshwater flux climatology of icebergs.
+
+\section{Coupling an external BGC model using NEMO framework}
+
+The coupling with an external BGC model through the NEMO compilation framework can be achieved in different ways according to the degree of coding complexity of the Biogeochemical model, like e.g., the whole code is made only by one file or it has multiple modules and interfaces spread across several subfolders.\\ \\
+Beside the 6 core files of MY\_TRC module, see (see \label{Mytrc}, let's assume an external BGC model named \textit{"MYBGC"} and constituted by a rather essential coding structure, likely few Fortran files. The new coupled configuration name is NEMO\_MYBGC. \\ \\
+The best solution is to have all files (the modified MY\_TRC routines and the BGC model ones) placed in a unique folder with root \path{<MYBGCPATH>} and to use the \textit{makenemo} external readdressing of MY\_SRC folder. \\ \\
+Before compiling the code it is necessary to create the new configuration folder
+
+\begin{minted}{bash}
+    $[nemo-code-root]> mkdir cfgs/NEMO_MYBGC
+\end{minted}
+
+and add in it the configuration file cpp\_MYBGC.fcm whose content will be
+
+\begin{minted}{bash}
+    bld::tool::fppkeys   key_xios key_top
+\end{minted}
+
+The compilation with \textit{makenemo} will be executed through the following syntax, by including OCE and TOP components
+
+\begin{minted}{bash}
+    $[nemo-code-root]> ./makenemo -r GYRE_PISCES -n NEMO_MYBGC -d "OCE TOP" -m <arch_my_machine> -j 8 -e <MYBGCPATH>
+\end{minted}
+
+The makenemo feature \textit{-e} was introduced to readdress at compilation time the standard MY\_SRC folder (usually found in NEMO configurations) with a user defined external one.
+After the compilation, the coupled configuration will be listed in \textbf{work\_cfg.txt} and it will look like
+
+\begin{minted}{bash}
+    NEMO_MYBGC OCE TOP
+\end{minted}
+
+The compilation of more articulated BGC model code \& infrastructure, like in the case of BFM \citep{bfm_nemo_coupling}, requires some additional features. \\
+
+As before, let's assume a coupled configuration name NEMO\_MYBGC, but in this case MYBGC model root becomes <MYBGCPATH> that contains 4 different subfolders for biogeochemistry, named initialization, pelagic, and benthic, and a separate one named nemo\_coupling including the modified MY\_SRC routines. The latter folder containing the modified NEMO coupling interface will be still linked using the makenemo \textit{-e} option. \\
+
+In order to include the BGC model subfolders in the compilation of NEMO code, it will be necessary to extend the configuration \textit{cpp\_NEMO\_MYBGC.fcm} file to include the specific paths of MYBGC folders, as in the following example
+
+\begin{minted}{bash}
+   bld::tool::fppkeys   key_xios key_top
+
+   src::MYBGC::initialization         <MYBGCPATH>/initialization
+   src::MYBGC::pelagic                <MYBGCPATH>/pelagic
+   src::MYBGC::benthic                <MYBGCPATH>/benthic
+
+   bld::pp::MYBGC      1
+   bld::tool::fppflags::MYBGC   \%FPPFLAGS
+   bld::tool::fppkeys                  \%bld::tool::fppkeys MYBGC_MACROS
+\end{minted}
+
+where MYBGC\_MACROS is the space delimited list of macros used in MYBGC model for selecting/excluding specific parts of the code. The BGC model code will be preprocessed in the configuration BLD folder as for NEMO, but with an independent path, like NEMO\_MYBGC/BLD/MYBGC/<subfolders>.\\
+
+The compilation of more articulated BGC model code \& infrastructure, like in the case of BFM \citep{bfm_nemo_coupling}, requires some additional features. \\
+
+As before, let's assume a coupled configuration name NEMO\_MYBGC, but in this case MYBGC model root becomes <MYBGCPATH> that contains 4 different subfolders for biogeochemistry, named initialization, pelagic, and benthic, and a separate one named nemo\_coupling including the modified MY\_SRC routines. The latter folder containing the modified NEMO coupling interface will be still linked using the makenemo \textit{-e} option. \\
+
+In order to include the BGC model subfolders in the compilation of NEMO code, it will be necessary to extend the configuration \textit{cpp\_NEMO\_MYBGC.fcm} file to include the specific paths of MYBGC folders, as in the following example
+
+\begin{minted}{bash}
+   bld::tool::fppkeys   key_xios key_top
+
+   src::MYBGC::initialization         <MYBGCPATH>/initialization
+   src::MYBGC::pelagic                <MYBGCPATH>/pelagic
+   src::MYBGC::benthic                <MYBGCPATH>/benthic
+
+   bld::pp::MYBGC      1
+   bld::tool::fppflags::MYBGC   \%FPPFLAGS
+   bld::tool::fppkeys                  \%bld::tool::fppkeys MYBGC_MACROS
+\end{minted}
+
+where MYBGC\_MACROS is the space delimited list of macros used in MYBGC model for selecting/excluding specific parts of the code. The BGC model code will be preprocessed in the configuration BLD folder as for NEMO, but with an independent path, like NEMO\_MYBGC/BLD/MYBGC/<subfolders>.\\
+
+The compilation will be performed similarly to in the previous case with the following
+
+\begin{minted}{bash}
+makenemo -r NEMO_MYBGC -m <arch_my_machine> -j 8 -e <MYBGCPATH>/nemo_coupling
+\end{minted}
+
+Note that, the additional lines specific for the BGC model source and build paths, can be written into a separate file, e.g. named MYBGC.fcm, and then simply included in the cpp\_NEMO\_MYBGC.fcm as follow:
+
+\begin{minted}{bash}
+bld::tool::fppkeys  key_zdftke key_dynspg_ts key_xios key_top
+inc <MYBGCPATH>/MYBGC.fcm
+\end{minted}
+
+This will enable a more portable compilation structure for all MYBGC related configurations.
+
+Important: the coupling interface contained in nemo\_coupling cannot be added using the FCM syntax, as the same files already exists in NEMO and they are overridden only with the readdressing of MY\_SRC contents to avoid compilation conflicts due to duplicate routines.
+
+All modifications illustrated above, can be easily implemented using shell or python scripting to edit the NEMO configuration cpp.fcm file and to create the BGC model specific FCM compilation file with code paths.
+
+\end{document}

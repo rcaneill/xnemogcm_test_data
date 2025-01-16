@@ -1,0 +1,8 @@
+CTestConfig.cmake
+build*
+\#.\#
+*.*~
+html
+*.o
+*.tmp
+*.tmp2

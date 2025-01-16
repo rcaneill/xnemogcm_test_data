@@ -1,0 +1,10 @@
+!------------------------------------------------------------------------------
+&namthd_pnd     !   Melt ponds
+!------------------------------------------------------------------------------
+   ln_pnd_H12       = .false.         !  activate evolutive melt ponds (from Holland et al 2012)
+      ln_pnd_fwb    = .false.         !     melt ponds store freshwater or not
+   ln_pnd_CST       = .false.         !  activate constant melt ponds
+      rn_apnd       =   0.2           !     prescribed pond fraction, at Tsu=0
+      rn_hpnd       =   0.05          !     prescribed pond depth, at Tsu=0
+   ln_pnd_alb       = .false.         !  melt ponds affect albedo or not
+/

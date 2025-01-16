@@ -1,0 +1,129 @@
+%% ==============================================================================
+%% NEMO_book.tex: build the NEMO Reference Manual
+%% ==============================================================================
+
+
+%% Run ../build_NEMO_manual.sh to generate the PDF version (with pdflatex)
+
+%% Document layout
+%% ==============================================================================
+
+\documentclass[a4paper, 11pt]{book}
+
+
+%% Preamble
+%% ==============================================================================
+
+\usepackage{../../tex_main/NEMO_manual}
+\usepackage{../../tex_sub/NEMO_minted}
+
+\usepackage{bm}
+
+\makeindex
+
+
+%% 
+%% ==============================================================================
+
+\begin{document}
+
+
+%% Frontmatter
+%% ==============================================================================
+
+%% Frontpage
+
+\title{
+\vspace{1.5cm}
+\rule{400pt}{1.5pt} \\
+\vspace{0.45cm}
+ {\Huge SI$^3$ \\}
+ {\Large -- Sea Ice modelling Integrated Initiative --}\\
+ {\Large The NEMO Sea Ice engine}\\ 
+\date{\today}
+\author{The NEMO Sea Ice Working Group \\
+\\
+\small \textit{Note du P\^ole de mod\'elisation de l'Institut Pierre-Simon Laplace No 31} \\
+\small \textcolor{red}{First draft documentation. Needs completion and rewriting}. \\
+\\
+ISSN No 1288-1619\\
+}
+\rule{400pt}{1.5pt}
+}
+
+\maketitle						% generate the title
+
+\frontmatter
+
+%% ToC i.e. Table of Contents
+
+\dominitoc
+\tableofcontents
+
+
+%% Mainmatter
+%% ==============================================================================
+
+\mainmatter
+
+\subfile{../tex_sub/todolist}
+
+%% Abstract - Foreword
+
+\subfile{../tex_sub/abstract_foreword}
+
+% Introduction
+
+\subfile{../tex_sub/introduction}
+
+% Chapters
+
+\subfile{../tex_sub/chap_model_basics}
+
+\subfile{../tex_sub/chap_domain}
+
+\subfile{../tex_sub/chap_dynamics}
+
+\subfile{../tex_sub/chap_transport}
+
+\subfile{../tex_sub/chap_ridging_rafting}
+
+\subfile{../tex_sub/chap_radiative_transfer}
+
+\subfile{../tex_sub/chap_thermo}
+
+\subfile{../tex_sub/chap_interfaces}
+
+\subfile{../tex_sub/chap_output_diagnostics}
+
+\subfile{../tex_sub/chap_single_category_use}
+
+\subfile{../tex_sub/chap_bdy_agrif}
+
+\subfile{../tex_sub/chap_miscellaneous}
+
+%% Appendix
+
+%\appendix
+%% Backmatter
+%% ==============================================================================
+
+\backmatter
+
+%% Bibliography
+
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{Bibliography}
+
+\bibliography{../tex_main/SI3_manual.bbl}
+%\bibliography{/Users/ioulianikolskaia/Boulot/LIBRARY/BIBTEX/Martin_biblio.bib} 
+
+%% Index
+
+\cleardoublepage
+\phantomsection
+\addcontentsline{toc}{chapter}{Index}
+\printindex
+
+\end{document}

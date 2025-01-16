@@ -1,0 +1,60 @@
+<!-- Context surface -->
+
+<context id="surface">
+
+  <field_definition level="1" enabled=".TRUE." domain_ref="domain_srf"  axis_ref="axis_srf" operation="average" freq_op="1ts" default_value="9.96921e+36" prec="4">
+    <field id="field_A_srf"  name="field_A_srf" long_name="Champ en degC" operation="average" unit="degC" />
+    <field id="field_A_srf_2" field_ref="field_A_srf" />
+    <field id="field_A_srf_K" name="field_A_srf_K" field_ref="field_A_srf" long_name="Champ en degK" unit="degK"> field_A_srf + 273.15 </field>
+    <field id="field_A_srf_K_2" field_ref="field_A_srf_K" />
+    <field id="field_A_srf_max" name="field_A_srf_max" field_ref="field_A_srf" long_name="maximum field_A_srf" operation="maximum" />
+    <field id="field_D_srf" name="field_D_srf" long_name="Somme champ A et C"> field_A_srf + field_C_srf </field>
+  </field_definition>
+
+  <file_definition type="multiple_file" par_access="collective" output_level="10" enabled=".TRUE.">
+    <file id="output_surface" name="output_surface_6h" output_freq="6h">
+      <field field_ref="field_A_srf">
+        <variable id="my_attribute1" type="string">surf_att</variable>
+        <variable id="my_attribute2" type="int"> 10 </variable>
+        <variable id="my_attribute3" type="float">6.8</variable>
+        <variable id="my_attribute5" type="double">100.201</variable>
+      </field>
+      <field field_ref="field_A_srf_K" />
+      <field field_ref="field_A_srf_K_2" name="field_A_srf_K_2" /> <!-- Should be identical to field_A_srf_K -->
+      <field field_ref="field_A_srf_K" name="field_A_srf_K_3">field_A_srf_K</field> <!-- Should be identical to field_A_srf_K -->
+      <field field_ref="field_A_srf_K_2" name="field_A_srf_K_max_mean" long_name="Maximum of hourly average over 6h" operation="maximum" freq_op="1h"> @field_A_srf_K </field>
+      <field field_ref="field_A_srf" name="field_A_srf_min" operation="minimum" />
+      <field field_ref="field_A_srf_2" name="field_A_srf_min_2" operation="minimum" /> <!-- Should be identical to field_A_srf_min -->
+      <field field_ref="field_A_srf" name="field_A_srf_max" operation="maximum" />
+      <field field_ref="field_A_srf" name="field_A_srf_prec4" prec="8" />
+      <field field_ref="field_A_srf_max" name="field_A_srf_mean_max" long_name="Average of hourly maximum over 6h" operation="average" freq_op="1h"> @field_A_srf_max </field>
+      <variable id="my_global_attribute" type="string">file_6h</variable>
+    </file>
+
+    <file type="one_file" id="output_surface_1d" name="output_surface_1d" output_freq="1d" enabled="TRUE">
+      <field field_ref="field_A_srf" indexed_output="TRUE">
+        <variable id="my_attribute1" type="string">surf_att</variable>
+        <variable id="my_attribute2" type="int">10</variable>
+        <variable id="my_attribute3" type="float">6.8</variable>
+        <variable id="my_attribute4" type="double">100.201</variable>
+      </field>
+      <field field_ref="field_A_srf_K" />
+      <field field_ref="field_A_srf" name="field_A_srf_min" operation="minimum" />
+      <field field_ref="field_A_srf" name="field_A_srf_max" operation="maximum" />
+      <field field_ref="field_A_srf" name="field_A_srf_prec4" prec="8" />
+      <field field_ref="field_A_srf_max" name="field_A_srf_mean_max" long_name="Average of hourly maximum over 1d" operation="average" freq_op="1h"> @field_A_srf_max </field>
+      <variable id="my_global_attribute" type="string" >file_1d</variable>
+    </file>
+  </file_definition>
+
+  <axis_definition>
+    <axis id="axis_srf" />
+  </axis_definition>
+
+  <domain_definition>
+    <domain id="domain_srf" />
+  </domain_definition>
+
+  <grid_definition />
+
+</context>

@@ -1,0 +1,6 @@
+#!/bin/bash
+#
+# A batch script will be generated using:
+# /work/n01/shared/nemo/mkslurm_settejob_4.2_Gnu -S $NXIO_PROC -s 8 -m 4 -C $NB_PROC -g 2 -a n01-CLASS -j sette_job -t 20:00 > ${SETTE_DIR}/job_batch_template
+# by prepare_job.sh
+#

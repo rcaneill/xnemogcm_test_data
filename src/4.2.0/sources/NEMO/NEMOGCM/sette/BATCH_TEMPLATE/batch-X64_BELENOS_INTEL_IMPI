@@ -1,0 +1,184 @@
+#!/usr/bin/env bash
+
+#SBATCH -J sette
+#SBATCH -o sette.%j.out
+#SBATCH -e sette.%j.err
+#SBATCH --export=ALL
+#SBATCH --parsable
+#SBATCH --exclusive
+#SBATCH -N 1
+
+#SBATCH -p normal256
+#SBATCH --time=01:00:00
+##SBATCH --time=00:15:00
+
+#SBATCH -A smer
+##SBATCH -A cmems
+
+#SBATCH --qos=normal
+##SBATCH --qos=coper
+
+
+# Test specific settings. Do not hand edit these lines; the fcm_job.sh script will set these
+# (via sed operating on this template job file). 
+#
+  echo " ";
+  OCORES=NPROCS
+  XCORES=NXIOPROCS
+  O_PER_NODE=32
+  X_PER_NODE=8
+  if [ $XCORES -le $X_PER_NODE ]; then X_PER_NODE=$XCORES; fi
+  if [ $OCORES -le $O_PER_NODE ]; then O_PER_NODE=$OCORES; fi
+  export SETTE_DIR=DEF_SETTE_DIR
+
+###############################################################
+#
+#
+# load sette functions (only post_test_tidyup needed)
+#
+  . ${SETTE_DIR}/all_functions.sh
+###############################################################
+#
+# modules to load
+module purge
+module load gcc/9.2.0 intel/2018.5.274 intelmpi/2018.5.274 phdf5/1.8.18 netcdf_par/4.7.1_V2
+#module load xios-2.5_rev1903
+export XIOS_DIR="/home/ext/mr/smer/samsong/SRC/XIOS/trunk/BEL_INTEL18_r2134"
+export XIOS_BIN="${XIOS_DIR}/bin"
+export XIOS_BIN_DIR=${XIOS_BIN}
+export XIOS_INC="${XIOS_DIR}/inc"
+export XIOS_INC_DIR=${XIOS_INC}
+export XIOS_LIB="${XIOS_DIR}/lib"
+export XIOS_LIB_DIR=${XIOS_LIB}
+export XIO_HOME=${XIOS_DIR}
+
+# Don't remove neither change the following line
+# BODY
+#
+# Test specific settings. Do not hand edit these lines; the fcm_job.sh script will set these
+# (via sed operating on this template job file). Note that the number of compute nodes required
+# is also set by the fcm_job.sh on the PBS select header line above.
+#
+# These variables are needed by post_test_tidyup function in all_functions.sh
+#
+  export INPUT_DIR=DEF_INPUT_DIR
+  export CONFIG_DIR=DEF_CONFIG_DIR
+  export TOOLS_DIR=DEF_TOOLS_DIR
+  export NEMO_VALIDATION_DIR=DEF_NEMO_VALIDATION
+  export NEW_CONF=DEF_NEW_CONF
+  export CMP_NAM=DEF_CMP_NAM
+  export TEST_NAME=DEF_TEST_NAME
+  export EXE_DIR=DEF_EXE_DIR
+  ulimit -a
+  ulimit -s unlimited
+#
+# end of set up
+###############################################################
+#
+# change to the working directory 
+#
+  cd $EXE_DIR
+
+  echo Running on host `hostname`
+  echo Time is `date`
+  echo Directory is `pwd`
+# 
+#  Run the parallel MPI executable 
+#
+
+  # Comm/Fabric
+  # -----------
+  export DAPL_ACK_RETRY=7
+  export DAPL_ACK_TIMER=20
+  export DAPL_IB_SL=0
+  export DAPL_UCM_CQ_SIZE=8192
+  export DAPL_UCM_DREQ_RETRY=4
+  export DAPL_UCM_QP_SIZE=8192
+  export DAPL_UCM_REP_TIME=8000
+  export DAPL_UCM_RTU_TIME=8000
+  export DAPL_UCM_WAIT_TIME=10000
+  export I_MPI_CHECK_DAPL_PROVIDER_COMPATIBILITY=0
+  export I_MPI_CHECK_DAPL_PROVIDER_MISMATCH=none
+  export I_MPI_DAPL_RDMA_MIXED=enable
+  export I_MPI_DAPL_SCALABLE_PROGRESS=1
+  export I_MPI_DAPL_TRANSLATION_CACHE=1
+  export I_MPI_DAPL_UD_DIRECT_COPY_THRESHOLD=65536
+  export I_MPI_DAPL_UD=on
+  export I_MPI_FABRICS=shm:dapl
+  export I_MPI_DAPL_PROVIDER=ofa-v2-mlx5_0-1u
+  export I_MPI_FALLBACK=disable
+  export I_MPI_FALLBACK_DEVICE=disable
+  export I_MPI_DYNAMIC_CONNECTION=1
+  export I_MPI_FAST_COLLECTIVES=1
+  export I_MPI_LARGE_SCALE_THRESHOLD=8192
+  # File system
+  # -----------
+  export I_MPI_EXTRA_FILESYSTEM_LIST=lustre
+  export I_MPI_EXTRA_FILESYSTEM=on
+  # Slurm
+  # -----
+  export I_MPI_HYDRA_BOOTSTRAP=slurm
+  export I_MPI_SLURM_EXT=0
+  # Force kill job
+  # --------------
+  export I_MPI_JOB_SIGNAL_PROPAGATION=on
+  export I_MPI_JOB_ABORT_SIGNAL=9
+  # Extra
+  # -----
+  export I_MPI_LIBRARY_KIND=release_mt
+  export EC_MPI_ATEXIT=0
+  export EC_PROFILE_HEAP=0
+  # Process placement (cyclic)
+  # --------------------------
+  export I_MPI_JOB_RESPECT_PROCESS_PLACEMENT=off
+  export I_MPI_PERHOST=1
+  # Process pinning
+  # ---------------
+  export I_MPI_PIN=enable
+  export I_MPI_PIN_PROCESSOR_LIST="allcores:map=scatter" # map=spread
+
+  if [ $XCORES -gt 0 ]; then
+#
+#  Run MPMD case
+#
+     #XIOS will run on a separate node so will run in parallel queue
+     if [ ! -f ./xios_server.exe ] && [ -f ${XIO_HOME}/bin/xios_server.exe ]; then
+        cp ${XIO_HOME}/bin/xios_server.exe .
+     fi
+     if [ ! -f ./xios_server.exe ]; then
+        echo "./xios_server.exe not found"
+        echo "run aborted"
+        exit
+     fi
+
+#    cat > mpmd.conf <<EOF
+#0-$((OCORES-1)) ./nemo
+#${OCORES}-39 ./xios_server.exe
+#EOF
+    cat > mpmd.conf <<EOF
+-n ${OCORES} ./nemo
+-n ${XCORES} ./xios_server.exe
+EOF
+
+#     echo time srun --cpu_bind=cores --mpi=pmi2 -m cyclic -n 40 --multi-prog ./mpmd.conf
+#          time srun --cpu_bind=cores --mpi=pmi2 -m cyclic -n 40 --multi-prog ./mpmd.conf
+     echo time mpiexec.hydra -configfile ./mpmd.conf
+          time mpiexec.hydra -configfile ./mpmd.conf
+#
+  else
+#
+# Run SPMD case
+#
+#    echo time srun --cpu_bind=cores --mpi=pmi2 -m cyclic -n ${OCORES} ./nemo
+#         time srun --cpu_bind=cores --mpi=pmi2 -m cyclic -n ${OCORES} ./nemo
+     echo time mpiexec.hydra -n ${OCORES} ./nemo
+          time mpiexec.hydra -n ${OCORES} ./nemo
+  fi
+#
+
+#
+  post_test_tidyup
+# END_BODY
+# Don't remove neither change the previous line
+  exit
+

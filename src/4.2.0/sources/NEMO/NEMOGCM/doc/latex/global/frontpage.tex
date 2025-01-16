@@ -1,0 +1,71 @@
+%% =================================================================================================
+%% Front cover
+%% =================================================================================================
+
+\begin{titlepage}
+%   \newgeometry{hmargin=1.5cm,vmargin=3cm}
+   \setlength{\parindent}{0pt}
+
+   \begin{center}
+
+      \begin{minipage}{0.3\textwidth}
+         \includegraphics[height=1.5cm]{NEMO_grey}
+      \end{minipage} %% Don't insert void line between `minipage` envs
+      \begin{minipage}{0.6\textwidth}
+         \begin{center}
+            \Large\slshape
+            \textbf{N}ucleus for \textbf{E}uropean \textbf{M}odelling of the \textbf{O}cean \\
+            \medskip
+            \hyperref[resources]{
+               \faWordpress \hspace{1cm} \faCodeFork      \hspace{1cm}
+               \faGithub    \hspace{1cm} \faCloudDownload \hspace{1cm} \faEnvelope
+            }
+         \end{center}
+      \end{minipage}
+
+   \end{center}
+
+   \spcup
+   \textcolor{white}{\fontsize{0.8cm}{0.8cm}\selectfont\textbf{\hdg}}
+   \ifdef{\shdg}{\medskip\par\textcolor{white}{\Huge\shdg}}{}
+   \spcdn
+
+   \begin{center}
+      \LARGE Version {\ver} - {\today} \\
+      \medskip
+      \href{http://doi.org/10.5281/zenodo.\zid}{\includegraphics{zenodo.\zid}}
+   \end{center}
+
+   \vfill
+
+   \begin{minipage}{\autwd}
+      \raggedleft\input{authors}
+   \end{minipage}
+   \hspace{15pt} %% Don't insert void line between `minipage` envs
+   \begin{minipage}{0.02\linewidth}
+      \rule{1pt}{\lnlg}
+   \end{minipage}
+   \hspace{ 5pt} %%   "     ""    ""   ""     "        ""      ""
+   \begin{minipage}{\abswd}
+      \begin{abstract}
+         \input{abstract}
+      \end{abstract}
+   \end{minipage}
+
+   \vfill
+
+   \begin{center}
+      \Large
+      \CMCC{\includegraphics[height=1cm]{CMCC}} \hspace{0.25cm}
+      \CNRS{\includegraphics[height=1cm]{CNRS}} \hspace{0.25cm}
+       \MOI{\includegraphics[height=1cm]{MOI} } \hspace{0.25cm}
+      \UKMO{\includegraphics[height=1cm]{UKMO}} \hspace{0.25cm}
+      \NERC{\includegraphics[height=1cm]{NERC}}                 \\
+      \medskip
+      \slshape
+         {C}ommunity \hspace{1.5em} {O}cean \hspace{1.5em} {M}odel
+   \end{center}
+
+\end{titlepage}
+
+%\restoregeometry

@@ -1,0 +1,426 @@
+\documentclass[../main/NEMO_manual]{subfiles}
+
+\begin{document}
+
+\chapter{Miscellaneous Topics}
+\label{chap:MISC}
+
+\chaptertoc
+
+\paragraph{Changes record} ~\\
+
+{\footnotesize
+  \begin{tabularx}{\textwidth}{l||X|X}
+    Release     & Author(s)            & Modifications                      \\
+    \hline
+    {\em   X.X} & {\em Pierre Mathiot} & {Update of the closed sea section} \\
+    {\em   4.0} & {\em ...           } & {\em ...                         } \\
+    {\em   3.6} & {\em ...           } & {\em ...                         } \\
+    {\em   3.4} & {\em ...           } & {\em ...                         } \\
+    {\em <=3.4} & {\em ...           } & {\em ...                         }
+  \end{tabularx}
+}
+
+\clearpage
+
+%% =================================================================================================
+\section{Representation of unresolved straits}
+\label{sec:MISC_strait}
+
+In climate modeling, it often occurs that a crucial connections between water masses is broken as
+the grid mesh is too coarse to resolve narrow straits.
+For example, coarse grid spacing typically closes off the Mediterranean from the Atlantic at
+the Strait of Gibraltar.
+In this case, it is important for climate models to include the effects of salty water entering the Atlantic from
+the Mediterranean.
+Likewise, it is important for the Mediterranean to replenish its supply of water from the Atlantic to
+balance the net evaporation occurring over the Mediterranean region.
+This problem occurs even in eddy permitting simulations.
+For example, in ORCA 1/4\deg\ several straits of the Indonesian archipelago (Ombai, Lombok...)
+are much narrow than even a single ocean grid-point.
+
+We describe briefly here the two methods that can be used in \NEMO\ to handle such
+improperly resolved straits. The methods consist of opening the strait while ensuring
+that the mass exchanges through the strait are not too large by either artificially
+reducing the cross-sectional area of the strait grid-cells or, locally increasing the
+lateral friction.
+
+%% =================================================================================================
+\subsection{Hand made geometry changes}
+\label{subsec:MISC_strait_hand}
+
+The first method involves reducing the scale factor in the cross-strait direction to a
+value in better agreement with the true mean width of the strait
+(\autoref{fig:MISC_strait_hand}).  This technique is sometime called "partially open face"
+or "partially closed cells".  The key issue here is only to reduce the faces of $T$-cell
+(\ie\ change the value of the horizontal scale factors at $u$- or $v$-point) but not the
+volume of the $T$-cell.  Indeed, reducing the volume of strait $T$-cell can easily produce
+a numerical instability at that grid point which would require a reduction of the model
+time step.  Thus to instigate a local change in the width of a Strait requires two steps:
+
+\begin{itemize}
+
+\item Add \texttt{e1e2u} and \texttt{e1e2v} arrays to the \np{cn_domcfg}{cn\_domcfg} file. These 2D
+arrays should contain the products of the unaltered values of: $\texttt{e1u}*\texttt{e2u}$
+and $\texttt{e1u}*\texttt{e2v}$ respectively. That is the original surface areas of $u$-
+and $v$- cells respectively.  These areas are usually defined by the corresponding product
+within the \NEMO\ code but the presence of \texttt{e1e2u} and \texttt{e1e2v} in the
+\np{cn_domcfg}{cn\_domcfg} file will suppress this calculation and use the supplied fields instead.
+If the model domain is provided by user-supplied code in \mdl{usrdef\_hgr}, then this
+routine should also return \texttt{e1e2u} and \texttt{e1e2v} and set the integer return
+argument \texttt{ie1e2u\_v} to a non-zero value. Values other than 0 for this argument
+will suppress the calculation of the areas.
+
+\item Change values of \texttt{e2u} or \texttt{e1v} (either in the \np{cn_domcfg}{cn\_domcfg} file or
+via code in  \mdl{usrdef\_hgr}), whereever a Strait reduction is required. The choice of
+whether to alter \texttt{e2u} or \texttt{e1v} depends. respectively,  on whether the
+Strait in question is North-South orientated (\eg\ Gibraltar) or East-West orientated (\eg
+Lombok).
+
+\end{itemize}
+
+The second method is to increase the viscous boundary layer thickness by a local increase
+of the fmask value at the coast. This method can also be effective in wider passages.  The
+concept is illustarted in the second part of  \autoref{fig:MISC_strait_hand} and changes
+to specific locations can be coded in \mdl{usrdef\_fmask}. The \forcode{usr_def_fmask}
+routine is always called after \texttt{fmask} has been defined according to the choice of
+lateral boundary condition as discussed in \autoref{sec:LBC_coast}. The default version of
+\mdl{usrdef\_fmask} contains settings specific to ORCA2 and ORCA1 configurations. These are
+meant as examples only; it is up to the user to verify settings and provide alternatives
+for their own configurations. The default \forcode{usr_def_fmask} makes no changes to
+\texttt{fmask} for any other configuration.
+
+\begin{figure}[!tbp]
+  \centering
+  \includegraphics[width=0.66\textwidth]{MISC_Gibraltar}
+  \includegraphics[width=0.66\textwidth]{MISC_Gibraltar2}
+  \caption[Two methods to defined the Gibraltar strait]{
+    Example of the Gibraltar strait defined in a 1\deg\ $\times$ 1\deg\ mesh.
+    \textit{Top}: using partially open cells.
+    The meridional scale factor at $v$-point is reduced on both sides of the strait to
+    account for the real width of the strait (about 20 km).
+    Note that the scale factors of the strait $T$-point remains unchanged.
+    \textit{Bottom}: using viscous boundary layers.
+    The four fmask parameters along the strait coastlines are set to a value larger than 4,
+    \ie\ "strong" no-slip case (see \autoref{fig:LBC_shlat}) creating a large viscous boundary layer
+    that allows a reduced transport through the strait.}
+  \label{fig:MISC_strait_hand}
+\end{figure}
+
+%% =================================================================================================
+\section[Closed seas (\textit{closea.F90})]{Closed seas (\protect\mdl{closea})}
+\label{sec:MISC_closea}
+
+\begin{listing}
+  \nlst{namclo}
+  \caption{\forcode{&namclo}}
+  \label{lst:namclo}
+\end{listing}
+
+Some configurations include inland seas and lakes as ocean
+points. This is particularly the case for configurations that are
+coupled to an atmosphere model where one might want to include inland
+seas and lakes as ocean model points in order to provide a better
+bottom boundary condition for the atmosphere. However there is no
+route for freshwater to run off from the lakes to the ocean and this
+can lead to large drifts in the sea surface height over the lakes. The
+closea module provides options to either fill in closed seas and lakes
+at run time, or to set the net surface freshwater flux for each lake
+to zero and put the residual flux into the ocean.
+
+The inland seas and lakes are defined using mask fields in the
+domain configuration file. Special treatment of the closed sea (redistribution of net freshwater or mask those), are defined in \autoref{lst:namclo} and
+can be trigger by \np{ln_closea}{ln\_closea}\forcode{=.true.} in namelist namcfg.
+
+The options available are the following:
+\begin{description}
+\item[\np{ln_maskcs}{ln\_maskcs}\forcode{ = .true.}] All the closed seas are masked using \textit{mask\_opensea} variable.
+\item[\np{ln_maskcs}{ln\_maskcs}\forcode{ = .false.}] The net surface flux over each inland sea or group of
+inland seas is set to zero each timestep and the residual flux is
+distributed over a target area.
+\end{description}
+
+When \np{ln_maskcs}{ln\_maskcs}\forcode{ = .false.}, 
+3 options are available for the redistribution (set up of these options is done in the tool DOMAINcfg):
+\begin{description}[font=$\bullet$ ]
+\item[ glo]: The residual flux is redistributed globally.
+\item[ emp]: The residual flux is redistributed as emp in a river outflow.
+\item[ rnf]: The residual flux is redistributed as rnf in a river outflow if negative. If there is a net evaporation, the residual flux is redistributed globally.
+\end{description}
+
+For each case, 2 masks are needed (\autoref{fig:MISC_closea_mask_example}): 
+\begin{description}
+\item $\bullet$ one describing the 'sources' (ie the closed seas concerned by each options) called \textit{mask\_csglo}, \textit{mask\_csrnf}, \textit{mask\_csemp}. 
+\item $\bullet$ one describing each group of inland seas (the Great Lakes for example) and the target area (river outflow or world ocean) for each group of inland seas (St Laurence for the Great Lakes for example) called
+\textit{mask\_csgrpglo}, \textit{mask\_csgrprnf}, \textit{mask\_csgrpemp}.
+\end{description}
+
+\begin{figure}[!tbp]
+  \centering
+  \includegraphics[width=0.66\textwidth]{MISC_closea_mask_example}
+  \caption[Mask fields for the \protect\mdl{closea} module]{
+    Example of mask fields for the \protect\mdl{closea} module.
+    \textit{Left}: a \textit{mask\_csrnf} field;
+    \textit{Right}: a \textit{mask\_csgrprnf} field.
+    In this example, if \protect\np{ln_closea}{ln\_closea} is set to \forcode{.true.},
+    the mean freshwater flux over each of the American Great Lakes will be set to zero,
+    and the total residual for all the lakes, if negative, will be put into
+    the St Laurence Seaway in the area shown.}
+  \label{fig:MISC_closea_mask_example}
+\end{figure}
+
+Closed sea not defined (because too small, issue in the bathymetry definition ...) are defined in \textit{mask\_csundef}.
+These points can be masked using the namelist option \np{ln_mask_csundef}{ln\_mask\_csundef}\forcode{= .true.} or used to correct the bathymetry input file.\\
+
+The masks needed for the closed sea can be created using the DOMAINcfg tool in the utils/tools/DOMAINcfg directory.
+See \autoref{sec:clocfg} for details on the usage of definition of the closed sea masks.
+
+%% =================================================================================================
+\section{Sub-domain functionality}
+\label{sec:MISC_zoom}
+
+%% =================================================================================================
+\subsection{Simple subsetting of input files via NetCDF attributes}
+
+The extended grids for use with the under-shelf ice cavities will result in redundant rows
+around Antarctica if the ice cavities are not active.  A simple mechanism for subsetting
+input files associated with the extended domains has been implemented to avoid the need to
+maintain different sets of input fields for use with or without active ice cavities.  This
+subsetting operates for the j-direction only and works by optionally looking for and using
+a global file attribute (named: \np{open_ocean_jstart}{open\_ocean\_jstart}) to determine the starting j-row
+for input.  The use of this option is best explained with an example:
+\medskip
+
+\noindent Consider an ORCA1
+configuration using the extended grid domain configuration file: \textit{eORCA1\_domcfg.nc}
+This file define a horizontal domain of 362x332.  The first row with
+open ocean wet points in the non-isf bathymetry for this set is row 42 (\fortran\ indexing)
+then the formally correct setting for \np{open_ocean_jstart}{open\_ocean\_jstart} is 41.  Using this value as
+the first row to be read will result in a 362x292 domain which is the same size as the
+original ORCA1 domain.  Thus the extended domain configuration file can be used with all
+the original input files for ORCA1 if the ice cavities are not active (\np{ln_isfcav =
+.false.}). Full instructions for achieving this are:
+
+\begin{itemize}
+\item Add the new attribute to any input files requiring a j-row offset, i.e:
+\begin{cmds}
+ncatted  -a open_ocean_jstart,global,a,d,41 eORCA1_domcfg.nc
+\end{cmds}
+
+\item Add the logical switch \np{ln_use_jattr}{ln\_use\_jattr} to \nam{cfg}{cfg} in the configuration
+namelist (if it is not already there) and set \forcode{.true.}
+\end{itemize}
+
+\noindent Note that with this option, the j-size of the global domain is (extended
+j-size minus \np{open_ocean_jstart}{open\_ocean\_jstart} + 1 ) and this must match the \texttt{jpjglo} value
+for the configuration. This means an alternative version of \textit{eORCA1\_domcfg.nc} must
+be created for when \np{ln_use_jattr}{ln\_use\_jattr} is active. The \texttt{ncap2} tool provides a
+convenient way of achieving this:
+
+\begin{cmds}
+ncap2 -s 'jpjglo=292' eORCA1_domcfg.nc nORCA1_domcfg.nc
+\end{cmds}
+
+The domain configuration file is unique in this respect since it also contains the value of \texttt{jpjglo}
+that is read and used by the model.
+Any other global, 2D and 3D, netcdf, input field can be prepared for use in a reduced domain by adding the
+\texttt{open\_ocean\_jstart} attribute to the file's global attributes.
+In particular this is true for any field that is read by \NEMO\ using the following optional argument to
+the appropriate call to \np{iom_get}{iom\_get}.
+
+\begin{forlines}
+lrowattr=ln_use_jattr
+\end{forlines}
+
+Currently, only the domain configuration variables make use of this optional argument so
+this facility is of little practical use except for tests where no other external input
+files are needed or you wish to use an extended domain configuration with inputs from
+earlier, non-extended configurations. Alternatively, it should be possible to exclude
+empty rows for extended domain, forced ocean runs using interpolation on the fly, by
+adding the optional argument to \texttt{iom\_get} calls for the weights and initial
+conditions. Experimenting with this remains an exercise for the user.
+
+%% =================================================================================================
+\section[Accuracy and reproducibility (\textit{lib\_fortran.F90})]{Accuracy and reproducibility (\protect\mdl{lib\_fortran})}
+\label{sec:MISC_fortran}
+
+%% =================================================================================================
+\subsection[Issues with intrinsinc SIGN function (\texttt{\textbf{key\_nosignedzero}})]{Issues with intrinsinc SIGN function (\protect\key{nosignedzero})}
+\label{subsec:MISC_sign}
+
+The SIGN(A, B) is the \fortran\ intrinsic function delivers the magnitude of A with the sign of B.
+For example, SIGN(-3.0,2.0) has the value 3.0.
+The problematic case is when the second argument is zero, because, on platforms that support IEEE arithmetic,
+zero is actually a signed number.
+There is a positive zero and a negative zero.
+
+In \fninety, the processor was required always to deliver a positive result for SIGN(A, B) if B was zero.
+Nevertheless, in \fninety, the processor is allowed to do the correct thing and deliver ABS(A) when
+B is a positive zero and -ABS(A) when B is a negative zero.
+This change in the specification becomes apparent only when B is of type real, and is zero,
+and the processor is capable of distinguishing between positive and negative zero,
+and B is negative real zero.
+Then SIGN delivers a negative result where, under \fninety\ rules, it used to return a positive result.
+This change may be especially sensitive for the ice model,
+so we overwrite the intrinsinc function with our own function simply performing :   \\
+\verb?   IF( B >= 0.e0 ) THEN   ;   SIGN(A,B) = ABS(A)  ?    \\
+\verb?   ELSE                   ;   SIGN(A,B) =-ABS(A)     ?  \\
+\verb?   ENDIF    ? \\
+This feature can be found in \mdl{lib\_fortran} module and is effective when \key{nosignedzero} is defined.
+We use a CPP key as the overwritting of a intrinsic function can present performance issues with
+some computers/compilers.
+
+%% =================================================================================================
+\subsection{MPP reproducibility}
+\label{subsec:MISC_glosum}
+
+The numerical reproducibility of simulations on distributed memory parallel computers is a critical issue.
+In particular, within \NEMO\ global summation of distributed arrays is most susceptible to rounding errors,
+and their propagation and accumulation cause uncertainty in final simulation reproducibility on
+different numbers of processors.
+To avoid so, based on \citet{he.ding_JS01} review of different technics,
+we use a so called self-compensated summation method.
+The idea is to estimate the roundoff error, store it in a buffer, and then add it back in the next addition.
+
+Suppose we need to calculate $b = a_1 + a_2 + a_3$.
+The following algorithm will allow to split the sum in two
+($sum_1 = a_{1} + a_{2}$ and $b = sum_2 = sum_1 + a_3$) with exactly the same rounding errors as
+the sum performed all at once.
+\begin{align*}
+	sum_1 \ \  &= a_1 + a_2 \\
+	error_1     &= a_2 + ( a_1 - sum_1 ) \\
+	sum_2 \ \  &= sum_1 + a_3 + error_1 \\
+	error_2     &= a_3 + error_1 + ( sum_1 - sum_2 ) \\
+	b \qquad \ &= sum_2 \\
+\end{align*}
+An example of this feature can be found in \mdl{lib\_fortran} module.
+It is systematicallt used in glob\_sum function (summation over the entire basin excluding duplicated rows and
+columns due to cyclic or north fold boundary condition as well as overlap MPP areas).
+The self-compensated summation method should be used in all summation in i- and/or j-direction.
+See \mdl{closea} module for an example.
+Note also that this implementation may be sensitive to the optimization level.
+
+%% =================================================================================================
+\section{Model optimisation, control print and benchmark}
+\label{sec:MISC_opt}
+
+\begin{listing}
+  \nlst{namctl}
+  \caption{\forcode{&namctl}}
+  \label{lst:namctl}
+\end{listing}
+
+Options are defined through the  \nam{ctl}{ctl} namelist variables.
+
+%% =================================================================================================
+\subsection{Status and debugging information output}
+\label{subsec:MISC_statusinfo}
+
+
+NEMO can produce a range of text information output either: in the main output
+file (ocean.output) written by the normal reporting processor (narea == 1) or various
+specialist output files (e.g. layout.dat, run.stat, tracer.stat etc.). Some, for example
+run.stat and tracer.stat, contain globally collected values for which a single file is
+sufficient. Others, however, contain information that could, potentially, be different
+for each processing region. For computational efficiency, the default volume of text
+information produced is reduced to just a few files from the narea=1 processor.
+
+When more information is required for monitoring or debugging purposes, the various
+forms of output can be selected via the \np{sn_cfctl}{sn\_cfctl} structure. As well as simple
+on-off switches this structure also allows selection of a range of processors for
+individual reporting (where appropriate) and a time-increment option to restrict
+globally collected values to specified time-step increments.
+
+Options within the structure are selected by the top-level switches shown here
+with their default settings:
+
+\begin{forlines}
+   sn_cfctl%l_runstat = .TRUE.    ! switches and which areas produce reports with the proc integer settings.
+   sn_cfctl%l_trcstat = .FALSE.   ! The default settings for the proc integers should ensure
+   sn_cfctl%l_oceout  = .FALSE.   ! that  all areas report.
+   sn_cfctl%l_layout  = .FALSE.   !
+   sn_cfctl%l_prtctl  = .FALSE.   !
+   sn_cfctl%l_prttrc  = .FALSE.   !
+   sn_cfctl%l_oasout  = .FALSE.   !
+   sn_cfctl%procmin   = 0         ! Minimum area number for reporting [default:0]
+   sn_cfctl%procmax   = 1000000   ! Maximum area number for reporting [default:1000000]
+   sn_cfctl%procincr  = 1         ! Increment for optional subsetting of areas [default:1]
+   sn_cfctl%ptimincr  = 1         ! Timestep increment for writing time step progress info
+\end{forlines}
+
+Details of the suboptions follow: 
+
+\subsection{Control print suboptions}
+
+The options that can be individually selected fall into three categories:
+
+\begin{enumerate} 
+\item{Time step progress information} 
+
+This category includes
+\texttt{run.stat} and \texttt{tracer.stat} files which record certain physical and
+passive tracer metrics (respectively). Typical contents of \texttt{run.stat} include
+global maximums of ssh, velocity; and global minimums and maximums of temperature
+and salinity.  A netCDF version of \texttt{run.stat} (\texttt{run.stat.nc}) is also
+produced with the same time-series data and this can easily be expanded to include
+extra monitoring information.  \texttt{tracer.stat} contains the volume-weighted
+average tracer value for each passive tracer. Collecting these metrics involves
+global communications and will impact on model efficiency so both these options are
+disabled by default by setting the respective options, \forcode{sn_cfctl%runstat} and
+\forcode{sn_cfctl%trcstat} to false. A compromise can be made by activating either or
+both of these options and setting the \forcode{sn_cfctl%timincr} entry to an integer
+value greater than one. This increment determines the time-step frequency at which
+the global metrics are collected and reported.  This increment also applies to the
+time.step file which is otherwise updated every timestep.
+\item{One-time configuration information/progress logs}
+
+Some run-time configuration information and limited progress information is always
+produced by the first ocean process. This includes the \texttt{ocean.output} file
+which reports on all the namelist options read by the model and remains open to catch
+any warning or error messages generated during execution. A \texttt{layout.dat}
+file is also produced which details the MPI-decomposition used by the model. The
+suboptions: \forcode{sn_cfctl%oceout} and \forcode{sn_cfctl%layout} can be used
+to activate the creation of these files by all ocean processes.  For example,
+when \forcode{sn_cfctl%oceout} is true all processors produce their own version of
+\texttt{ocean.output}.  All files, beyond the the normal reporting processor (narea == 1), are
+named with a \_XXXX extension to their name, where XXXX is a zero-padded, 4-digit area number
+(more than 4 digits will be used if the processor count exceeds 9999). This is useful as 
+a debugging aid since all processes can
+report their local conditions. Note though that these files are buffered on most UNIX
+systems so bug-hunting efforts using this facility should also utilise the \fortran:
+
+\forline|CALL FLUSH(numout)|
+
+statement after any additional write statements to ensure that file contents reflect
+the last model state. Associated with the \forcode{sn_cfctl%oceout} option is the
+additional \forcode{sn\_cfctl%oasout} suboption. This does not activate its own output
+file but rather activates the writing of addition information regarding the OASIS
+configuration when coupling via oasis and the sbccpl routine. This information is
+written to any active \texttt{ocean.output} files.
+\item{Control sums of trends for debugging}
+
+NEMO includes an option for debugging reproducibility differences between
+a MPP and mono-processor runs.  This is somewhat dated and clearly only
+useful for this purpose when dealing with configurations that can be run
+on a single processor. The full details can be found in this report: \href{
+http://forge.ipsl.jussieu.fr/nemo/attachment/wiki/Documentation/prtctl_NEMO_doc_v2.pdf}{The
+control print option in NEMO} The switches to activate production of the control sums
+of trends for either the physics or passive tracers are the \forcode{sn_cfctl%prtctl}
+and \forcode{sn_cfctl%prttrc} suboptions, respectively. Although, perhaps, of limited use for its
+original intention, the ability to produce these control sums of trends in specific
+areas provides another tool for diagnosing model behaviour.  
+
+If only the output from a
+select few regions is required then additional options are available to activate options
+for only a simple subset of processing regions. These are: \forcode{sn_cfctl%procmin},
+\forcode{sn_cfctl%procmax} and \forcode{sn_cfctl%procincr} which can be used to specify
+the minimum and maximum active areas and the increment. The default values are set
+such that all regions will be active. Note this subsetting can also be used to limit
+which additional \texttt{ocean.output} and \texttt{layout.dat} files are produced if
+those suboptions are active.
+
+\end{enumerate}
+
+\subinc{\input{../../global/epilogue}}
+
+\end{document}

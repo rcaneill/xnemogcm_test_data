@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+
+<!--
+============================================================================================================
+=                                           output files definition                                        =
+=                                            Define your own filesfor ocean dynamics context               =
+=                                         put the variables you want...                                    =
+============================================================================================================
+    -->
+   
+    <file_definition type="one_file" name="@expname@_@freq@_@startdate@_@enddate@" sync_freq="5d" min_digits="4">
+    
+      <file_group id="5d" output_freq="5d"  output_level="10" enabled=".TRUE.">  <!-- 5d files -->   
+        <file id="file11" name_suffix="_grid_T" description="ocean T grid variables" >
+          <field field_ref="e3t"      />
+          <field field_ref="toce"         name="thetao" />
+          <field field_ref="soce"         name="so"     />
+          <field field_ref="sst"          name="tos"   />
+          <field field_ref="sss"          name="sos"   />
+          <field field_ref="ssh"          name="zos"   />
+          <field field_ref="mldkz5"   />
+          <field field_ref="mldr10_1" />
+          <field field_ref="sbt"      />
+          <field field_ref="heatc"        name="heatc" />
+          <field field_ref="saltc"        name="saltc" />
+
+	  <field field_ref="empmr"        name="wfo"      />
+	  <field field_ref="qsr_oce"      name="qsr_oce"  />
+	  <field field_ref="qns_oce"      name="qns_oce"  />
+	  <field field_ref="qt_oce"       name="qt_oce"   />
+	  <field field_ref="saltflx"      name="sfx"      />
+	  <field field_ref="taum"         name="taum"     />
+	  <field field_ref="wspd"         name="windsp"   />
+	  <field field_ref="precip"       name="precip"   />
+	  <!-- ice and snow -->
+	  <field field_ref="snowpre" />
+	</file>
+
+	<file id="file12" name_suffix="_grid_U" description="ocean U grid variables" >
+	  <field field_ref="e3u" />
+	  <field field_ref="ssu"          name="uos"      />
+	  <field field_ref="uoce"         name="uo"       />
+	  <field field_ref="utau"         name="tauuo"    />
+	</file>
+	
+	<file id="file13" name_suffix="_grid_V" description="ocean V grid variables" >
+	  <field field_ref="e3v" />
+	  <field field_ref="ssv"          name="vos"      />
+	  <field field_ref="voce"         name="vo"       />
+	  <field field_ref="vtau"         name="tauvo"    />
+	</file>
+	
+	<file id="file14" name_suffix="_grid_ABL" description="ABL grid variables" >
+	  <field field_ref="u_abl" />
+	  <field field_ref="v_abl" />
+	  <field field_ref="t_abl" />
+	  <field field_ref="q_abl" />
+	  <field field_ref="uvz1_abl" />
+	  <field field_ref="tz1_abl" />
+	  <field field_ref="qz1_abl" />
+	  <field field_ref="uvz1_dta" />
+	  <field field_ref="tz1_dta" />
+	  <field field_ref="qz1_dta" />
+	  <field field_ref="pblh" />
+	</file>
+
+      </file_group> 
+
+   </file_definition>
+    
+
+
+

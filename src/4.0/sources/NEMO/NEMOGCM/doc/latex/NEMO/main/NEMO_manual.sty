@@ -1,0 +1,174 @@
+%% ==============================================================================
+%% NEMO_manual.sty: all customizations (packages, styles, cmds)
+%% ==============================================================================
+
+
+%% LaTeX packages
+%% ==============================================================================
+
+\usepackage{natbib}           %% bib
+\usepackage{caption}          %% caption
+\usepackage{xcolor}           %% color
+\usepackage{times}            %% font
+\usepackage{hyperref}         %% hyper
+\usepackage{idxlayout}        %% index
+\usepackage{enumitem}         %% list
+\usepackage{minted}           %% listing
+\usepackage{amsmath}          %% maths
+\usepackage{fancyhdr}         %% page
+\usepackage{minitoc}          %% toc
+\usepackage{subfiles}         %% subdocs
+\usepackage[utf8]{inputenc}   %% input encoding
+
+%% Extensions in bundle package
+
+\usepackage{amssymb, graphicx, makeidx, tabularx}
+
+
+%% Configuration
+
+\captionsetup{margin=10pt, font={small}, labelsep=colon, labelfont={bf}}
+\graphicspath{{../../../figures/}}
+\hypersetup{
+	pdftitle={NEMO ocean engine}, pdfauthor={Gurvan Madec, and NEMO System Team},
+	colorlinks
+}
+\idxlayout{font=footnotesize, columns=3}
+\renewcommand{\bibfont}{\footnotesize}
+\renewcommand{\bibsep}{3pt}
+
+
+%% Styles
+%% ==============================================================================
+
+\pagestyle{fancy}
+\bibliographystyle{../main/ametsoc}
+
+%% Additionnal fonts
+
+\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
+
+
+%% Page layout
+
+\fancyhf{}
+\fancyhead[LE,RO]{\bfseries\thepage}
+\fancyhead[LO]{\bfseries\hspace{-0em}\rightmark}
+\renewcommand{\sectionmark}[1]{\markright{\thesection.\ #1}}
+\fancyhead[RE]{\bfseries\leftmark}
+\renewcommand{\chaptermark}[1]{\markboth{#1}{}}
+\renewcommand{\headrulewidth}{0.5pt}
+\renewcommand{\footrulewidth}{0pt  }
+\addtolength{\headheight}{2.6pt}
+
+
+%% Catcodes
+
+\makeatletter
+\def\LigneVerticale{\vrule height 5cm depth 2cm\hspace{0.1cm}\relax}
+\def\LignesVerticales{\let\LV\LigneVerticale\LV\LV\LV\LV\LV\LV\LV\LV\LV\LV}
+\def\GrosCarreAvecUnChiffre#1{
+	\rlap{\vrule height 0.8cm width 1cm depth 0.2cm}
+	\rlap{\hbox to 1cm{\hss\mbox{\color{white} #1}\hss}}
+ 	\vrule height 0pt width 1cm depth 0pt
+}
+\def\@makechapterhead#1{
+	\hbox{
+		\huge\LignesVerticales\hspace{-0.5cm}
+		\GrosCarreAvecUnChiffre{\thechapter}\hspace{0.2cm}
+		\hbox{#1}
+	}
+	\par\vskip
+1cm
+}
+\def\@makeschapterhead#1{
+	\hbox{
+		\huge\LignesVerticales
+		\hbox{#1}
+	}
+	\par\vskip
+2cm
+}
+\def\cleardoublepage{\clearpage\if@twoside \ifodd\c@page\else
+  \hbox{}
+  \vspace*{\fill}
+  \vspace{\fill}
+  \thispagestyle{empty}
+  \newpage
+  \if@twocolumn\hbox{}\newpage\fi\fi\fi}
+\def\@seccntformat#1{\protect\makebox[0pt][r]{\csname the#1\endcsname\quad}}
+\makeatother
+
+
+%% Global custom commands: \newcommand{<name>}[<args>][<first argument value>]{<code>}
+%% ==============================================================================
+
+%% NEMO and Fortran in small capitals
+\newcommand{\NEMO}{\textsc{nemo}}
+\newcommand{\fortran}{\textsc{Fortran}}
+\newcommand{\fninety}{\textsc{Fortran 90}}
+
+%% Common aliases
+\renewcommand{\deg}[1][]{\ensuremath{^{\circ}#1}}
+\newcommand{\zstar }{\ensuremath{z^\star}}
+\newcommand{\sstar }{\ensuremath{s^\star}}
+\newcommand{\ztilde}{\ensuremath{\tilde z}}
+\newcommand{\stilde}{\ensuremath{\tilde s}}
+\newcommand{\ie}{\ensuremath{i.e.}}
+\newcommand{\eg}{\ensuremath{e.g.}}
+
+%% Inline maths
+\newcommand{\fractext}[2]{\textstyle \frac{#1}{#2}}
+\newcommand{\rdt}{\Delta t}
+
+%% Text env. for Gurvan
+\newcommand{\gmcomment}[1]{}
+
+%% Index entries (italic font for files, preformat for code)
+\newcommand{\hf}[1]{\textit{#1.h90}            \index{h90 file!#1}}
+\newcommand{\ifile}[1]{\textit{#1.nc}          \index{Input NetCDF files!#1.nc}}
+\newcommand{\jp}[1]{\texttt{#1}                \index{Model parameters!#1}}
+\newcommand{\key}[1]{\texttt{\textbf{key\_#1}} \index{CPP keys!key\_#1}}
+\newcommand{\mdl}[1]{\textit{#1.F90}           \index{Modules!#1}}
+\newcommand{\ngn}[1]{\texttt{#1}               \index{Namelist Group Name!#1}}
+\newcommand{\np}[1]{\texttt{#1}                \index{Namelist variables!#1}}
+\newcommand{\rou}[1]{\texttt{#1}               \index{Routines!#1}}
+
+%% Maths
+\newcommand{\lt}{\left}
+\newcommand{\rt}{\right}
+\newcommand{\vect}[1]{\ensuremath{\mathbf{#1}}}
+\newcommand{\pd}[2][]{\ensuremath{\frac{\partial #1}{\partial #2}}}
+
+%% Shortened DOI in bibliography
+\newcommand{\doi}[1]{\href{http://dx.doi.org/#1}{doi:#1}}
+
+%% Namelists inclusion
+\newcommand{\nlst}[1]{\forfile{../../../namelists/#1}}
+
+
+%% Minted package: syntax highlighting configuration
+%% ==============================================================================
+
+%% Global highlighting style
+\setminted{style=emacs, fontsize=\scriptsize, breaklines, frame=leftline}
+\setminted[xml]{style=borland} %% Specific per language
+
+%% Oneliner
+\newmint[forline]{fortran}{}   % \forline|...|
+\newmint[xmlline]{xml}{}       % \xmlline|...|
+\newmint[cmd]{console}{}       % \cmd|...|
+
+%% Multi-lines
+\newminted[forlines]{fortran}{}   % \begin{forlines}
+\newminted[xmllines]{xml}{}       % \begin{xmllines}
+\newminted[cmds]{console}{}       % \begin{cmds}
+\newminted[clines]{c}{}           % \begin{clines}
+
+%% File
+\newmintedfile[forfile]{fortran}{}   % \forfile{../namelists/nam...}
+
+%% Inline
+\newmintinline[forcode]{fortran}{fontsize=auto, frame=lines}   % \forcode{...}
+\newmintinline[xmlcode]{xml}{    fontsize=auto, frame=lines}   % \xmlcode{...}
+\newmintinline[snippet]{console}{fontsize=auto, frame=lines}   % \snippet{...}

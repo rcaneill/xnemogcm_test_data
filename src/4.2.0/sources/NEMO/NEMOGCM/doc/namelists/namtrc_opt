@@ -1,0 +1,11 @@
+!-----------------------------------------------------------------------
+&namtrc_opt      !  light availability in the water column
+!-----------------------------------------------------------------------
+!                !  file name       ! frequency (hours) ! variable  ! time interp. !  clim  ! 'yearly'/ ! weights  ! rotation ! land/sea mask !
+!                !                  !  (if <0  months)  !   name    !   (logical)  !  (T/F) ! 'monthly' ! filename ! pairing  ! filename      !
+   sn_par        = 'par.orca'       ,     24            , 'fr_par'  ,  .true.      , .true. , 'yearly'  , ''       , ''       , ''
+   cn_dir        = './'        ! root directory for the location of the dynamical files
+   ln_varpar     =  .true.     ! Read PAR from file
+   parlux        =  0.43       ! Fraction of shortwave as PAR
+   light_loc     = 'center'    ! Light location in the water cell ('center', 'integral')
+/

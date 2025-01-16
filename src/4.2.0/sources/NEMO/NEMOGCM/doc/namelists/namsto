@@ -1,0 +1,38 @@
+!-----------------------------------------------------------------------
+&namsto        ! Stochastic parametrization of EOS                      (default: OFF)
+!-----------------------------------------------------------------------
+   ln_sto_ldf  = .false.   ! stochastic lateral diffusion
+   rn_ldf_std  =  0.1      ! lateral diffusion standard deviation (in percent)
+   rn_ldf_tcor =  1440.    ! lateral diffusion correlation timescale (in timesteps)
+   ln_sto_hpg  = .false.   ! stochastic pressure gradient
+   rn_hpg_std  =  0.1      ! density gradient standard deviation (in percent)
+   rn_hpg_tcor =  1440.    ! density gradient correlation timescale (in timesteps)
+   ln_sto_pstar  = .false. ! stochastic ice strength
+   rn_pstar_std  =  0.1    ! ice strength standard deviation (in percent)
+   rn_pstar_tcor =  1440.  ! ice strength correlation timescale (in timesteps)
+   nn_pstar_ord  =  1      ! order of autoregressive processes
+   nn_pstar_flt  =  0      ! passes of Laplacian filter
+   ln_sto_trd  = .false.   ! stochastic model trend
+   rn_trd_std  =  0.1      ! trend standard deviation (in percent)
+   rn_trd_tcor =  1440.    ! trend correlation timescale (in timesteps)
+   ln_sto_eos  = .false.   ! stochastic equation of state
+   nn_sto_eos  = 1         ! number of independent random walks
+   rn_eos_stdxy = 1.4       ! random walk horz. standard deviation (in grid points)
+   rn_eos_stdz = 0.7       ! random walk vert. standard deviation (in grid points)
+   rn_eos_tcor = 1440.     ! random walk time correlation (in timesteps)
+   nn_eos_ord  = 1         ! order of autoregressive processes
+   nn_eos_flt  = 0         ! passes of Laplacian filter
+   rn_eos_lim  = 2.0       ! limitation factor (default = 3.0)
+   ln_sto_trc  = .false.   ! stochastic tracer dynamics
+   nn_sto_trc  = 1         ! number of independent random walks
+   rn_trc_stdxy = 1.4      ! random walk horz. standard deviation (in grid points)
+   rn_trc_stdz = 0.7       ! random walk vert. standard deviation (in grid points)
+   rn_trc_tcor = 1440.     ! random walk time correlation (in timesteps)
+   nn_trc_ord  = 1         ! order of autoregressive processes
+   nn_trc_flt  = 0         ! passes of Laplacian filter
+   rn_trc_lim  = 3.0       ! limitation factor (default = 3.0)
+   ln_rststo   = .false.   ! start from mean parameter (F) or from restart file (T)
+   ln_rstseed  = .true.    ! read seed of RNG from restart file
+   cn_storst_in  = "restart_sto" !  suffix of stochastic parameter restart file (input)
+   cn_storst_out = "restart_sto" !  suffix of stochastic parameter restart file (output)
+/

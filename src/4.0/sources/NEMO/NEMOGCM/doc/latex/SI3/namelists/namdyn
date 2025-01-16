@@ -1,0 +1,17 @@
+!------------------------------------------------------------------------------
+&namdyn         !   Ice dynamics
+!------------------------------------------------------------------------------
+   ln_dynFULL       = .true.          !  dyn.: full ice dynamics               (rheology + advection + ridging/rafting + correction)
+   ln_dynRHGADV     = .false.         !  dyn.: no ridge/raft & no corrections  (rheology + advection)
+   ln_dynADV        = .false.         !  dyn.: only advection w prescribed vel.(rn_uvice + advection)
+      rn_uice       =   0.00001       !        prescribed ice u-velocity
+      rn_vice       =   0.            !        prescribed ice v-velocity
+   rn_ishlat        =   2.            !  free slip (0) ; partial slip (0-2) ; no slip (2) ; strong slip (>2)
+   ln_landfast      = .false.         !  landfast ice parameterization (T or F)                           
+      rn_gamma      =   0.15          !     fraction of ocean depth that ice must reach to initiate landfast
+                                      !        recommended range: [0.1 ; 0.25]
+      rn_icebfr     =  10.            !     maximum bottom stress per unit area of contact [N/m2]                 
+                                      !        a very large value ensures ice velocity=0 even with a small contact area
+                                      !        recommended range: ?? (should be greater than atm-ice stress => >0.1 N/m2)
+      rn_lfrelax    =   1.e-5         !     relaxation time scale to reach static friction [s-1]
+/

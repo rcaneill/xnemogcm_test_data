@@ -1,0 +1,51 @@
+<?xml version="1.0"?>
+<simulation>
+  <context id="test_domain">
+    <file_definition type="one_file" par_access="collective"  output_freq="6h" sync_freq="6h" output_level="10" enabled=".TRUE.">
+      <file id="output_domain">
+        <field id="field_domain_1" grid_ref="domain" operation="average" freq_op="1ts" prec="8" />
+        <field id="field_domain_2" domain_ref="domain" operation="average" freq_op="1ts" prec="8" />
+      </file>
+    </file_definition>
+
+    <grid_definition>
+      <grid id="domain">
+        <domain domain_ref="domain"/>
+      </grid>
+    </grid_definition>
+
+   <domain_definition>
+    <domain id="domain"/>
+  </domain_definition>
+  </context>
+
+  <context id="test_axis">
+    <file_definition type="one_file" par_access="collective"  output_freq="6h" sync_freq="6h" output_level="10" enabled=".TRUE.">
+      <file id="output_axis">
+        <field id="field_axis" grid_ref="domain" operation="average" freq_op="1ts" prec="8" />
+      </file>
+    </file_definition>
+
+    <grid_definition>
+      <grid id="domain">
+        <axis id="x" />
+        <axis id="y" />
+      </grid>
+    </grid_definition>
+  </context>
+
+  <context id="xios">
+      <variable_definition>
+        <variable_group id="buffer">
+            <variable id="optimal_buffer_size" type="string">performance</variable>
+            <variable id="buffer_size_factor" type="double">1.0</variable>
+        </variable_group>
+
+        <variable_group id="parameters" >
+          <variable id="using_server" type="bool">false</variable>
+          <variable id="info_level" type="int">50</variable>
+          <variable id="print_file" type="bool">true</variable>
+        </variable_group>
+      </variable_definition>
+  </context>
+</simulation>

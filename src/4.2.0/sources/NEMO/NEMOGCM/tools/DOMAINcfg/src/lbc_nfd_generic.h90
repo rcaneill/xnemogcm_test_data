@@ -1,0 +1,469 @@
+#if defined MULTI
+#   define NAT_IN(k)                cd_nat(k)   
+#   define SGN_IN(k)                psgn(k)
+#   define F_SIZE(ptab)             kfld
+#   if defined DIM_2d
+#      if defined SINGLE_PRECISION
+#         define ARRAY_TYPE(i,j,k,l,f)    TYPE(PTR_2D_sp),INTENT(inout)::ptab(f)
+#      else
+#         define ARRAY_TYPE(i,j,k,l,f)    TYPE(PTR_2D_dp),INTENT(inout)::ptab(f)
+#      endif
+#      define ARRAY_IN(i,j,k,l,f)      ptab(f)%pt2d(i,j)
+#      define J_SIZE(ptab)             SIZE(ptab(1)%pt2d,2)
+#      define K_SIZE(ptab)             1
+#      define L_SIZE(ptab)             1
+#   endif
+#   if defined DIM_3d
+#      if defined SINGLE_PRECISION
+#         define ARRAY_TYPE(i,j,k,l,f)    TYPE(PTR_3D_sp),INTENT(inout)::ptab(f)
+#      else
+#         define ARRAY_TYPE(i,j,k,l,f)    TYPE(PTR_3D_dp),INTENT(inout)::ptab(f)
+#      endif
+#      define ARRAY_IN(i,j,k,l,f)      ptab(f)%pt3d(i,j,k)
+#      define J_SIZE(ptab)             SIZE(ptab(1)%pt3d,2)
+#      define K_SIZE(ptab)             SIZE(ptab(1)%pt3d,3)
+#      define L_SIZE(ptab)             1
+#   endif
+#   if defined DIM_4d
+#      if defined SINGLE_PRECISION
+#         define ARRAY_TYPE(i,j,k,l,f)    TYPE(PTR_4D_sp),INTENT(inout)::ptab(f)
+#      else
+#         define ARRAY_TYPE(i,j,k,l,f)    TYPE(PTR_4D_dp),INTENT(inout)::ptab(f)
+#      endif
+#      define ARRAY_IN(i,j,k,l,f)      ptab(f)%pt4d(i,j,k,l)
+#      define J_SIZE(ptab)             SIZE(ptab(1)%pt4d,2)
+#      define K_SIZE(ptab)             SIZE(ptab(1)%pt4d,3)
+#      define L_SIZE(ptab)             SIZE(ptab(1)%pt4d,4)
+#   endif
+#else
+!                          !==  IN: ptab is an array  ==!
+#   define NAT_IN(k)                cd_nat
+#   define SGN_IN(k)                psgn
+#   define F_SIZE(ptab)             1
+#   if defined DIM_2d
+#      define ARRAY_IN(i,j,k,l,f)   ptab(i,j)
+#      define J_SIZE(ptab)          SIZE(ptab,2)
+#      define K_SIZE(ptab)          1
+#      define L_SIZE(ptab)          1
+#   endif
+#   if defined DIM_3d
+#      define ARRAY_IN(i,j,k,l,f)   ptab(i,j,k)
+#      define J_SIZE(ptab)          SIZE(ptab,2)
+#      define K_SIZE(ptab)          SIZE(ptab,3)
+#      define L_SIZE(ptab)          1
+#   endif
+#   if defined DIM_4d
+#      define ARRAY_IN(i,j,k,l,f)   ptab(i,j,k,l)
+#      define J_SIZE(ptab)          SIZE(ptab,2)
+#      define K_SIZE(ptab)          SIZE(ptab,3)
+#      define L_SIZE(ptab)          SIZE(ptab,4)
+#   endif
+#   if defined SINGLE_PRECISION
+#      define ARRAY_TYPE(i,j,k,l,f)    REAL(sp),INTENT(inout)::ARRAY_IN(i,j,k,l,f)
+#   else
+#      define ARRAY_TYPE(i,j,k,l,f)    REAL(dp),INTENT(inout)::ARRAY_IN(i,j,k,l,f)
+#   endif
+#endif
+
+#   if defined SINGLE_PRECISION
+#      define PRECISION sp
+#   else
+#      define PRECISION dp
+#   endif
+
+#if defined MULTI
+   SUBROUTINE ROUTINE_NFD( ptab, cd_nat, psgn, kfld )
+      INTEGER          , INTENT(in   ) ::   kfld        ! number of pt3d arrays
+#else
+   SUBROUTINE ROUTINE_NFD( ptab, cd_nat, psgn       )
+#endif
+      ARRAY_TYPE(:,:,:,:,:)                             ! array or pointer of arrays on which the boundary condition is applied
+      CHARACTER(len=1) , INTENT(in   ) ::   NAT_IN(:)   ! nature of array grid-points
+      REAL(wp)         , INTENT(in   ) ::   SGN_IN(:)   ! sign used across the north fold boundary
+      !
+      INTEGER  ::    ji,  jj,  jk,  jl,  jf   ! dummy loop indices
+      INTEGER  ::        ipj, ipk, ipl, ipf   ! dimension of the input array
+      INTEGER  ::   ii1, ii2, ij1, ij2
+      !!----------------------------------------------------------------------
+      !
+      ipj = J_SIZE(ptab)   ! 2nd dimension
+      ipk = K_SIZE(ptab)   ! 3rd    -
+      ipl = L_SIZE(ptab)   ! 4th    -
+      ipf = F_SIZE(ptab)   ! 5th    -      use in "multi" case (array of pointers)
+      !
+      DO jf = 1, ipf                      ! Loop on the number of arrays to be treated
+         !
+         SELECT CASE ( npolj )
+         !
+         CASE ( 3 , 4 )                        ! *  North fold  T-point pivot
+            !
+            SELECT CASE ( NAT_IN(jf)  )
+            CASE ( 'T' , 'W' )                         ! T-, W-point
+               DO jl = 1, ipl; DO jk = 1, ipk
+                  !
+                  ! last nn_hls lines (from ipj to ipj-nn_hls+1) : full
+               	  DO jj = 1, nn_hls
+               	     ij1 = ipj            - jj + 1       ! ends at: ipj - nn_hls + 1
+                     ij2 = ipj - 2*nn_hls + jj - 1       ! ends at: ipj - 2*nn_hls + nn_hls - 1 = ipj - nn_hls - 1
+                     !
+                     DO ji = 1, nn_hls            ! first nn_hls points
+                        ii1 =                ji          ! ends at: nn_hls
+                        ii2 = 2*nn_hls + 2 - ji          ! ends at: 2*nn_hls + 2 - nn_hls = nn_hls + 2
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     DO ji = 1, 1                 ! point nn_hls+1
+                        ii1 = nn_hls + ji
+                        ii2 = ii1
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     DO ji = 1, Ni0glo - 1        ! points from nn_hls+2 to jpiglo - nn_hls   (note: Ni0glo = jpiglo - 2*nn_hls)
+                        ii1 = 2 + nn_hls      + ji - 1   ! ends at: 2 + nn_hls + jpiglo - 2*nn_hls - 1 - 1 = jpiglo - nn_hls
+                        ii2 = jpiglo - nn_hls - ji + 1   ! ends at: jpiglo - nn_hls - ( jpiglo - 2*nn_hls - 1 ) + 1 = nn_hls + 2
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     DO ji = 1, 1                 ! point jpiglo - nn_hls + 1
+                        ii1 = jpiglo - nn_hls + ji
+                        ii2 =          nn_hls + ji
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     DO ji = 1, nn_hls-1          ! last nn_hls-1 points
+                        ii1 = jpiglo - nn_hls + 1 + ji   ! ends at: jpiglo - nn_hls + 1 + nn_hls - 1 = jpiglo
+                        ii2 = jpiglo - nn_hls + 1 - ji   ! ends at: jpiglo - nn_hls + 1 - nn_hls + 1 = jpiglo - 2*nn_hls + 2
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                  END DO
+                  !
+                  ! line number ipj-nn_hls : right half
+               	  DO jj = 1, 1
+                     ij1 = ipj - nn_hls
+                     ij2 = ij1   ! same line
+                     !
+                     DO ji = 1, Ni0glo/2-1        ! points from jpiglo/2+2 to jpiglo - nn_hls   (note: Ni0glo = jpiglo - 2*nn_hls)
+                        ii1 = jpiglo/2 + ji + 1          ! ends at: jpiglo/2 + (jpiglo/2 - nn_hls - 1) + 1 = jpiglo - nn_hls
+                        ii2 = jpiglo/2 - ji + 1          ! ends at: jpiglo/2 - (jpiglo/2 - nn_hls - 1) + 1 = nn_hls + 2
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     DO ji = 1, nn_hls            ! first nn_hls points: redo them just in case (if e-w periodocity already done)
+                        !                         ! as we just changed points jpiglo-2nn_hls+1 to jpiglo-nn_hls  
+                        ii1 =                ji          ! ends at: nn_hls
+                        ii2 = 2*nn_hls + 2 - ji          ! ends at: 2*nn_hls + 2 - nn_hls = nn_hls + 2
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     !                            ! last nn_hls-1 points: have been / will done by e-w periodicity 
+                  END DO
+                  !
+               END DO; END DO
+            CASE ( 'U' )                               ! U-point
+               DO jl = 1, ipl; DO jk = 1, ipk
+                  !
+                  ! last nn_hls lines (from ipj to ipj-nn_hls+1) : full
+               	  DO jj = 1, nn_hls
+               	     ij1 = ipj            - jj + 1       ! ends at: ipj - nn_hls + 1
+                     ij2 = ipj - 2*nn_hls + jj - 1       ! ends at: ipj - 2*nn_hls + nn_hls - 1 = ipj - nn_hls - 1
+                     !
+                     DO ji = 1, nn_hls            ! first nn_hls points
+                        ii1 =                ji          ! ends at: nn_hls
+                        ii2 = 2*nn_hls + 1 - ji          ! ends at: 2*nn_hls + 1 - nn_hls = nn_hls + 1
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     DO ji = 1, Ni0glo            ! points from nn_hls to jpiglo - nn_hls   (note: Ni0glo = jpiglo - 2*nn_hls)
+                        ii1 = nn_hls          + ji       ! ends at: nn_hls + jpiglo - 2*nn_hls = jpiglo - nn_hls
+                        ii2 = jpiglo - nn_hls - ji + 1   ! ends at: jpiglo - nn_hls - ( jpiglo - 2*nn_hls ) + 1 = nn_hls + 1
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     DO ji = 1, nn_hls            ! last nn_hls points
+                        ii1 = jpiglo - nn_hls + ji       ! ends at: jpiglo - nn_hls + nn_hls = jpiglo
+                        ii2 = jpiglo - nn_hls + 1 - ji   ! ends at: jpiglo - nn_hls + 1 - nn_hls = jpiglo - 2*nn_hls + 1
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                  END DO
+                  !
+                  ! line number ipj-nn_hls : right half
+               	  DO jj = 1, 1
+                     ij1 = ipj - nn_hls
+                     ij2 = ij1   ! same line
+                     !
+                     DO ji = 1, Ni0glo/2          ! points from jpiglo/2+1 to jpiglo - nn_hls   (note: Ni0glo = jpiglo - 2*nn_hls)
+                        ii1 = jpiglo/2 + ji              ! ends at: jpiglo/2 + (jpiglo/2 - nn_hls) = jpiglo - nn_hls
+                        ii2 = jpiglo/2 - ji + 1          ! ends at: jpiglo/2 - (jpiglo/2 - nn_hls) + 1 = nn_hls + 1
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     DO ji = 1, nn_hls            ! first nn_hls points: redo them just in case (if e-w periodocity already done)
+                        !                         ! as we just changed points jpiglo-2nn_hls+1 to jpiglo-nn_hls  
+                        ii1 =                ji          ! ends at: nn_hls
+                        ii2 = 2*nn_hls + 1 - ji          ! ends at: 2*nn_hls + 1 - nn_hls = nn_hls + 1
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     !                            ! last nn_hls-1 points: have been / will done by e-w periodicity 
+                  END DO
+                  !
+               END DO; END DO
+            CASE ( 'V' )                               ! V-point
+               DO jl = 1, ipl; DO jk = 1, ipk
+                  !
+                  ! last nn_hls+1 lines (from ipj to ipj-nn_hls) : full
+               	  DO jj = 1, nn_hls+1
+               	     ij1 = ipj            - jj + 1       ! ends at: ipj - ( nn_hls + 1 ) + 1 = ipj - nn_hls
+                     ij2 = ipj - 2*nn_hls + jj - 2       ! ends at: ipj - 2*nn_hls + nn_hls + 1 - 2 = ipj - nn_hls - 1
+                     !
+                     DO ji = 1, nn_hls            ! first nn_hls points
+                        ii1 =                ji          ! ends at: nn_hls
+                        ii2 = 2*nn_hls + 2 - ji          ! ends at: 2*nn_hls + 2 - nn_hls = nn_hls + 2
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     DO ji = 1, 1                 ! point nn_hls+1
+                        ii1 = nn_hls + ji
+                        ii2 = ii1
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     DO ji = 1, Ni0glo - 1        ! points from nn_hls+2 to jpiglo - nn_hls   (note: Ni0glo = jpiglo - 2*nn_hls)
+                        ii1 = 2 + nn_hls      + ji - 1   ! ends at: 2 + nn_hls + jpiglo - 2*nn_hls - 1 - 1 = jpiglo - nn_hls
+                        ii2 = jpiglo - nn_hls - ji + 1   ! ends at: jpiglo - nn_hls - ( jpiglo - 2*nn_hls - 1 ) + 1 = nn_hls + 2
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     DO ji = 1, 1                 ! point jpiglo - nn_hls + 1
+                        ii1 = jpiglo - nn_hls + ji
+                        ii2 =          nn_hls + ji
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     DO ji = 1, nn_hls-1          ! last nn_hls-1 points
+                        ii1 = jpiglo - nn_hls + 1 + ji   ! ends at: jpiglo - nn_hls + 1 + nn_hls - 1 = jpiglo
+                        ii2 = jpiglo - nn_hls + 1 - ji   ! ends at: jpiglo - nn_hls + 1 - nn_hls + 1 = jpiglo - 2*nn_hls + 2
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                  END DO
+                  !
+               END DO; END DO
+            CASE ( 'F' )                               ! F-point
+               DO jl = 1, ipl; DO jk = 1, ipk
+                  !
+                  ! last nn_hls+1 lines (from ipj to ipj-nn_hls) : full
+               	  DO jj = 1, nn_hls+1
+               	     ij1 = ipj            - jj + 1       ! ends at: ipj - ( nn_hls + 1 ) + 1 = ipj - nn_hls
+                     ij2 = ipj - 2*nn_hls + jj - 2       ! ends at: ipj - 2*nn_hls + nn_hls + 1 - 2 = ipj - nn_hls - 1
+                     !
+                     DO ji = 1, nn_hls            ! first nn_hls points
+                        ii1 =                ji          ! ends at: nn_hls
+                        ii2 = 2*nn_hls + 1 - ji          ! ends at: 2*nn_hls + 1 - nn_hls = nn_hls + 1
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     DO ji = 1, Ni0glo            ! points from nn_hls to jpiglo - nn_hls   (note: Ni0glo = jpiglo - 2*nn_hls)
+                        ii1 = nn_hls          + ji       ! ends at: nn_hls + jpiglo - 2*nn_hls = jpiglo - nn_hls
+                        ii2 = jpiglo - nn_hls - ji + 1   ! ends at: jpiglo - nn_hls - ( jpiglo - 2*nn_hls ) + 1 = nn_hls + 1
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     DO ji = 1, nn_hls            ! last nn_hls points
+                        ii1 = jpiglo - nn_hls + ji       ! ends at: jpiglo - nn_hls + nn_hls = jpiglo
+                        ii2 = jpiglo - nn_hls + 1 - ji   ! ends at: jpiglo - nn_hls + 1 - nn_hls = jpiglo - 2*nn_hls + 1
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                  END DO
+                  !
+               END DO; END DO
+            END SELECT   ! NAT_IN(jf)
+            !
+         CASE ( 5 , 6 )                        ! *  North fold  F-point pivot
+            !
+            SELECT CASE ( NAT_IN(jf)  )
+            CASE ( 'T' , 'W' )                         ! T-, W-point
+               DO jl = 1, ipl; DO jk = 1, ipk
+                  !
+                  ! first: line number ipj-nn_hls : 3 points
+               	  DO jj = 1, 1
+                     ij1 = ipj - nn_hls
+                     ij2 = ij1   ! same line
+                     !
+                     DO ji = 1, 1            ! points from jpiglo/2+1
+                        ii1 = jpiglo/2 + ji
+                        ii2 = jpiglo/2 - ji + 1
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) =              ARRAY_IN(ii2,ij2,jk,jl,jf)   ! Warning: pb with sign...
+                     END DO
+                     DO ji = 1, 1            ! points jpiglo - nn_hls
+                        ii1 = jpiglo - nn_hls + ji - 1
+                        ii2 =          nn_hls + ji
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) =              ARRAY_IN(ii2,ij2,jk,jl,jf)   ! Warning: pb with sign...
+                     END DO
+                     DO ji = 1, 1            ! point nn_hls: redo it just in case (if e-w periodocity already done)
+                        !                    ! as we just changed point jpiglo - nn_hls
+                        ii1 = nn_hls + ji - 1
+                        ii2 = nn_hls + ji
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) =              ARRAY_IN(ii2,ij2,jk,jl,jf)   ! Warning: pb with sign...
+                     END DO
+                  END DO
+                  !
+                  ! Second: last nn_hls lines (from ipj to ipj-nn_hls+1) : full
+               	  DO jj = 1, nn_hls
+               	     ij1 = ipj + 1        - jj           ! ends at: ipj + 1 - nn_hls
+                     ij2 = ipj - 2*nn_hls + jj           ! ends at: ipj - 2*nn_hls + nn_hls = ipj - nn_hls
+                     !
+                     DO ji = 1, nn_hls            ! first nn_hls points
+                        ii1 =                ji          ! ends at: nn_hls
+                        ii2 = 2*nn_hls + 1 - ji          ! ends at: 2*nn_hls + 1 - nn_hls = nn_hls + 1
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     DO ji = 1, Ni0glo            ! points from nn_hls to jpiglo - nn_hls   (note: Ni0glo = jpiglo - 2*nn_hls)
+                        ii1 = nn_hls          + ji       ! ends at: nn_hls + jpiglo - 2*nn_hls = jpiglo - nn_hls
+                        ii2 = jpiglo - nn_hls - ji + 1   ! ends at: jpiglo - nn_hls - ( jpiglo - 2*nn_hls ) + 1 = nn_hls + 1
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     DO ji = 1, nn_hls            ! last nn_hls points
+                        ii1 = jpiglo - nn_hls + ji       ! ends at: jpiglo - nn_hls + nn_hls = jpiglo
+                        ii2 = jpiglo - nn_hls + 1 - ji   ! ends at: jpiglo - nn_hls + 1 - nn_hls = jpiglo - 2*nn_hls + 1
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                  END DO
+                  !
+               END DO; END DO
+            CASE ( 'U' )                               ! U-point
+               DO jl = 1, ipl; DO jk = 1, ipk
+                  !
+                  ! last nn_hls lines (from ipj to ipj-nn_hls+1) : full
+               	  DO jj = 1, nn_hls
+               	     ij1 = ipj + 1        - jj           ! ends at: ipj + 1 - nn_hls
+                     ij2 = ipj - 2*nn_hls + jj           ! ends at: ipj - 2*nn_hls + nn_hls = ipj - nn_hls
+                     !
+                     DO ji = 1, nn_hls-1          ! first nn_hls-1 points
+                        ii1 =            ji              ! ends at: nn_hls-1
+                        ii2 = 2*nn_hls - ji              ! ends at: 2*nn_hls - ( nn_hls - 1 ) = nn_hls + 1
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     DO ji = 1, 1                 ! point nn_hls
+                        ii1 = nn_hls + ji - 1
+                        ii2 = jpiglo - ii1
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     DO ji = 1, Ni0glo - 1        ! points from nn_hls+1 to jpiglo - nn_hls - 1  (note: Ni0glo = jpiglo - 2*nn_hls)
+                        ii1 =          nn_hls + ji       ! ends at: nn_hls + ( jpiglo - 2*nn_hls - 1 ) = jpiglo - nn_hls - 1
+                        ii2 = jpiglo - nn_hls - ji       ! ends at: jpiglo - nn_hls - ( jpiglo - 2*nn_hls - 1 ) = nn_hls + 1
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     DO ji = 1, 1                 ! point jpiglo - nn_hls
+                        ii1 = jpiglo - nn_hls + ji - 1
+                        ii2 = ii1
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     DO ji = 1, nn_hls            ! last nn_hls points
+                        ii1 = jpiglo - nn_hls + ji       ! ends at: jpiglo - nn_hls + nn_hls = jpiglo
+                        ii2 = jpiglo - nn_hls - ji       ! ends at: jpiglo - nn_hls - nn_hls = jpiglo - 2*nn_hls
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                  END DO
+                  !
+               END DO; END DO
+            CASE ( 'V' )                               ! V-point
+               DO jl = 1, ipl; DO jk = 1, ipk
+                  !
+                  ! last nn_hls lines (from ipj to ipj-nn_hls+1) : full
+               	  DO jj = 1, nn_hls
+               	     ij1 = ipj            - jj + 1       ! ends at: ipj - nn_hls + 1
+                     ij2 = ipj - 2*nn_hls + jj - 1       ! ends at: ipj - 2*nn_hls + nn_hls - 1 = ipj - nn_hls - 1
+                     !
+                     DO ji = 1, nn_hls            ! first nn_hls points
+                        ii1 =                ji          ! ends at: nn_hls
+                        ii2 = 2*nn_hls + 1 - ji          ! ends at: 2*nn_hls + 1 - nn_hls = nn_hls + 1
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     DO ji = 1, Ni0glo            ! points from nn_hls to jpiglo - nn_hls   (note: Ni0glo = jpiglo - 2*nn_hls)
+                        ii1 = nn_hls          + ji       ! ends at: nn_hls + jpiglo - 2*nn_hls = jpiglo - nn_hls
+                        ii2 = jpiglo - nn_hls - ji + 1   ! ends at: jpiglo - nn_hls - ( jpiglo - 2*nn_hls ) + 1 = nn_hls + 1
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     DO ji = 1, nn_hls            ! last nn_hls points
+                        ii1 = jpiglo - nn_hls + ji       ! ends at: jpiglo - nn_hls + nn_hls = jpiglo
+                        ii2 = jpiglo - nn_hls + 1 - ji   ! ends at: jpiglo - nn_hls + 1 - nn_hls = jpiglo - 2*nn_hls + 1
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                  END DO   
+                  !
+                  ! line number ipj-nn_hls : right half
+               	  DO jj = 1, 1
+                     ij1 = ipj - nn_hls
+                     ij2 = ij1   ! same line
+                     !
+                     DO ji = 1, Ni0glo/2          ! points from jpiglo/2+1 to jpiglo - nn_hls   (note: Ni0glo = jpiglo - 2*nn_hls)
+                        ii1 = jpiglo/2 + ji              ! ends at: jpiglo/2 + (jpiglo/2 - nn_hls) = jpiglo - nn_hls
+                        ii2 = jpiglo/2 - ji + 1          ! ends at: jpiglo/2 - (jpiglo/2 - nn_hls) + 1 = nn_hls + 1
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     DO ji = 1, nn_hls            ! first nn_hls points: redo them just in case (if e-w periodocity already done)
+                        !                         ! as we just changed points jpiglo-2nn_hls+1 to jpiglo-nn_hls  
+                        ii1 =                ji          ! ends at: nn_hls
+                        ii2 = 2*nn_hls + 1 - ji          ! ends at: 2*nn_hls + 1 - nn_hls = nn_hls + 1
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     !                            ! last nn_hls points: have been / will done by e-w periodicity 
+                  END DO
+                  !
+               END DO; END DO
+            CASE ( 'F' )                               ! F-point
+               DO jl = 1, ipl; DO jk = 1, ipk
+                  !
+                  ! last nn_hls lines (from ipj to ipj-nn_hls+1) : full
+               	  DO jj = 1, nn_hls
+               	     ij1 = ipj            - jj + 1       ! ends at: ipj - nn_hls + 1
+                     ij2 = ipj - 2*nn_hls + jj - 1       ! ends at: ipj - 2*nn_hls + nn_hls - 1 = ipj - nn_hls - 1
+                     !
+                     DO ji = 1, nn_hls-1          ! first nn_hls-1 points
+                        ii1 =            ji              ! ends at: nn_hls-1
+                        ii2 = 2*nn_hls - ji              ! ends at: 2*nn_hls - ( nn_hls - 1 ) = nn_hls + 1
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     DO ji = 1, 1                 ! point nn_hls
+                        ii1 = nn_hls + ji - 1
+                        ii2 = jpiglo - ii1
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     DO ji = 1, Ni0glo - 1        ! points from nn_hls+1 to jpiglo - nn_hls - 1  (note: Ni0glo = jpiglo - 2*nn_hls)
+                        ii1 =          nn_hls + ji       ! ends at: nn_hls + ( jpiglo - 2*nn_hls - 1 ) = jpiglo - nn_hls - 1
+                        ii2 = jpiglo - nn_hls - ji       ! ends at: jpiglo - nn_hls - ( jpiglo - 2*nn_hls - 1 ) = nn_hls + 1
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     DO ji = 1, 1                 ! point jpiglo - nn_hls
+                        ii1 = jpiglo - nn_hls + ji - 1
+                        ii2 = ii1
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     DO ji = 1, nn_hls            ! last nn_hls points
+                        ii1 = jpiglo - nn_hls + ji       ! ends at: jpiglo - nn_hls + nn_hls = jpiglo
+                        ii2 = jpiglo - nn_hls - ji       ! ends at: jpiglo - nn_hls - nn_hls = jpiglo - 2*nn_hls
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                  END DO   
+                  !
+                  ! line number ipj-nn_hls : right half
+               	  DO jj = 1, 1
+                     ij1 = ipj - nn_hls
+                     ij2 = ij1   ! same line
+                     !
+                     DO ji = 1, Ni0glo/2-1        ! points from jpiglo/2+1 to jpiglo - nn_hls-1  (note: Ni0glo = jpiglo - 2*nn_hls)
+                        ii1 = jpiglo/2 + ji              ! ends at: jpiglo/2 + (jpiglo/2 - nn_hls) = jpiglo - nn_hls
+                        ii2 = jpiglo/2 - ji              ! ends at: jpiglo/2 - (jpiglo/2 - nn_hls - 1 ) = nn_hls + 1
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     DO ji = 1, nn_hls-1          ! first nn_hls-1 points: redo them just in case (if e-w periodocity already done)
+                        !                         ! as we just changed points jpiglo-2nn_hls+1 to jpiglo-nn_hl-1  
+                        ii1 =            ji              ! ends at: nn_hls
+                        ii2 = 2*nn_hls - ji              ! ends at: 2*nn_hls - ( nn_hls - 1 ) = nn_hls + 1
+                        ARRAY_IN(ii1,ij1,jk,jl,jf) = SGN_IN(jf) * ARRAY_IN(ii2,ij2,jk,jl,jf)
+                     END DO
+                     !                            ! last nn_hls points: have been / will done by e-w periodicity 
+                  END DO
+                  !
+               END DO; END DO
+            END SELECT   ! NAT_IN(jf)
+            !
+         END SELECT   ! npolj
+         !
+      END DO   ! ipf
+      !
+   END SUBROUTINE ROUTINE_NFD
+
+#undef PRECISION
+#undef ARRAY_TYPE
+#undef ARRAY_IN
+#undef NAT_IN
+#undef SGN_IN
+#undef J_SIZE
+#undef K_SIZE
+#undef L_SIZE
+#undef F_SIZE

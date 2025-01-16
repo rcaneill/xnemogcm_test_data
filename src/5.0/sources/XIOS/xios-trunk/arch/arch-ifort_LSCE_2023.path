@@ -1,0 +1,6 @@
+NETCDF_INCDIR="-I $NETCDF4_DIR/include"
+NETCDF_LIBDIR="-L $NETCDF4_DIR/lib"
+NETCDF_LIB="-lnetcdf -lnetcdff"
+HDF5_INCDIR="-I /usr/local/install/hdf5-1.10.5/include"
+HDF5_LIBDIR="-L/usr/local/install/hdf5-1.10.5/lib" 
+HDF5_LIB="-lhdf5_hl -lhdf5 -lhdf5 -lz -lcurl"

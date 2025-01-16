@@ -1,0 +1,5 @@
+!-----------------------------------------------------------------------
+&namsbc_fwb    !   freshwater-budget adjustment                         (nn_fwb > 0)
+!-----------------------------------------------------------------------
+   rn_fwb0     = 0.0          ! Initial freshwater adjustment flux [kg/m2/s] (nn_fwb = 2)
+/

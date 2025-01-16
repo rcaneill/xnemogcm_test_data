@@ -1,0 +1,139 @@
+#if defined GLOBSUM_CODE
+!                          ! FUNCTION FUNCTION_GLOBSUM !
+#   if defined DIM_1d
+#      define XD                1d
+#      define ARRAY_TYPE(i,j,k)    REAL(wp)                 , INTENT(in   ) ::   ARRAY_IN(i,j,k)
+#      define ARRAY_IN(i,j,k)   ptab(i)
+#      define ARRAY2_IN(i,j,k)  ptab2(i)
+#      define J_SIZE(ptab)      1
+#      define K_SIZE(ptab)      1
+#      define MASK_ARRAY(i,j)   1.
+#   endif
+#   if defined DIM_2d
+#      define XD                2d
+#      define ARRAY_TYPE(i,j,k)    REAL(wp)                 , INTENT(in   ) ::   ARRAY_IN(i,j,k)
+#      define ARRAY_IN(i,j,k)   ptab(i,j)
+#      define ARRAY2_IN(i,j,k)  ptab2(i,j)
+#      define J_SIZE(ptab)      SIZE(ptab,2)
+#      define K_SIZE(ptab)      1
+#      define MASK_ARRAY(i,j)   tmask_i(i,j)
+#   endif
+#   if defined DIM_3d
+#      define XD                3d
+#      define ARRAY_TYPE(i,j,k)    REAL(wp)                 , INTENT(in   ) ::   ARRAY_IN(i,j,k)
+#      define ARRAY_IN(i,j,k)   ptab(i,j,k)
+#      define ARRAY2_IN(i,j,k)  ptab2(i,j,k)
+#      define J_SIZE(ptab)      SIZE(ptab,2)
+#      define K_SIZE(ptab)      SIZE(ptab,3)
+#      define MASK_ARRAY(i,j)   tmask_i(i,j)
+#   endif
+
+   FUNCTION glob_sum_/**/XD/**/( cdname, ptab )
+      !!----------------------------------------------------------------------
+      CHARACTER(len=*),  INTENT(in   ) ::   cdname  ! name of the calling subroutine
+      ARRAY_TYPE(:,:,:)                             ! array on which operation is applied
+      REAL(wp)   ::  glob_sum_/**/XD
+      !
+      !!-----------------------------------------------------------------------
+      !
+      COMPLEX(dp)::   ctmp
+      REAL(wp)   ::   ztmp
+      INTEGER    ::   ji, jj, jk           ! dummy loop indices
+      INTEGER    ::   ipi,ipj, ipk         ! dimensions
+      INTEGER    ::   iis, iie, ijs, ije   ! loop start and end
+      !!-----------------------------------------------------------------------
+      !
+      ipi = SIZE(ptab,1)   ! 1st dimension
+      ipj = J_SIZE(ptab)   ! 2nd dimension
+      ipk = K_SIZE(ptab)   ! 3rd dimension
+      !
+      IF( ipi == jpi .AND. ipj == jpj ) THEN   ! do 2D loop only over the inner domain (-> avoid to use undefined values)
+         iis = Nis0   ;   iie = Nie0
+         ijs = Njs0   ;   ije = Nje0
+      ELSE
+         iis = 1   ;   iie = jpi
+         ijs = 1   ;   ije = jpj
+      ENDIF
+      !
+      ctmp = CMPLX( 0.e0, 0.e0, dp )   ! warning ctmp is cumulated
+      DO jk = 1, ipk
+        DO jj = ijs, ije
+          DO ji = iis, iie
+             ztmp =  ARRAY_IN(ji,jj,jk) * MASK_ARRAY(ji,jj)
+             CALL DDPDD( CMPLX( ztmp, 0.e0, dp ), ctmp )
+          END DO
+        END DO
+      END DO
+      CALL mpp_sum( cdname, ctmp )   ! sum over the global domain
+      glob_sum_/**/XD = REAL(ctmp,wp)
+
+   END FUNCTION glob_sum_/**/XD
+
+#undef XD
+#undef ARRAY_TYPE
+#undef ARRAY2_TYPE
+#undef ARRAY_IN
+#undef ARRAY2_IN
+#undef J_SIZE
+#undef K_SIZE
+#undef MASK_ARRAY
+!
+# endif
+#if defined GLOBMINMAX_CODE
+!                          ! FUNCTION FUNCTION_GLOBMINMAX !
+#   if defined DIM_2d
+#      define XD                2d
+#      define ARRAY_TYPE(i,j,k)    REAL(wp)                 , INTENT(in   ) ::   ARRAY_IN(i,j,k)
+#      define ARRAY_IN(i,j,k)   ptab(i,j)
+#      define ARRAY2_IN(i,j,k)  ptab2(i,j)
+#      define K_SIZE(ptab)      1
+#   endif
+#   if defined DIM_3d
+#      define XD                3d
+#      define ARRAY_TYPE(i,j,k)    REAL(wp)                 , INTENT(in   ) ::   ARRAY_IN(i,j,k)
+#      define ARRAY_IN(i,j,k)   ptab(i,j,k)
+#      define ARRAY2_IN(i,j,k)  ptab2(i,j,k)
+#      define K_SIZE(ptab)      SIZE(ptab,3)
+#   endif
+#   if defined OPERATION_GLOBMIN
+#      define OPER min
+#   endif
+#   if defined OPERATION_GLOBMAX
+#      define OPER max
+#   endif
+
+   FUNCTION glob_/**/OPER/**/_/**/XD/**/( cdname, ptab )
+      !!----------------------------------------------------------------------
+      CHARACTER(len=*),  INTENT(in   ) ::   cdname  ! name of the calling subroutine
+      ARRAY_TYPE(:,:,:)                             ! array on which operation is applied
+      REAL(wp)   ::  glob_/**/OPER/**/_/**/XD
+      !
+      !!-----------------------------------------------------------------------
+      !
+      COMPLEX(dp)::   ctmp
+      REAL(wp)   ::   ztmp
+      INTEGER    ::   jk       ! dummy loop indices
+      INTEGER    ::   ipk      ! dimensions
+      !!-----------------------------------------------------------------------
+      !
+      ipk = K_SIZE(ptab)   ! 3rd dimension
+      !
+      ztmp = OPER/**/val( ARRAY_IN(:,:,1)*tmask_i(:,:) )
+      DO jk = 2, ipk
+         ztmp = OPER/**/(ztmp, OPER/**/val( ARRAY_IN(:,:,jk)*tmask_i(:,:) ))
+      ENDDO
+
+      CALL mpp_/**/OPER/**/( cdname, ztmp)
+
+      glob_/**/OPER/**/_/**/XD  = ztmp
+
+   END FUNCTION glob_/**/OPER/**/_/**/XD
+
+#undef XD
+#undef ARRAY_TYPE
+#undef ARRAY2_TYPE
+#undef ARRAY_IN
+#undef ARRAY2_IN
+#undef K_SIZE
+#undef OPER
+# endif

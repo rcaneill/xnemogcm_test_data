@@ -1,0 +1,25 @@
+!-----------------------------------------------------------------------
+&namtrc          !   tracers definition
+!-----------------------------------------------------------------------
+   jp_bgc        =  24
+!
+   ln_pisces     =  .true.
+   ln_my_trc     =  .false.
+   ln_age        =  .false.
+   ln_cfc11      =  .false.
+   ln_cfc12      =  .false.
+   ln_c14        =  .false.
+!
+   !
+   ln_trcdta     =  .true.   !  Initialisation from data input file (T) or not (F)
+   ln_trcdmp     =  .false.  !  add a damping termn (T) or not (F)
+   ln_trcdmp_clo =  .false.  !  damping term (T) or not (F) on closed seas
+   ln_trcbc      =  .true.   !  Surface, Lateral or Open Boundaries conditions
+   ln_trcais     =  .true.   !  Antarctic Ice Sheet nutrient supply
+!                !           !                                           !             !         !
+!                !    name   !           title of the field              !   units     ! init    ! sbc    ! cbc    !  obc    !  ais
+   sn_tracer(1)   = 'DIC     ' , 'Dissolved inorganic Concentration      ',  'mol-C/L' , .true.  , .false., .true. , .false. , .false.
+   sn_tracer(2)   = 'Fer     ' , 'Dissolved Iron Concentration           ',  'mol-C/L' , .true.  , .true. , .true. , .false. , .true.
+   sn_tracer(3)   = 'NO3     ' , 'Nitrates Concentration                 ',  'mol-C/L' , .true.  , .true. , .true. , .false. , .false.
+   sn_tracer(4)   = 'PHY     ' , 'Nanophytoplankton Concentration        ',  'mol-C/L' , .false. , .false., .false., .false. , .false.
+

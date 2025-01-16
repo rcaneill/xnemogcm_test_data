@@ -1,0 +1,46 @@
+%% =================================================================================================
+%% Packages
+%% =================================================================================================
+
+%% Document class
+\usepackage[footsepline=0.25pt,headsepline=0.25pt]{scrlayer-scrpage} %% KOMA-script
+
+%% Customisation (cover page, chapter headings and mark of draft copy)
+\usepackage[margin=2cm]{geometry} %% Why 2cm margin? Load geometry before background!
+\usepackage[pages=some]{background} %% 'some' for title page
+\usepackage[scale=15,color=pink]{draftwatermark}
+\usepackage[Bjornstrup]{fncychap} %% Chapter style
+
+%% Fonts
+\usepackage{fontspec}
+%% Issue with path to 'FontAwesome.otf'
+\defaultfontfeatures{Path=/usr/local/texlive/2021/texmf-dist/fonts/opentype/public/fontawesome/}
+\usepackage{academicons,fontawesome}
+
+%% Formatting
+\usepackage[inline]{enumitem}
+\usepackage{etoc,tabularx,xcolor}
+
+%% Graphics
+\usepackage{caption}
+\graphicspath{{../../../badges/}{../figures/}{../../../logos/}}
+
+%% Labels
+\usepackage{lastpage,natbib}
+%\usepackage{natbib,pageslts}
+
+%% Mathematics: 'amsmath' is loaded by 'mathtools'
+\usepackage{mathtools,amssymb}
+
+%% Versatility
+\usepackage{subfiles}
+
+%% Source code listings
+\usepackage[cachedir=cache,outputdir=../build,chapter,newfloat]{minted}
+%% chapter? newfloat?
+
+%% Indexing and cross-referencing, loaded at the end for higher compatibility
+\usepackage{hyperref,imakeidx}
+
+%% Missing utmr8a font
+\usepackage{times}

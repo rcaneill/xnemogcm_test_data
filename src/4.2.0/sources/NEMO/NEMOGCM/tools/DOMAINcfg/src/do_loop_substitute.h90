@@ -1,0 +1,68 @@
+#if defined show_comments
+! These comments are not intended to be retained during preprocessing; i.e. do not define "show_comments"
+!!----------------------------------------------------------------------
+!! NEMO/OCE 4.0 , NEMO Consortium (2018)
+!! Software governed by the CeCILL license (see ./LICENSE)
+!!----------------------------------------------------------------------
+! This header file contains preprocessor definitions and macros used in the do-loop substitutions introduced
+! between version 4.0 and 4.2. The primary aim of these macros is to assist in future applications of tiling
+! to improve performance. This is expected to be achieved by alternative versions of these macros in selected
+! locations. The initial introduction of these macros simply replaced all identifiable nested 2D- and 3D-loops
+! with single line statements (and adjusts indenting accordingly). Do loops were identifiable if they comformed
+! to either:
+!                                       DO jk = ....
+!   DO jj = ....                           DO jj = ...
+!      DO ji = ....                           DO ji = ...
+!         .                   OR                 .  
+!         .                                      .
+!     END DO                                  END DO
+!   END DO                                 END DO
+!                                       END DO
+! and white-space variants thereof.
+!
+! Additionally, only loops with recognised jj and ji loops limits were treated; these were:
+! Lower limits of 1, 2 or fs_2
+! Upper limits of jpi, jpim1 or fs_jpim1 (for ji) or jpj, jpjm1 or fs_jpjm1 (for jj)
+!
+! The macro naming convention takes the form: DO_2D( B, T, L, R) where: 
+!   B is the Bottom offset from the PE's inner domain;
+!   T is the Top    offset from the PE's inner domain;
+!   L is the Left   offset from the PE's inner domain;
+!   R is the Right  offset from the PE's inner domain
+!
+! So, given an inner domain of 2,jpim1 and 2,jpjm1, a typical example would replace:
+! 
+!   DO jj = 2, jpj
+!      DO ji = 1, jpim1
+!         .
+!         .
+!      END DO
+!   END DO
+!
+! with:
+!
+!   DO_2D( 0, 1, 1, 0 )
+!      .
+!      .
+!   END_2D
+! 
+! similar conventions apply to the 3D loops macros. jk loop limits are retained through macro arguments 
+! and are not restricted. This includes the possibility of strides for which an extra set of DO_3DS 
+! macros are defined.
+!
+! In the following definitions the inner PE domain is defined by start indices of (Nis0, Njs0) and end 
+! indices of (Nie0, Nje0) where:
+!
+! Nis0 =   1 + nn_hls     Njs0 =   1 + nn_hls
+! Nie0 = jpi - nn_hls     Nje0 = jpj - nn_hls
+! 
+#endif
+
+#define DO_2D(B, T, L, R) DO jj = Njs0-(B), Nje0+(T)   ;   DO ji = Nis0-(L), Nie0+(R)
+
+#define DO_3D(B, T, L, R, ks, ke) DO jk = ks, ke   ;   DO_2D(B, T, L, R)
+
+#define DO_3DS(B, T, L, R, ks, ke, ki) DO jk = ks, ke, ki   ;   DO_2D(B, T, L, R)
+
+#define END_2D   END DO   ;   END DO
+#define END_3D   END DO   ;   END DO   ;   END DO

@@ -1,0 +1,16 @@
+!-----------------------------------------------------------------------
+&namcfg        !   parameters of the configuration                      (default: use namusr_def in namelist_cfg)
+!-----------------------------------------------------------------------
+   ln_read_cfg = .false.     !  (=T) read the domain configuration file
+      !                      !  (=F) user defined configuration           (F => create/check namusr_def)
+      cn_domcfg = "domain_cfg"  ! domain configuration filename
+      !
+      ln_closea    = .false. !  (=T => fill namclo) 
+      !                      !  (=F) no control of net precip/evap over closed sea
+      !
+   ln_write_cfg = .false.    !  (=T) create the domain configuration file
+      cn_domcfg_out = "domain_cfg_out" ! newly created domain configuration filename
+      !
+   ln_use_jattr = .false.    !  use (T) the file attribute: open_ocean_jstart, if present
+   !                         !  in netcdf input files, as the start j-row for reading
+/

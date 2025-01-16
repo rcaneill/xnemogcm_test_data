@@ -1,0 +1,2 @@
+bld::tool::fppkeys   key_top key_my_trc key_xios key_linssh
+inc $BFMDIR/src/nemo/bfm.fcm

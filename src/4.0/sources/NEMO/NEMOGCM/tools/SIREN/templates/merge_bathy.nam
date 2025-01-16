@@ -1,0 +1,42 @@
+&namlog
+   cn_logfile=
+   cn_verbosity=
+   in_maxerror=
+/
+
+&namcfg
+   cn_varcfg=
+   cn_dumcfg=
+/
+
+&namcrs
+   cn_bathy0=
+   in_perio0=
+/
+
+&namfin
+   cn_bathy1=
+   in_perio1=
+/
+
+&namnst
+   in_rhoi=
+   in_rhoj=
+/
+
+&nambdy
+   ln_north=
+   ln_south=
+   ln_east=
+   ln_west=
+   cn_north=
+   cn_south=
+   cn_east=
+   cn_west=
+   in_ncrs=
+   ln_oneseg=
+/
+
+&namout
+   cn_fileout=
+/

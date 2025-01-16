@@ -1,0 +1,14 @@
+!-----------------------------------------------------------------------
+&namclo        !   parameters of the closed sea (cs) behavior                (default: OFF)
+!-----------------------------------------------------------------------
+   ln_maskcs = .false.        ! (=T) cs are masked ; So, in this case ln_mask_csundef and ln_clo_rnf have no effect.
+      !                       ! (=F => set ln_mask_csundef and ln_clo_rnf) 
+      !                       ! cs masks are read and net evap/precip over closed sea spread out depending on domain_cfg.nc masks.
+      !                       ! See ln_mask_csundef and ln_clo_rnf for specific option related to this case
+      !
+      ln_mask_csundef = .true.   ! (=T) undefined closed seas are masked ; 
+      !                          ! (=F) undefined closed seas are kept and no specific treatment is done for these closed seas
+      !
+      ln_clo_rnf = .true.        ! (=T) river mouth specified in domain_cfg.nc masks (rnf and emp case) are added to the runoff mask.
+      !                          !      allow the treatment of closed sea outflow grid-points to be the same as river mouth grid-points
+/

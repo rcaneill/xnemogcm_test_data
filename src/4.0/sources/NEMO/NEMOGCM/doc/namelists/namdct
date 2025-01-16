@@ -1,0 +1,9 @@
+!-----------------------------------------------------------------------
+&namdct        ! transports through some sections                       ("key_diadct")
+!-----------------------------------------------------------------------
+    nn_dct     = 15        !  time step frequency for transports computing
+    nn_dctwri  = 15        !  time step frequency for transports writing
+    nn_secdebug = 112       !      0 : no section to debug
+    !                      !     -1 : debug all section
+    !                      !  0 < n : debug section number n
+/

@@ -1,0 +1,223 @@
+# if defined SINGLE_PRECISION
+#    define PRECISION sp
+#    define SENDROUTINE mppsend_sp
+#    define RECVROUTINE mpprecv_sp
+#    define LBCNORTH mpp_lbc_north_icb_sp
+# else
+#    define PRECISION dp
+#    define SENDROUTINE mppsend_dp
+#    define RECVROUTINE mpprecv_dp
+#    define LBCNORTH mpp_lbc_north_icb_dp
+# endif
+
+   SUBROUTINE ROUTINE_LNK( cdname, pt2d, cd_type, psgn, kexti, kextj )
+      !!----------------------------------------------------------------------
+      !!                  ***  routine mpp_lnk_2d_icb  ***
+      !!
+      !! ** Purpose :   Message passing management for 2d array (with extra halo for icebergs)
+      !!                This routine receives a (1-kexti:jpi+kexti,1-kexti:jpj+kextj)
+      !!                array (usually (0:jpi+1, 0:jpj+1)) from lbc_lnk_icb calls.
+      !!
+      !! ** Method  :   Use mppsend and mpprecv function for passing mask
+      !!      between processors following neighboring subdomains.
+      !!            domain parameters
+      !!                    jpi    : first dimension of the local subdomain
+      !!                    jpj    : second dimension of the local subdomain
+      !!                    kexti  : number of columns for extra outer halo
+      !!                    kextj  : number of rows for extra outer halo
+      !!                    nbondi : mark for "east-west local boundary"
+      !!                    nbondj : mark for "north-south local boundary"
+      !!                    noea   : number for local neighboring processors
+      !!                    nowe   : number for local neighboring processors
+      !!                    noso   : number for local neighboring processors
+      !!                    nono   : number for local neighboring processors
+      !!----------------------------------------------------------------------
+      CHARACTER(len=*)                                        , INTENT(in   ) ::   cdname      ! name of the calling subroutine
+      REAL(PRECISION), DIMENSION(1-kexti:jpi+kexti,1-kextj:jpj+kextj), INTENT(inout) ::   pt2d     ! 2D array with extra halo
+      CHARACTER(len=1)                                        , INTENT(in   ) ::   cd_type  ! nature of ptab array grid-points
+      REAL(wp)                                                , INTENT(in   ) ::   psgn     ! sign used across the north fold
+      INTEGER                                                 , INTENT(in   ) ::   kexti    ! extra i-halo width
+      INTEGER                                                 , INTENT(in   ) ::   kextj    ! extra j-halo width
+      !
+      INTEGER  ::   jl   ! dummy loop indices
+      INTEGER  ::   imigr, iihom, ijhom        ! local integers
+      INTEGER  ::   ipreci, iprecj             !   -       -
+      INTEGER  ::   ml_req1, ml_req2, ml_err   ! for key_mpi_isend
+      INTEGER, DIMENSION(MPI_STATUS_SIZE) ::   ml_stat   ! for key_mpi_isend
+      !!
+      REAL(PRECISION), DIMENSION(1-kexti:jpi+kexti,nn_hls+kextj,2) ::   r2dns, r2dsn
+      REAL(PRECISION), DIMENSION(1-kextj:jpj+kextj,nn_hls+kexti,2) ::   r2dwe, r2dew
+      !!----------------------------------------------------------------------
+      ipreci = nn_hls + kexti      ! take into account outer extra 2D overlap area
+      iprecj = nn_hls + kextj
+
+      IF( narea == 1 .AND. numcom == -1 ) CALL mpp_report( cdname, 1, 1, 1, ld_lbc = .TRUE. )
+
+      ! 1. standard boundary treatment
+      ! ------------------------------
+      ! Order matters Here !!!!
+      !
+      !                                      ! East-West boundaries
+      !                                           !* Cyclic east-west
+      IF( l_Iperio ) THEN
+         pt2d(1-kexti:     1   ,:) = pt2d(jpim1-kexti: jpim1 ,:)       ! east
+         pt2d(  jpi  :jpi+kexti,:) = pt2d(     2     :2+kexti,:)       ! west
+         !
+      ELSE                                        !* closed
+# if defined SINGLE_PRECISION
+         IF( .NOT. cd_type == 'F' )   pt2d(  1-kexti   :nn_hls   ,:) = 0._sp    ! east except at F-point
+                                      pt2d(jpi-nn_hls+1:jpi+kexti,:) = 0._sp    ! west
+# else
+         IF( .NOT. cd_type == 'F' )   pt2d(  1-kexti   :nn_hls   ,:) = 0._dp    ! east except at F-point
+                                      pt2d(jpi-nn_hls+1:jpi+kexti,:) = 0._dp    ! west
+# endif
+      ENDIF
+      !                                      ! North-South boundaries
+      IF( l_Jperio ) THEN                         !* cyclic (only with no mpp j-split)
+         pt2d(:,1-kextj:     1   ) = pt2d(:,jpjm1-kextj:  jpjm1)       ! north
+         pt2d(:,  jpj  :jpj+kextj) = pt2d(:,     2     :2+kextj)       ! south
+      ELSE                                        !* closed
+# if defined SINGLE_PRECISION
+         IF( .NOT. cd_type == 'F' )   pt2d(:,  1-kextj   :nn_hls   ) = 0._sp    ! north except at F-point
+                                      pt2d(:,jpj-nn_hls+1:jpj+kextj) = 0._sp    ! south
+# else
+         IF( .NOT. cd_type == 'F' )   pt2d(:,  1-kextj   :nn_hls   ) = 0._dp    ! north except at F-point
+                                      pt2d(:,jpj-nn_hls+1:jpj+kextj) = 0._dp    ! south
+# endif
+      ENDIF
+      !
+
+      ! north fold treatment
+      ! -----------------------
+      IF( npolj /= 0 ) THEN
+         !
+         SELECT CASE ( jpni )
+                   CASE ( 1 )     ;   CALL lbc_nfd         ( pt2d(1:jpi,1:jpj+kextj), cd_type, psgn, kextj )
+                   CASE DEFAULT   ;   CALL LBCNORTH        ( pt2d(1:jpi,1:jpj+kextj), cd_type, psgn, kextj )
+         END SELECT
+         !
+      ENDIF
+
+      ! 2. East and west directions exchange
+      ! ------------------------------------
+      ! we play with the neigbours AND the row number because of the periodicity
+      !
+      SELECT CASE ( nbondi )      ! Read Dirichlet lateral conditions
+      CASE ( -1, 0, 1 )                ! all exept 2 (i.e. close case)
+         iihom = jpi - (2 * nn_hls) -kexti
+         DO jl = 1, ipreci
+            r2dew(:,jl,1) = pt2d(nn_hls+jl,:)
+            r2dwe(:,jl,1) = pt2d(iihom +jl,:)
+         END DO
+      END SELECT
+      !
+      !                           ! Migrations
+      imigr = ipreci * ( jpj + 2*kextj )
+      !
+      !                           ! Migrations
+      imigr = ipreci * ( jpj + 2*kextj )
+      !
+      IF( ln_timing ) CALL tic_tac(.TRUE.)
+      !
+      SELECT CASE ( nbondi )
+      CASE ( -1 )
+         CALL SENDROUTINE( 2, r2dwe(1-kextj,1,1), imigr, noea, ml_req1 )
+         CALL RECVROUTINE( 1, r2dew(1-kextj,1,2), imigr, noea )
+         CALL mpi_wait(ml_req1,ml_stat,ml_err)
+      CASE ( 0 )
+         CALL SENDROUTINE( 1, r2dew(1-kextj,1,1), imigr, nowe, ml_req1 )
+         CALL SENDROUTINE( 2, r2dwe(1-kextj,1,1), imigr, noea, ml_req2 )
+         CALL RECVROUTINE( 1, r2dew(1-kextj,1,2), imigr, noea )
+         CALL RECVROUTINE( 2, r2dwe(1-kextj,1,2), imigr, nowe )
+         CALL mpi_wait(ml_req1,ml_stat,ml_err)
+         CALL mpi_wait(ml_req2,ml_stat,ml_err)
+      CASE ( 1 )
+         CALL SENDROUTINE( 1, r2dew(1-kextj,1,1), imigr, nowe, ml_req1 )
+         CALL RECVROUTINE( 2, r2dwe(1-kextj,1,2), imigr, nowe )
+         CALL mpi_wait(ml_req1,ml_stat,ml_err)
+      END SELECT
+      !
+      IF( ln_timing ) CALL tic_tac(.FALSE.)
+      !
+      !                           ! Write Dirichlet lateral conditions
+      iihom = jpi - nn_hls
+      !
+      SELECT CASE ( nbondi )
+      CASE ( -1 )
+         DO jl = 1, ipreci
+            pt2d(iihom+jl,:) = r2dew(:,jl,2)
+         END DO
+      CASE ( 0 )
+         DO jl = 1, ipreci
+            pt2d(jl-kexti,:) = r2dwe(:,jl,2)
+            pt2d(iihom+jl,:) = r2dew(:,jl,2)
+         END DO
+      CASE ( 1 )
+         DO jl = 1, ipreci
+            pt2d(jl-kexti,:) = r2dwe(:,jl,2)
+         END DO
+      END SELECT
+
+
+      ! 3. North and south directions
+      ! -----------------------------
+      ! always closed : we play only with the neigbours
+      !
+      IF( nbondj /= 2 ) THEN      ! Read Dirichlet lateral conditions
+         ijhom = jpj - (2 * nn_hls) - kextj
+         DO jl = 1, iprecj
+            r2dsn(:,jl,1) = pt2d(:,ijhom +jl)
+            r2dns(:,jl,1) = pt2d(:,nn_hls+jl)
+         END DO
+      ENDIF
+      !
+      !                           ! Migrations
+      imigr = iprecj * ( jpi + 2*kexti )
+      !
+      IF( ln_timing ) CALL tic_tac(.TRUE.)
+      !
+      SELECT CASE ( nbondj )
+      CASE ( -1 )
+         CALL SENDROUTINE( 4, r2dsn(1-kexti,1,1), imigr, nono, ml_req1 )
+         CALL RECVROUTINE( 3, r2dns(1-kexti,1,2), imigr, nono )
+         CALL mpi_wait(ml_req1,ml_stat,ml_err)
+      CASE ( 0 )
+         CALL SENDROUTINE( 3, r2dns(1-kexti,1,1), imigr, noso, ml_req1 )
+         CALL SENDROUTINE( 4, r2dsn(1-kexti,1,1), imigr, nono, ml_req2 )
+         CALL RECVROUTINE( 3, r2dns(1-kexti,1,2), imigr, nono )
+         CALL RECVROUTINE( 4, r2dsn(1-kexti,1,2), imigr, noso )
+         CALL mpi_wait(ml_req1,ml_stat,ml_err)
+         CALL mpi_wait(ml_req2,ml_stat,ml_err)
+      CASE ( 1 )
+         CALL SENDROUTINE( 3, r2dns(1-kexti,1,1), imigr, noso, ml_req1 )
+         CALL RECVROUTINE( 4, r2dsn(1-kexti,1,2), imigr, noso )
+         CALL mpi_wait(ml_req1,ml_stat,ml_err)
+      END SELECT
+      !
+      IF( ln_timing ) CALL tic_tac(.FALSE.)
+      !
+      !                           ! Write Dirichlet lateral conditions
+      ijhom = jpj - nn_hls
+      !
+      SELECT CASE ( nbondj )
+      CASE ( -1 )
+         DO jl = 1, iprecj
+            pt2d(:,ijhom+jl) = r2dns(:,jl,2)
+         END DO
+      CASE ( 0 )
+         DO jl = 1, iprecj
+            pt2d(:,jl-kextj) = r2dsn(:,jl,2)
+            pt2d(:,ijhom+jl) = r2dns(:,jl,2)
+         END DO
+      CASE ( 1 )
+         DO jl = 1, iprecj
+            pt2d(:,jl-kextj) = r2dsn(:,jl,2)
+         END DO
+      END SELECT
+      !
+   END SUBROUTINE ROUTINE_LNK
+
+#    undef LBCNORTH
+#    undef PRECISION 
+#    undef SENDROUTINE 
+#    undef RECVROUTINE 

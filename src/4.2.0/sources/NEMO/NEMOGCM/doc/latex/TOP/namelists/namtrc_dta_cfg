@@ -1,0 +1,12 @@
+!-----------------------------------------------------------------------
+&namtrc_dta      !    Initialisation from data input file
+!-----------------------------------------------------------------------
+!                !  file name          ! frequency (hours) ! variable  ! time interp. !  clim  ! 'yearly'/ !
+!                !                     !  (if <0  months)  !   name    !   (logical)  !  (T/F) ! 'monthly' !
+   sn_trcdta(1)  = 'data_DIC_nomask.nc',        -12        ,  'PiDIC'  ,    .false.   , .true. , 'yearly'  ,
+   sn_trcdta(2)  = 'data_FER_nomask.nc',        -1         ,  'Fer'    ,    .true.    , .true. , 'yearly'  ,
+   sn_trcdta(3)  = 'data_NO3_nomask.nc',        -1         ,  'NO3'    ,    .true.    , .true. , 'yearly'  ,
+!
+   rn_trfac(1)   =   1.028e-06  !  multiplicative factor
+   rn_trfac(2)   =   1.0e-06    !  -      -      -     -
+   rn_trfac(3)   =   7.6e-06    !  -      -      -     -

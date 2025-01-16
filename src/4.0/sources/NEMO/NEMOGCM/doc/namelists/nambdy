@@ -1,0 +1,44 @@
+!-----------------------------------------------------------------------
+&nambdy        !  unstructured open boundaries                          (default: OFF)
+!-----------------------------------------------------------------------
+   ln_bdy         = .false.   !  Use unstructured open boundaries
+   nb_bdy         = 2         !  number of open boundary sets
+   ln_coords_file = .true. , .false.    !  =T : read bdy coordinates from file
+      cn_coords_file = 'coordinates.bdy.nc'  !  bdy coordinates files
+   ln_mask_file   = .false.   !  =T : read mask from file
+      cn_mask_file = ''       !  name of mask file (if ln_mask_file=.TRUE.)
+   cn_dyn2d    = 'flather', 'none'       !
+   nn_dyn2d_dta   =  3 , 0    !  = 0, bdy data are equal to the initial state
+      !                       !  = 1, bdy data are read in 'bdydata   .nc' files
+      !                       !  = 2, use tidal harmonic forcing data from files
+      !                       !  = 3, use external data AND tidal harmonic forcing
+   cn_dyn3d      =  'none' , 'none'
+   nn_dyn3d_dta  =  0 , 0     !  = 0, bdy data are equal to the initial state
+   !                          !  = 1, bdy data are read in 'bdydata   .nc' files
+   cn_tra        =  'frs' , 'frs'
+   nn_tra_dta    =  1 , 0     !  = 0, bdy data are equal to the initial state
+   !                          !  = 1, bdy data are read in 'bdydata   .nc' files
+   cn_ice        =  'none' , 'none'
+   nn_ice_dta    =  0, 0      !  = 0, bdy data are equal to the initial state
+   !                          !  = 1, bdy data are read in 'bdydata   .nc' files
+   rn_ice_tem    = 270., 270. !  si3 only: arbitrary temperature of incoming sea ice
+   rn_ice_sal    = 10. ,  10. !  si3 only:      --   salinity           --
+   rn_ice_age    = 30. ,  30. !  si3 only:      --   age                --
+   !
+   ln_tra_dmp    =.false., .false.  !  open boudaries conditions for tracers
+   ln_dyn3d_dmp  =.false., .false.  !  open boundary condition for baroclinic velocities
+   rn_time_dmp   =  1., 1.    !  Damping time scale in days
+   rn_time_dmp_out = 1., 1.    !  Outflow damping time scale
+   nn_rimwidth   = 10, 5      !  width of the relaxation zone
+   ln_vol        = .false.    !  total volume correction (see nn_volctl parameter)
+   nn_volctl     =  1         !  = 0, the total water flux across open boundaries is zero
+   nb_jpk_bdy    = -1         ! number of levels in the bdy data (set < 0 if consistent with planned run)
+/
+!-----------------------------------------------------------------------
+&nambdy_index     ! index definition of bdy
+!-----------------------------------------------------------------------
+    ctypebdy = 'S'
+    nbdyind  =  2
+    nbdybeg  = 2
+    nbdyend  = 273
+/

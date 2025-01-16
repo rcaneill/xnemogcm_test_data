@@ -3,7 +3,7 @@ SHELL := /bin/bash
 .SECONDARY:
 
 .PHONY: all
-all : $(foreach v,3.6 4.0 4.2.0,\
+all : $(foreach v,3.6 4.0 4.2.0 5.0,\
 $(foreach f,mesh_mask_1_file mesh_mask_multi_files domcfg_mesh_mask nemo surface_fields open_and_merge nemo_no_grid_in_filename,bld/data/$(v)/$(f))\
 )
 	echo $^
@@ -16,12 +16,13 @@ $(foreach f,mesh_mask_1_file mesh_mask_multi_files domcfg_mesh_mask nemo surface
 
 
 # Build container
-bld/containers/%/apptainer-nemo.sif : src/%/apptainer-nemo.def src/%/arch_xios src/%/arch_nemo
+bld/containers/%/apptainer-nemo.sif : src/%/apptainer-nemo.def src/%/arch_xios src/%/arch_nemo src/%/sources
 	mkdir -p $(@D)
 	ln -s src/$*/arch_xios .
 	ln -s src/$*/arch_nemo .
+	ln -s src/$*/sources .
 	apptainer build $@ $<
-	rm -rf arch_xios arch_nemo
+	rm -rf arch_xios arch_nemo sources
 
 # Output files that we want to keep
 NEMO_OUT := $(foreach point,T U V W,GYRE_1y_00010101_00011230_grid_$(point).nc) \

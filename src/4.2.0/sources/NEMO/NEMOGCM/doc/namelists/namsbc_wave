@@ -1,0 +1,29 @@
+!-----------------------------------------------------------------------
+&namsbc_wave   ! External fields from wave model                        (ln_wave=T)
+!-----------------------------------------------------------------------
+   ln_sdw      = .false.       !  get the 2D Surf Stokes Drift & Compute the 3D stokes drift
+   ln_stcor    = .false.       !  add Stokes Coriolis and tracer advection terms
+   ln_cdgw     = .false.       !  Neutral drag coefficient read from wave model
+   ln_tauoc    = .false.       !  ocean stress is modified by wave induced stress
+   ln_wave_test= .false.       !  Test case with constant wave fields
+!
+   ln_charn    = .false.       !  Charnock coefficient read from wave model (IFS only)
+   ln_taw      = .false.       !  ocean stress is modified by wave induced stress (coupled mode)
+   ln_phioc    = .false.       !  TKE flux from wave model
+   ln_bern_srfc= .false.       !  wave induced pressure. Bernoulli head J term
+   ln_breivikFV_2016 = .false. !  breivik 2016 vertical stokes profile
+   ln_vortex_force = .false.   !  Vortex Force term 
+   ln_stshear  = .false.       !  include stokes shear in EKE computation
+!
+   cn_dir      = './'      !  root directory for the waves data location
+   !___________!_________________________!___________________!___________!_____________!________!___________!__________________!__________!_______________!
+   !           !  file name              ! frequency (hours) ! variable  ! time interp.!  clim  ! 'yearly'/ ! weights filename ! rotation ! land/sea mask !
+   !           !                         !  (if <0  months)  !   name    !   (logical) !  (T/F) ! 'monthly' !                  ! pairing  !    filename   !
+   sn_cdg      =  'sdw_ecwaves_orca2'    ,        6.         , 'drag_coeff' ,  .true.  , .true. , 'yearly'  ,  ''              , ''       , ''
+   sn_usd      =  'sdw_ecwaves_orca2'    ,        6.         , 'u_sd2d'     ,  .true.  , .true. , 'yearly'  ,  ''              , ''       , ''
+   sn_vsd      =  'sdw_ecwaves_orca2'    ,        6.         , 'v_sd2d'     ,  .true.  , .true. , 'yearly'  ,  ''              , ''       , ''
+   sn_hsw      =  'sdw_ecwaves_orca2'    ,        6.         , 'hs'         ,  .true.  , .true. , 'yearly'  ,  ''              , ''       , ''
+   sn_wmp      =  'sdw_ecwaves_orca2'    ,        6.         , 'wmp'        ,  .true.  , .true. , 'yearly'  ,  ''              , ''       , ''
+   sn_wnum     =  'sdw_ecwaves_orca2'    ,        6.         , 'wave_num'   ,  .true.  , .true. , 'yearly'  ,  ''              , ''       , ''
+   sn_tauoc    =  'sdw_ecwaves_orca2'    ,        6.         , 'wave_stress',  .true.  , .true. , 'yearly'  ,  ''              , ''       , ''
+/

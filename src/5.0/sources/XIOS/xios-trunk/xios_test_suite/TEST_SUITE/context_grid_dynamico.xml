@@ -1,0 +1,19 @@
+<context id="grid_dynamico">
+  
+  <calendar type="Gregorian" time_origin="1850-01-01 00:00:00" timestep="1s"/> 
+   
+   
+  <file_definition>   
+     <file id="dynamico_grid" name="Ai" mode="read" output_freq="1ts" type="one_file">
+       <field id="Ai" domain_ref="domain_dynamico" operation="instant"/>
+     </file>
+  </file_definition>
+  
+  <domain_definition>
+    <domain id="domain_dynamico" type="unstructured">
+      <generate_rectilinear_domain/>
+    </domain>
+  </domain_definition>
+
+
+</context>

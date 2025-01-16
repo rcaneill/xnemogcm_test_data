@@ -1,0 +1,120 @@
+#!/bin/bash
+
+source ../ARCH/arch-${arch}.env
+cd .. ; source load_env_local ; cd RUN_TEST_SUITE 
+
+export machine_name=$xios_machine_name
+export machine_full_name=$xios_full_machine_name
+export xios_dir=$(bash -c "cd ../.. && pwd" 2>&1)
+
+export reference_file=xios_reference.tar.gz
+export reference_folder=xios_reference
+
+export build_dir=xios_test_suite/RUN_TEST_SUITE/build_${arch}_${mode}
+export xios_revision=$(svn info --show-item revision ../.. 2>&1)
+export relurl=$(svn info --show-item relative-url ../.. 2>&1)
+
+
+set -x 
+
+echo "Start Building XIOS ... "
+bash -c "cd ../.. && ./make_xios --arch_path `pwd`/../ARCH --arch ${arch} --${mode} --build_dir ${build_dir} --job 16 &> /dev/null"
+export build_status=$?
+if [[ ${build_status} == 0 ]]
+then
+  echo "XIOS Build Finished. Start Unit Tests"
+else
+  echo "XIOS Build Failed. Skip Unit Tests"
+fi
+
+#----------- Fetch reference -----------
+cp ${xios_reference_dir}/${reference_file} ./
+tar -xzvf ${reference_file}
+
+rm -f ${reference_file}
+
+for i in $(ls ${reference_folder}/) 
+do
+  folder=${i%%}
+  bash -c "cd ${folder} && rm -rf config_*"
+  bash -c "cp -r ${reference_folder}/${folder}/config_* ./${folder}"
+done
+
+rm -rf ${reference_folder}
+
+
+rm -f plain_report.txt
+
+echo "#revision" ${xios_revision} >> plain_report.txt
+echo "#relurl" ${relurl} >> plain_report.txt
+echo "#machine" ${machine_name} >> plain_report.txt
+echo "#build_dir" ${xios_dir}/${build_dir} >> plain_report.txt
+echo "#arch" ${arch} >> plain_report.txt
+echo "#mode" ${mode} >> plain_report.txt
+
+if [[ ${build_status} == 0 ]]
+then
+
+rm -f setup.sh
+touch setup.sh
+>setup.sh
+for i in $(ls -d test_*/)
+do
+  cp setup.py ${i%%/}  
+  cp default_param.json ${i%%/}  
+  cp param_list.py ${i%%/}     
+  cp run_sub_test.sh ${i%%/}    
+  echo "bash -c \"cd " ${i%%/} " && python setup.py\" ">> setup.sh
+  echo "echo \"setup.py called from " ${i%%/} "\"">> setup.sh
+done
+
+export output=$(python user_config.py 2>&1 >/dev/null)
+
+if [ "$output" -ne 0 ]
+then
+	echo "user_config.py failed"
+	exit
+else
+	echo "user_config.py OK"
+fi
+
+
+cmake .
+ctest -V 
+#ctest --output-on-failure
+make report
+
+rm -f test_*/setup.py
+rm -f test_*/run_sub_test.sh
+rm -f test_*/run_test_*.py
+rm -f test_*/CMakeLists.txt
+rm -f test_*/context_grid_dynamico.xml
+rm -f test_*/dynamico_grid.nc
+rm -f test_*/default_param.pyc
+rm -f test_*/user_param.pyc
+rm -f test_*/user_param.py.*
+
+rundir=${xios_test_suite_repository}/RUN
+mkdir -p $rundir ; CHMOD  $rundir
+mkdir -p ${rundir}/test_${machine_name} ; CHMOD ${rundir}/test_${machine_name}
+
+cp plain_report.txt ${rundir}/test_${machine_name}/test_${xios_revision}_${machine_name}_${arch}_${mode}.txt
+CHMOD ${rundir}/test_${machine_name}/test_${xios_revision}_${machine_name}_${arch}_${mode}.txt
+
+mkdir -p ${rundir}/def_files ;  CHMOD ${rundir}/RUN/def_files
+mkdir -p ${rundir}/def_files/${xios_revision} ;  CHMOD ${rundir}/def_files/${xios_revision}
+
+for i in $(ls -d test_*/)
+do
+  mkdir -p ${rundir}/def_files/${xios_revision}/${i%%}
+  cp ${i%%}/user_param.json ${rundir}/def_files/${xios_revision}/${i%%}  
+  for j in $(ls -d ${i%%/}/config_*)
+  do
+    mkdir -p ${rundir}/def_files/${xios_revision}/${j%%}
+    cp ${j%%}/setup/all_param.def ${rundir}/def_files/${xios_revision}/${j%%}  
+  done
+  CHMOD ${rundir}/def_files
+done
+
+fi
+

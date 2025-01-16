@@ -1,0 +1,89 @@
+%% =================================================================================================
+%% Manual structure
+%% =================================================================================================
+
+%% Preamble: global configuration
+%% =================================================================================================
+
+%% Layout
+\documentclass[fontsize=10pt,twoside,abstract,draft]{scrreprt}
+
+%% Overall configuration 
+\input{../../global/preamble}
+
+%% Special cmds around to {in,ex}clude content only in subfile
+  \newcommand{\subinc}[1]{#1}
+  \newcommand{\subexc}[1]{  }
+
+\begin{document}
+
+\renewcommand{\subinc}[1]{  }
+\renewcommand{\subexc}[1]{#1}
+
+%% Frontmatter: covers
+%% ({sub}title, DOI, authors, abstract and color theme are specific to each manual)
+%% =================================================================================================
+
+%\frontmatter %% Not recognized in 'scrreprt' document class
+\pagenumbering{gobble}   %% Disable page numbering temporarily
+\pagestyle{empty}
+
+\input{../../global/frontpage}
+\input{../../global/info_page}
+
+\cleardoublepage
+
+\pagenumbering{Roman} %% Reactivate page numbering (uppercase roman numbers)
+\pagestyle{plain}
+%\lastpageref{pagesLTS.0}
+
+\tableofcontents
+\listoffigures
+\listoflistings
+\listoftables
+%\listoftodos
+%\lastpageref{pagesLTS.Roman}
+
+\cleardoublepage
+
+%% Mainmatter: toc, lists, introduction and primary chapters
+%% =================================================================================================
+
+%\mainmatter %% Not recognized in 'scrreprt' document class
+\pagenumbering{arabic} %% Standard page numbering
+\pagestyle{plain}
+
+\input{introduction}
+
+\cleardoublepage
+
+\pagestyle{scrheadings}
+\renewcommand{\chapterpagestyle}{empty}
+
+\input{chapters}
+
+%% Appendix: subordinate chapters
+%% =================================================================================================
+
+\appendix %% Chapter numbering with letters by now
+\lohead{Apdx \thechapter\ \leftmark}
+
+\input{appendices}
+
+\input{../../global/coding_rules} %% Add coding rules on every manual
+
+%\lastpageref{pagesLTS.arabic}
+\cleardoublepage
+
+%% Backmatter: bibliography, glossaries and indices
+%% =================================================================================================
+
+%\backmatter %% Not recognized in 'scrreprt' document class
+\pagenumbering{roman} %% Lowercase roman numbers
+\pagestyle{plain}
+
+\input{../../global/epilogue}
+
+%\lastpageref{pagesLTS.roman}
+
+\end{document}

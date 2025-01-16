@@ -1,0 +1,8 @@
+      ! Variable setting
+      ctrcnm    (jp_age) = 'Age'
+      ctrcln    (jp_age) = 'Sea water age since surface contact'
+      ctrcun    (jp_age) = 'year'
+      ln_trc_ini(jp_age) = .false.
+      ln_trc_sbc(jp_age) = .false.
+      ln_trc_cbc(jp_age) = .false.
+      ln_trc_obc(jp_age) = .false.

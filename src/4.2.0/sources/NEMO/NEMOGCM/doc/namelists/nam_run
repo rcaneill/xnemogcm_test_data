@@ -1,0 +1,8 @@
+!-----------------------------------------------------------------------
+&nam_run      !  Characteristics of the simulation
+!-----------------------------------------------------------------------
+  ln_sed_2way = .false.  ! 2 way coupling with pisces
+  nrosorder   = 3        ! Order of the rosenbrock methode (3,4)
+  rosatol     = 1.E-4    ! Tolerance for the absolute error
+  rosrtol     = 1.E-4    ! Tolerance for the relative error
+/

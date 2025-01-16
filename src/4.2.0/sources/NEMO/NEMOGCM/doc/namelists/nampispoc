@@ -1,0 +1,11 @@
+!-----------------------------------------------------------------------
+&nampispoc     !   parameters for organic particles
+!-----------------------------------------------------------------------
+   xremip    =  0.035     ! remineralisation rate of POC
+   jcpoc     =  15        ! Number of lability classes
+   rshape    =  1.0       ! Shape of the gamma function
+!                         ! ln_p5z
+   xremipc   =  0.028     ! remineralisation rate of POC
+   xremipn   =  0.03      ! remineralisation rate of PON
+   xremipp   =  0.035     ! remineralisation rate of POP
+/

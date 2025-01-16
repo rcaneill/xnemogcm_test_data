@@ -1,0 +1,146 @@
+<?xml version="1.0"?>
+<simulation>
+
+ <context id="test">
+   <calendar type="Gregorian" start_date="2012-03-01 15:00:00" time_origin="2012-02-29 15:00:00" />
+
+   <field_definition level="1" enabled=".FALSE." default_value="9.96921e+36">
+     <field id="field_Domain_Axis"  operation="average" freq_op="3600s" domain_ref="domain_A"  axis_ref="axis_A" />
+     <field id="field_A"  operation="average" freq_op="3600s" grid_ref="grid_A" />
+     <field id="field_Axis"  operation="average" freq_op="3600s" grid_ref="grid_Axis" />
+     <field id="field_Two_Axis"  operation="average" freq_op="3600s" grid_ref="grid_Two_Axis" />
+     <field id="field_All_Axis" operation="average" freq_op="3600s" grid_ref="grid_All_Axis" />
+     <field id="field_Axis_transformed"  operation="average" freq_op="3600s" field_ref="field_A" grid_ref="grid_Axis_tranformed" />
+     <field id="field_Axis_transformed_Interpolated"  operation="average" freq_op="3600s" field_ref="field_Axis" grid_ref="grid_Axis_tranformed_Interpolated" />
+     <field id="field_Domain_transformed_Interpolated"  operation="average" freq_op="3600s" field_ref="field_A" grid_ref="grid_Domain_tranformed_Interpolated" />
+     <field id="field_Scalar" operation="average" freq_op="3600s" grid_ref="ScalarGrid" />
+     <field id="field_ReduceScalar" operation="average" field_ref="field_A" freq_op="3600s" grid_ref="ScalarReduceGrid" />
+     <field id="field_Value"  operation="average" freq_op="3600s" grid_ref="grid_A" />
+   </field_definition>
+
+   <file_definition type="multiple_file" par_access="collective" output_freq="6h" output_level="10" enabled=".TRUE.">
+     <file id="output" name="output" type="one_file">
+        <field field_ref="field_A" />
+     </file>
+     <file id="output_Axis" name="output_Axis" type="one_file">
+        <field field_ref="field_Axis" />
+     </file>
+     <file id="output_Two_Axis" name="output_Two_Axis" type="one_file">
+        <field field_ref="field_Two_Axis" />
+     </file>
+     <file id="output_All_Axis" name="output_All_Axis" type="one_file">
+        <field field_ref="field_All_Axis" />
+     </file>
+     <file id="output_Axis_transformed" name="output_Axis_transformed" type="one_file">
+        <field field_ref="field_Axis_transformed" />
+     </file>
+     <file id="output_Axis_transformed_interpolated" name="output_Axis_transformed_interpolated">
+        <field field_ref="field_Axis_transformed_Interpolated" />
+     </file>
+     <file id="output_Domain_transformed_interpolated" name="output_Domain_transformed_interpolated" type="one_file">
+        <field field_ref="field_Domain_transformed_Interpolated" />
+     </file>
+     <file id="output_Scalar" name="output_Scalar" type="one_file">
+        <field field_ref="field_Scalar" />
+     </file>
+     <file id="output_ReduceScalar" name="output_ReduceScalar" type="one_file">
+        <field field_ref="field_ReduceScalar" />
+     </file>
+   </file_definition>
+
+   <axis_definition>
+     <axis id="axis_A" />
+     <axis id="axis_B" />
+     <axis id="axis_C" />
+     <axis id="axis_D" />
+     <axis id="axis_E">
+       <interpolate_axis type="polynomial" order="3"/>
+     </axis>
+     <axis id="axis_F" axis_ref="axis_C">
+       <interpolate_axis type="polynomial" order="3" coordinate="field_Value"/>
+<!--       <inverse_axis />-->
+<!--        <zoom_axis begin="0" n="4" />-->
+<!--        <inverse_axis />-->
+     </axis>
+   </axis_definition>
+
+   <scalar_definition>
+     <scalar id="scalar" value="10.0">
+       <reduce_axis operation="max"/>
+     </scalar>
+   </scalar_definition>
+
+   <domain_definition>
+     <domain id="domain_A" />
+     <domain id="domain_A_transformed">
+       <generate_rectilinear_domain />
+     </domain>
+   </domain_definition>
+
+   <grid_definition>
+     <grid_group id="gridGroup">
+       <grid id="grid_A">
+         <domain domain_ref="domain_A" />
+         <axis axis_ref="axis_C" positive="up"/>
+       </grid>
+       <grid id="grid_Axis">
+         <axis axis_ref="axis_D" />
+       </grid>
+       <grid id="grid_Two_Axis">
+         <axis axis_ref="axis_A" />
+         <axis axis_ref="axis_B" />
+       </grid>
+       <grid id="grid_All_Axis">
+         <axis axis_ref="axis_A" />
+         <axis axis_ref="axis_B" />
+         <axis axis_ref="axis_C" />
+       </grid>
+       <grid id="grid_Axis_tranformed">
+         <domain domain_ref="domain_A" />
+         <axis axis_ref="axis_F" />
+       </grid>
+       <grid id="grid_Domain_tranformed_Interpolated">
+         <domain domain_ref="domain_A_transformed" />
+         <axis axis_ref="axis_C" />
+       </grid>
+       <grid id="grid_Axis_tranformed_Interpolated">
+         <axis axis_ref="axis_E" />
+       </grid>
+       <grid id="ScalarReduceGrid">
+        <domain domain_ref="domain_A" />
+        <scalar scalar_ref="scalar"/>
+       </grid>
+       <grid id="ScalarGrid">
+        <scalar scalar_ref="scalar"/>
+       </grid>
+     </grid_group>
+   </grid_definition>
+
+  </context>
+
+  <context id="toto" >
+  </context>
+
+  <context id="titi">
+  </context>
+
+  <context id="tata">
+  </context>
+
+  <context id="xios">
+      <variable_definition>
+        <variable_group id="buffer">
+            <variable id="optimal_buffer_size" type="string">performance</variable>
+            <variable id="buffer_size_factor" type="double">1.0</variable>
+         </variable_group>
+
+        <variable_group id="parameters" >
+          <variable id="using_server" type="bool">false</variable>
+          <variable id="info_level" type="int">50</variable>
+	        <variable id="print_file" type="bool">true</variable>
+        </variable_group>
+      </variable_definition>
+  </context>
+
+</simulation>
+

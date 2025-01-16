@@ -1,0 +1,6 @@
+#!/bin/bash
+
+source ./load_env_local
+mkdir -p RUN_TEST_SUITE
+cp -r TEST_SUITE/* RUN_TEST_SUITE
+(cd RUN_TEST_SUITE && ./run_test_${xios_machine_name}_local)

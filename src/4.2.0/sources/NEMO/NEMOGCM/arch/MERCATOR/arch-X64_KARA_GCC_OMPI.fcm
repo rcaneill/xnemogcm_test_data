@@ -1,0 +1,65 @@
+# compiler options for KARA (using GNU compiler)
+#
+# GNU_OMPI (NEMO-4.0 + XIOS-2.5)
+# gcc/9.3.0 openmpi/4.0.5_gcc9.3.0 hdf5/1.8.18_gcc9.3.0 netcdf/4.7.1_gcc9.3.0 xios/2.5_rev1903_gcc9.3.0
+#
+# GNU_OMPI (NEMO-4.2 + XIOS-TRUNK)
+# gcc/9.3.0 openmpi/4.0.5_gcc9.3.0 hdf5/1.8.18_gcc9.3.0 netcdf/4.7.1_gcc9.3.0 xios/trunk_rev2136_gcc9.3.0
+#
+#
+# NCDF_INC    netcdf4 include file
+# NCDF_LIB    netcdf4 library
+# XIOS_INC    xios include file    (taken into accound only if key_xios is activated)
+# XIOS_LIB    xios library         (taken into accound only if key_xios is activated)
+# OASIS_INC   oasis include file   (taken into accound only if key_oasis3 is activated)
+# OASIS_LIB   oasis library        (taken into accound only if key_oasis3 is activated)
+#
+# FC          Fortran compiler command
+# FCFLAGS     Fortran compiler flags
+# FFLAGS      Fortran 77 compiler flags
+# LD          linker
+# LDFLAGS     linker flags, e.g. -L<lib dir> if you have libraries
+# FPPFLAGS    pre-processing flags
+# AR          assembler
+# ARFLAGS     assembler flags
+# MK          make
+# USER_INC    complete list of include files
+# USER_LIB    complete list of libraries to pass to the linker
+# CC          C compiler used to compile conv for AGRIF
+# CFLAGS      compiler flags used with CC
+#
+# Note that:
+#  - unix variables "$..." are accpeted and will be evaluated before calling fcm.
+#  - fcm variables are starting with a % (and not a $)
+#
+#---------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------
+# All NETCDF and HDF paths are empty as they are automatically defined through environment
+# variables by the load of modules
+#---------------------------------------------------------------------------------------------
+#---------------------------------------------------------------------------------------------
+#
+#
+%NCDF_INC            -I${NETCDF_INC}
+%NCDF_LIB            -L${NETCDF_LIB} -lnetcdff -lnetcdf -L${HDF5_LIB} -lhdf5_hl -lhdf5
+%XIOS_INC            -I${XIOS_INC}
+%XIOS_LIB            -L${XIOS_LIB} -lxios
+%OASIS_INC           -I${OASIS_DIR}/build/lib/mct -I${OASIS_DIR}/build/lib/psmile.MPI1
+%OASIS_LIB           -L${OASIS_DIR}/lib -lpsmile.MPI1 -lmct -lmpeu -lscrip
+
+%CPP                 cpp -Dkey_nosignedzero
+%FC                  mpif90 -c -cpp
+#%FCFLAGS             -fdefault-real-8 -O2 -ftree-vectorize -funroll-all-loops -march=skylake-avx512 -ffree-line-length-none -Wno-missing-include-dirs
+%FCFLAGS             -fdefault-real-8 -O1 -march=skylake-avx512 -ffree-line-length-none -Wno-missing-include-dirs
+%FFLAGS              %FCFLAGS
+%LD                  mpif90
+%LDFLAGS             -lstdc++
+%FPPFLAGS            -P -traditional
+%AR                  ar
+%ARFLAGS             rs
+%MK                  gmake
+%USER_INC            %XIOS_INC %OASIS_INC %NCDF_INC
+%USER_LIB            %XIOS_LIB %OASIS_LIB %NCDF_LIB
+
+%CC                  gcc
+%CFLAGS              -O0

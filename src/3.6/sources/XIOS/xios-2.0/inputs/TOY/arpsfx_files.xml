@@ -1,0 +1,24 @@
+
+<file_definition  type="one_file">
+
+ <file_group timeseries="exclusive" append="true" time_units="days">
+
+
+  <file ts_prefix="./%file_name%" name="x1107_arpsfx_ts"
+	output_freq="1ts" split_freq="1d" enabled="true" >
+
+    <field_group  operation="average" expr="@this" 
+		 default_value="1.e+20" ts_split_freq="1mo" ts_enabled="true" >
+
+      <!-- Surfex fields -->
+      <field field_ref="tas" grid_ref="grid_complete" />
+      <!-- Arpege fields -->
+      <field field_ref="pa_p" grid_ref="grid_complete_3D_p" name="pa_p_complete"/>
+      <field field_ref="pa_p"                               name="pa_p_native"/>
+      <field field_ref="pa"                                 name="pa_native"/>
+      </field_group >
+  </file>
+
+ </file_group>
+
+</file_definition>

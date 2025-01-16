@@ -1,0 +1,10 @@
+#!/bin/bash
+export COPY_TO_SERVER=false
+if [[ $1 == "--copy" ]]
+then
+  export COPY_TO_SERVER=$2
+  echo "copy to server =" ${COPY_TO_SERVER}
+fi
+source ./load_env
+./launch_compile $1 $2
+./launch_test_suite $1 $2

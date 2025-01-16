@@ -1,0 +1,16 @@
+# configurations & testcases
+
+*/work_cfgs.txt
+cfgs/*/BLD
+cfgs/*/EXP00
+cfgs/*/WORK
+cfgs/*_ST
+tests/*/BLD
+tests/*/EXP00
+tests/*/WORK
+tests/*_ST
+
+# mk
+mk/arch*
+mk/cpp.*
+mk/full_key_list.txt

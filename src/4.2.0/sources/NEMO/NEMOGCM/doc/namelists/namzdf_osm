@@ -1,0 +1,28 @@
+!-----------------------------------------------------------------------
+&namzdf_osm    !   OSM vertical diffusion                               (ln_zdfosm =T)
+!-----------------------------------------------------------------------
+   ln_use_osm_la = .false.     !  Use   rn_osm_la
+   rn_osm_la     = 0.3         !  Turbulent Langmuir number
+   rn_zdfosm_adjust_sd = 1.0   ! Stokes drift reduction factor
+   rn_osm_hblfrac = 0.1        ! specify top part of hbl for nn_osm_wave = 3 or 4
+   rn_osm_bl_thresh   = 5.e-5      !Threshold buoyancy for deepening of OSBL base
+   nn_ave = 0                  ! choice of horizontal averaging on avt, avmu, avmv
+   ln_dia_osm = .true.         ! output OSMOSIS-OBL variables
+   rn_osm_hbl0 = 10.           ! initial hbl value
+   ln_kpprimix = .true.        ! Use KPP-style Ri# mixing below BL
+   rn_riinfty  = 0.7           ! Highest local Ri_g permitting shear instability
+   rn_difri  =  0.005          ! max Ri# diffusivity at Ri_g = 0 (m^2/s)
+   ln_convmix  = .true.        ! Use convective instability mixing below BL
+   rn_difconv = 1. !0.01 !1.             ! diffusivity when unstable below BL  (m2/s)
+   rn_osm_dstokes     = 5.     !  Depth scale of Stokes drift (m)
+   nn_osm_wave = 0             ! Method used to calculate Stokes drift
+      !                        !  = 2: Use ECMWF wave fields
+      !                        !  = 1: Pierson Moskowitz wave spectrum
+      !                        !  = 0: Constant La# = 0.3
+   nn_osm_SD_reduce = 0        ! Method used to get active Stokes drift from surface value
+      !                        !  = 0: No reduction
+                               !  = 1: use SD avged over top 10% hbl
+                               !  = 2:use surface value of SD fit to slope at rn_osm_hblfrac*hbl below surface
+   ln_zdfosm_ice_shelter = .true.  ! reduce surface SD and depth scale under ice
+   ln_osm_mle = .true.         !  Use integrated FK-OSM model
+/

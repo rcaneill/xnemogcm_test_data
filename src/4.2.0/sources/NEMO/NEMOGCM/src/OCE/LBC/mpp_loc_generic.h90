@@ -1,0 +1,139 @@
+                          !==  IN: ptab is an array  ==!
+#   if defined SINGLE_PRECISION
+#      define ARRAY_TYPE(i,j,k)    REAL(sp)        , INTENT(in   ) ::   ARRAY_IN(i,j,k)
+#if ! defined key_mpi_off
+#      define MPI_TYPE MPI_2REAL
+#endif
+#      define PRECISION sp
+#   else
+#      define ARRAY_TYPE(i,j,k)    REAL(dp)        , INTENT(in   ) ::   ARRAY_IN(i,j,k)
+#if ! defined key_mpi_off
+#      define MPI_TYPE MPI_2DOUBLE_PRECISION
+#endif
+#      define PRECISION dp
+#   endif
+
+#   if defined DIM_2d
+#      define ARRAY_IN(i,j,k)   ptab(i,j)
+#      define MASK_IN(i,j,k)    ldmsk(i,j)
+#      define INDEX_TYPE(k)        INTEGER         , INTENT(  out) ::   kindex(2)
+#      define K_SIZE(ptab)      1
+#   endif
+#   if defined DIM_3d
+#      define ARRAY_IN(i,j,k)   ptab(i,j,k)
+#      define MASK_IN(i,j,k)    ldmsk(i,j,k)
+#      define INDEX_TYPE(k)        INTEGER         , INTENT(  out) ::   kindex(3)
+#      define K_SIZE(ptab)      SIZE(ptab,3)
+#   endif
+#   if defined OPERATION_MAXLOC
+#      define MPI_OPERATION MPI_MAXLOC
+#      define LOC_OPERATION MAXLOC
+#      define ERRVAL -HUGE
+#   endif
+#   if defined OPERATION_MINLOC
+#      define MPI_OPERATION MPI_MINLOC
+#      define LOC_OPERATION MINLOC
+#      define ERRVAL HUGE
+#   endif
+
+   SUBROUTINE ROUTINE_LOC( cdname, ptab, ldmsk, pmin, kindex, ldhalo )
+      !!----------------------------------------------------------------------
+      CHARACTER(len=*), INTENT(in    ) ::   cdname  ! name of the calling subroutine
+      ARRAY_TYPE(:,:,:)                            ! array on which loctrans operation is applied
+      LOGICAL          , INTENT(in   ) ::   MASK_IN(:,:,:)                     ! local mask
+      REAL(PRECISION)  , INTENT(  out) ::   pmin    ! Global minimum of ptab
+      INDEX_TYPE(:)                                ! index of minimum in global frame
+      LOGICAL, OPTIONAL, INTENT(in   ) ::   ldhalo  ! If .false. (default) excludes halos in kindex 
+      !
+      INTEGER  ::   ierror, ii, idim
+      INTEGER  ::   index0
+      INTEGER , DIMENSION(:), ALLOCATABLE  ::   ilocs
+      REAL(PRECISION) ::   zmin     ! local minimum
+      REAL(PRECISION), DIMENSION(2,1) ::   zain, zaout
+      LOGICAL  ::   llhalo
+      !!-----------------------------------------------------------------------
+      !
+      IF( narea == 1 .AND. numcom == -1 ) CALL mpp_report( cdname, ld_glb = .TRUE. )
+      !
+      IF( PRESENT(ldhalo) ) THEN   ;   llhalo = ldhalo
+      ELSE                         ;   llhalo = .FALSE.
+      ENDIF
+      !
+      idim = SIZE(kindex)
+      !
+      IF ( ANY( MASK_IN(:,:,:) ) ) THEN   ! there is at least 1 valid point...
+         !
+         ALLOCATE ( ilocs(idim) )
+         !
+         ilocs = LOC_OPERATION( ARRAY_IN(:,:,:) , mask= MASK_IN(:,:,:) )
+         zmin  = ARRAY_IN(ilocs(1),ilocs(2),ilocs(3))
+         !
+         kindex(1) = mig( ilocs(1) )
+#if defined DIM_2d || defined DIM_3d    /* avoid warning when kindex has 1 element */
+         kindex(2) = mjg( ilocs(2) )
+#endif
+#if defined DIM_3d                      /* avoid warning when kindex has 2 elements */
+         kindex(3) = ilocs(3)
+#endif
+         ! 
+         DEALLOCATE (ilocs)
+         !
+         index0 = kindex(1)-1   ! 1d index starting at 0
+#if defined DIM_2d || defined DIM_3d   /* avoid warning when kindex has 1 element */
+         index0 = index0 + jpiglo * (kindex(2)-1)
+#endif
+#if defined DIM_3d                     /* avoid warning when kindex has 2 elements */
+         index0 = index0 + jpiglo * jpjglo * (kindex(3)-1)
+#endif
+      ELSE
+         ! special case for land processors
+         zmin = ERRVAL(zmin)
+         index0 = 0
+      END IF
+      !
+      zain(1,:) = zmin
+      zain(2,:) = REAL(index0, PRECISION)
+      !
+#if ! defined key_mpi_off
+      IF( ln_timing ) CALL tic_tac(.TRUE., ld_global = .TRUE.)
+      CALL MPI_ALLREDUCE( zain, zaout, 1, MPI_TYPE, MPI_OPERATION ,MPI_COMM_OCE, ierror)
+      IF( ln_timing ) CALL tic_tac(.FALSE., ld_global = .TRUE.)
+#else
+      zaout(:,:) = zain(:,:)
+#endif
+      !
+      pmin      = zaout(1,1)
+      index0    = NINT( zaout(2,1) )
+#if defined DIM_3d                     /* avoid warning when kindex has 2 elements */
+      kindex(3) = index0 / (jpiglo*jpjglo)
+      index0    = index0 - kindex(3) * (jpiglo*jpjglo)
+#endif
+#if defined DIM_2d || defined DIM_3d   /* avoid warning when kindex has 1 element */
+      kindex(2) = index0 / jpiglo
+      index0 = index0 - kindex(2) * jpiglo
+#endif
+      kindex(1) = index0
+      kindex(:) = kindex(:) + 1   ! start indices at 1
+
+      IF( .NOT. llhalo ) THEN
+         kindex(1)  = kindex(1) - nn_hls
+#if defined DIM_2d || defined DIM_3d   /* avoid warning when kindex has 1 element */
+         kindex(2)  = kindex(2) - nn_hls
+#endif
+      ENDIF
+      
+   END SUBROUTINE ROUTINE_LOC
+
+
+#undef PRECISION
+#undef ARRAY_TYPE
+#undef ARRAY_IN
+#undef MASK_IN
+#undef K_SIZE
+#if ! defined key_mpi_off
+#   undef MPI_TYPE
+#endif
+#undef MPI_OPERATION
+#undef LOC_OPERATION
+#undef INDEX_TYPE
+#undef ERRVAL

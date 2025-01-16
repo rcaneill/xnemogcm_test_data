@@ -1,0 +1,16 @@
+*.aux
+*.bbl
+*.blg
+*.fdb*
+*.fls
+*.idx
+*.ilg
+*.ind
+*.lo*
+*.out
+*.pdf
+*.pyg
+*.tdo
+*.toc
+*.xdv
+cache*

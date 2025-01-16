@@ -1,0 +1,18 @@
+!------------------------------------------------------------------------------
+&nampar         !   Generic parameters
+!------------------------------------------------------------------------------
+   jpl              =   5             !  number of ice  categories
+   nlay_i           =   2             !  number of ice  layers
+   nlay_s           =   1             !  number of snow layers (only 1 is working)
+   nn_virtual_itd   =   0             !  virtual ITD mono-category parameterizations (1-3 => jpl = 1 only) or not (0)
+                                      !     2: activate enhanced thermal conductivity only --- temporary option
+                                      !     3: activate virtual thin ice melting only      ---  temporary option
+   ln_icedyn        = .true.          !  ice dynamics (T) or not (F)
+   ln_icethd        = .true.          !  ice thermo   (T) or not (F)
+   rn_amax_n        =   0.997         !  maximum tolerated ice concentration NH
+   rn_amax_s        =   0.997         !  maximum tolerated ice concentration SH
+   cn_icerst_in     = "restart_ice"   !  suffix of ice restart name (input)
+   cn_icerst_out    = "restart_ice"   !  suffix of ice restart name (output)
+   cn_icerst_indir  = "."             !  directory to read   input ice restarts
+   cn_icerst_outdir = "."             !  directory to write output ice restarts
+/

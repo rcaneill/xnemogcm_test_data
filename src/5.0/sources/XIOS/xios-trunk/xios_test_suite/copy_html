@@ -1,0 +1,4 @@
+#!/bin/bash
+
+source ./load_env
+(cd HTML && ./copy_html_${xios_machine_name})

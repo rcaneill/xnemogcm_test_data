@@ -1,0 +1,9 @@
+!-----------------------------------------------------------------------
+&namtrc_ais      !  Representation of Antarctic Ice Sheet tracers supply
+!-----------------------------------------------------------------------
+   rn_trafac(3)  =  4.476e-07   !  (  0.5e-3 / 55.85 * 0.05 )
+!
+   nn_ais_tr     =  1      !  tracer concentration in iceberg and ice shelf
+                           !    = 0 (null concentrations)
+                           !    = 1 prescribed concentrations
+   rn_icbdep     =  120.   ! Mean underwater depth of iceberg (m)

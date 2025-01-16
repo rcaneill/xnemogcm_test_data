@@ -1,0 +1,106 @@
+#!/bin/bash 
+#!
+#BSUB -q poe_short
+#BSUB -n TOTAL_NPROCS
+#BSUB -a poe
+#BSUB -J NEMO_SETTE
+#BSUB -o poe.stdout.%J
+#BSUB -e poe.stderr.%J
+
+ 
+
+###############################################################
+# Test specific settings. Do not hand edit these lines; the fcm_job.sh script will set these
+# (via sed operating on this template job file). 
+#
+  OCEANCORES=NPROCS
+  XIOS_NUMPROCS=NXIOPROCS
+  export SETTE_DIR=DEF_SETTE_DIR
+
+###############################################################
+#
+# set up mpp computing environment
+#
+# Local settings for machine IBM Power6 (VARGAS at IDRIS France)
+#
+
+# export MPIRUN="mpirun -n $OCEANCORES"
+
+module load  INTEL/intel_xe_2013 NETCDF/netcdf-4.3_parallel NETCDF/parallel-netcdf-1.3.1 HDF5/hdf5-1.8.11_parallel
+export MPIRUN="mpirun.lsf"
+
+export LD_LIBRARY_PATH=${XIOS}/lib:${LD_LIBRARY_PATH}
+
+XIOS_SERVER_PATHNAME="${XIOS}/bin/xios_server.exe"
+
+#
+# load sette functions (only post_test_tidyup needed)
+#
+  . ${SETTE_DIR}/all_functions.sh
+
+
+# Don't remove neither change the following line 
+# BODY
+
+#
+# These variables are needed by post_test_tidyup function in all_functions.sh
+#
+  export EXE_DIR=DEF_EXE_DIR
+  export INPUT_DIR=DEF_INPUT_DIR
+  export CONFIG_DIR=DEF_CONFIG_DIR
+  export NEMO_VALIDATION_DIR=DEF_NEMO_VALIDATION
+  export NEW_CONF=DEF_NEW_CONF
+  export CMP_NAM=DEF_CMP_NAM
+  export TEST_NAME=DEF_TEST_NAME
+#
+# end of set up
+
+
+###############################################################
+#
+# change to the working directory 
+#
+cd ${EXE_DIR}
+
+#
+  echo Running on host `hostname`
+  echo Time is `date`
+  echo Directory is `pwd`
+# 
+#  Run the parallel MPI executable 
+#
+#  echo "Running time ${MPIRUN} " $OCEANCORES " ./opa"
+#
+
+  if [ MPI_FLAG == "yes" ]; then
+     if [ $XIOS_NUMPROCS -eq 0 ]; then
+       time ${MPIRUN} ./opa
+     else
+
+       export MP_PGMMODEL=mpmd
+       export MP_CMDFILE=xioscmdfile
+       rm xioscmdfile &> /dev/null
+       touch xioscmdfile
+       k=0
+       while (( k < $OCEANCORES )) ; do
+          echo ./opa >> xioscmdfile
+          k=`expr $k + 1`
+       done
+       k=0
+       while (( k < $XIOS_NUMPROCS )) ; do
+          echo $XIOS_SERVER_PATHNAME >> xioscmdfile
+          k=`expr $k + 1`
+       done
+
+       time ${MPIRUN}
+     fi
+  else
+     time ./opa
+  fi
+#
+  post_test_tidyup
+
+# END_BODY
+# Don't remove neither change the previous line 
+
+  exit

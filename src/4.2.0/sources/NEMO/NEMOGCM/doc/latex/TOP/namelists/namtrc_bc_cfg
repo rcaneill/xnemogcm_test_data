@@ -1,0 +1,17 @@
+!----------------------------------------------------------------------
+&namtrc_bc       !   data for boundary conditions
+!-----------------------------------------------------------------------
+!                !  file name        ! frequency (hours) ! variable      ! time interp. !  clim  ! 'yearly'/ ! 
+!                !                   !  (if <0  months)  !   name        !   (logical)  !  (T/F) ! 'monthly' ! 
+   sn_trcsbc(2)  = 'dust.orca.new'   ,       -1          , 'dustfer'     ,  .true.      , .true. , 'yearly'  
+   sn_trcsbc(3)  = 'ndeposition.orca',      -12          , 'ndep'        ,  .false.     , .true. , 'yearly'  
+   rn_trsfac(2)  = 6.266e-04    ! Multiplicative factor
+   rn_trsfac(3)  =  5.4464e-01  !
+!
+   sn_trccbc(1)  = 'river.orca'      ,    -12            , 'riverdic'    ,  .true.      , .true. , 'yearly'  
+   sn_trccbc(2)  = 'river.orca'      ,    -12            , 'riverdfe'    ,  .true.      , .true. , 'yearly' 
+   sn_trccbc(3)  = 'river.orca'      ,    -12            , 'riverdin'    ,  .true.      , .true. , 'yearly'
+   rn_trcfac(1)  = 1.0   ! Multiplicative factor
+   rn_trcfac(2)  = 1.0   !
+   rn_trcfac(3)  = 1.0   ! 
+   rn_cbc_time   = 3.1536e+7   !  Time scaling factor for CBC data (seconds in a year)

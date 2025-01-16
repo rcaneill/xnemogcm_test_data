@@ -1,0 +1,21 @@
+!------------------------------------------------------------------------------
+&namsbc         !   Ice surface boundary conditions
+!------------------------------------------------------------------------------
+   rn_cio           =   5.0e-03       !  ice-ocean drag coefficient (-)
+   nn_snwfra        =   2             !  calculate the fraction of ice covered by snow (for zdf and albedo)
+                                      !     = 0  fraction = 1 (if snow) or 0 (if no snow)
+                                      !     = 1  fraction = 1-exp(-0.2*rhos*hsnw) [MetO formulation]
+                                      !     = 2  fraction = hsnw / (hsnw+0.02)    [CICE formulation]
+   rn_snwblow       =   0.66          !  mesure of snow blowing into the leads
+                                      !     = 1 => no snow blowing, < 1 => some snow blowing
+   nn_flxdist       =  -1             !  Redistribute heat flux over ice categories
+                                      !     =-1  Do nothing (needs N(cat) fluxes)
+                                      !     = 0  Average N(cat) fluxes then apply the average over the N(cat) ice
+                                      !     = 1  Average N(cat) fluxes then redistribute over the N(cat) ice using T-ice and albedo sensitivity
+                                      !     = 2  Redistribute a single flux over categories
+   ln_cndflx        = .false.         !  Use conduction flux as surface boundary conditions (i.e. for Jules coupling)
+      ln_cndemulate = .false.         !     emulate conduction flux (if not provided in the inputs)
+   nn_qtrice        =   0             !  Solar flux transmitted thru the surface scattering layer:
+                                      !     = 0  Grenfell and Maykut 1977 (depends on cloudiness and is 0 when there is snow) 
+                                      !     = 1  Lebrun 2019 (equals 0.3 anytime with different melting/dry snw conductivities)
+/
