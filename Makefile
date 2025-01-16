@@ -20,6 +20,7 @@ bld/containers/%/apptainer-nemo.sif : src/%/apptainer-nemo.def src/%/arch_xios s
 	mkdir -p $(@D)
 	ln -s src/$*/arch_xios .
 	ln -s src/$*/arch_nemo .
+	ls -s src/$*/sources .
 	apptainer build $@ $<
 	rm -rf arch_xios arch_nemo
 
