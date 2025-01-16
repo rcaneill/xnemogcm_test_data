@@ -1,0 +1,2 @@
+ORCA1_CICE # ORCA2_LIM # OPA_SRC TOP_SRC  # http://gws-access.ceda.ac.uk/public/nemo/uspconfigs/ORCA1_CICE/v3.6.0/ORCA1_CICE_ctl.txt
+ISOMIP     # GYRE      # OPA_SRC          # http://gws-access.ceda.ac.uk/public/nemo/uspconfigs/ISOMIP/v3.6.0/ISOMIP_ctl.txt

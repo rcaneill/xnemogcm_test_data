@@ -1,0 +1,63 @@
+step.class[build-tools] = build
+steps = extract preprocess build build-tools
+
+extract.ns = nemo
+extract.location[nemo]  = $HERE/../../..
+extract.path-root[nemo] = NEMOGCM
+extract.path-excl[nemo] = / \
+                        \ NEMO/OPA_SRC/TRD/trdmod_trc.F90 \
+                        \ NEMO/LIM_SRC_2/limrhg.F90 \
+                        \ TOOLS/OBSTOOLS/src/obs_prof_io.F90 \
+                        \ TOOLS/OBSTOOLS/src/ddatetoymdhms.h90 \
+                        \ TOOLS/OBSTOOLS/src/obs_fbm.F90 \
+                        \ TOOLS/OBSTOOLS/src/dom_oce.F90 \
+                        \ TOOLS/OBSTOOLS/src/obsprof_io.h90 \
+                        \ TOOLS/OBSTOOLS/src/str_c_to_for.h90 \
+                        \ TOOLS/OBSTOOLS/src/wrk_nemo.F90 \
+                        \ TOOLS/OBSTOOLS/src/obsvel_io.h90 \
+                        \ TOOLS/OBSTOOLS/src/grt_cir_dis_saa.h90 \
+                        \ TOOLS/OBSTOOLS/src/obs_sla_io.F90 \
+                        \ TOOLS/OBSTOOLS/src/lbcnfd.F90 \
+                        \ TOOLS/OBSTOOLS/src/obssla_types.h90 \
+                        \ TOOLS/OBSTOOLS/src/obs_utils.F90 \
+                        \ TOOLS/OBSTOOLS/src/lib_mpp.F90 \
+                        \ TOOLS/OBSTOOLS/src/obs_vel_io.F90 \
+                        \ TOOLS/OBSTOOLS/src/grt_cir_dis.h90 \
+                        \ TOOLS/OBSTOOLS/src/obs_conv_functions.h90 \
+                        \ TOOLS/OBSTOOLS/src/greg2jul.h90 \
+                        \ TOOLS/OBSTOOLS/src/obs_sla_types.F90 \
+                        \ TOOLS/OBSTOOLS/src/obssla_io.h90 \
+                        \ TOOLS/OBSTOOLS/src/obs_conv.F90 \
+                        \ TOOLS/OBSTOOLS/src/par_kind.F90 \
+                        \ TOOLS/WEIGHTS/SCRIP1.4 \
+                        \ TOOLS/WEIGHTS/nocsutil \
+                        \ EXTERNAL/IOIPSL/tools/tkcond.c \
+                        \ EXTERNAL/IOIPSL/tools/tkgen.c \
+                        \ EXTERNAL/IOIPSL/tools/tkparse.c \
+                        \ EXTERNAL/IOIPSL/tools/tkparse.h
+extract.path-incl[nemo] = EXTERNAL/IOIPSL NEMO/LIM_SRC_2 NEMO/LIM_SRC_3 NEMO/OPA_SRC NEMO/TOP_SRC \
+                        \ TOOLS/BDY_TOOLS TOOLS/GRIDGEN TOOLS/MPP_PREP TOOLS/NESTING TOOLS/OBSTOOLS/src \
+                        \ TOOLS/REBUILD_NEMO TOOLS/SECTIONS_DIADCT TOOLS/WEIGHTS
+
+preprocess.prop{file-ext.h} = .h90
+
+$nemo_config{?} = amm12
+include = $HERE/keys-$nemo_config.cfg
+
+build.prop{class,no-dep.f.module} = netcdf xios
+build.prop{class,no-dep.include}  = mpif.h netcdf.inc
+
+build.target            = nemo.exe \
+                        \ bdy_reorder mpp_optimiz_zoom_nc.exe mppopt_showproc_nc.exe \
+                        \ agrif_create_bathy.exe agrif_create_coordinates.exe agrif_create_data.exe \
+                        \ agrif_create_restart.exe agrif_create_restart_trc.exe \
+                        \ rebuild flio_rbld.exe rebuild_nemo rebuild_nemo.exe diadct_sections.exe \
+                        \ scrip.exe scripgrid.exe scripinterp.exe scripshape.exe
+build.ns-excl           = nemo/TOOLS/GRIDGEN/src/domain.f90 nemo/TOOLS/GRIDGEN/src/io_netcdf.f90 nemo/TOOLS/OBSTOOLS
+build.prop{dep.o}[nemo/NEMO/OPA_SRC/nemo.f90] = lib_cray.o
+
+build-tools.target      = create_coordinates.exe corio2fb.exe enact2fb.exe fbcomb.exe fbmatchup.exe \
+                        \ fbprint.exe fbsel.exe fbstat.exe fbthin.exe sla2fb.exe vel2fb.exe
+build-tools.ns-excl     = nemo/NEMO/OPA_SRC/DOM/domain.F90 nemo/NEMO/OPA_SRC/par_oce.F90 \
+                        \ nemo/NEMO/OPA_SRC/IOM/in_out_manager.F90 nemo/TOOLS/NESTING/src/io_netcdf.f90
+

@@ -1,0 +1,11 @@
+&param_toy
+ni_glo=256
+nj_glo=128
+llm=10
+timestep=1d
+sypd=1000000
+start_year=1850
+start_month=01
+start_day=01
+duration=1d
+/

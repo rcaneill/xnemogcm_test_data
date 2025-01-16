@@ -1,0 +1,413 @@
+!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+!! PISCES  (key_pisces) reference namelist (see below for key_pisces_reduced)
+!!              1  - air-sea exchange                         (nampisext)
+!!              2  - biological parameters                    (nampisbio)
+!!              3  - parameters for nutrient limitations      (nampislim)    
+!!              4  - parameters for phytoplankton             (nampisprod,nampismort)
+!!              5  - parameters for zooplankton               (nampismes,nampiszoo)
+!!              6  - parameters for remineralization          (nampisrem)
+!!              7  - parameters for calcite chemistry         (nampiscal)
+!!              8  - parameters for inputs deposition         (nampissed)
+!!              9  - parameters for Kriest parameterization   (nampiskrp, nampiskrs)
+!!              10 - additional 2D/3D  diagnostics            (nampisdia)
+!!              11 - Damping                                  (nampisdmp)
+!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+!'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+&nampisext     !   air-sea exchange
+!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+   ln_co2int  =  .false. ! read atm pco2 from a file (T) or constant (F)
+   atcco2     =  280.    ! Constant value atmospheric pCO2 - ln_co2int = F
+   clname     =  'atcco2.txt'  ! Name of atm pCO2 file - ln_co2int = T
+   nn_offset  =  0       ! Offset model-data start year - ln_co2int = T
+!                        ! If your model year is iyy, nn_offset=(years(1)-iyy) 
+!                        ! then the first atmospheric CO2 record read is at years(1)
+/
+!'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+&nampisatm     !  Atmospheric prrssure 
+!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+!              !  file name   ! frequency (hours) ! variable  ! time interp. !  clim  ! 'yearly'/ ! weights  ! rotation ! land/sea mask !
+!              !              !  (if <0  months)  !   name    !   (logical)  !  (T/F) ! 'monthly' ! filename ! pairing  ! filename      !
+   sn_patm     = 'presatm'    ,     -1            , 'patm'    ,  .true.      , .true. , 'yearly'  , ''       , ''       , ''
+   cn_dir      = './'     !  root directory for the location of the dynamical files
+!
+   ln_presatm  = .false.   ! constant atmopsheric pressure (F) or from a file (T)
+/
+!'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+&nampisbio     !   biological parameters
+!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+   nrdttrc    =  1        ! time step frequency for biology
+   wsbio      =  2.       ! POC sinking speed
+   xkmort     =  2.E-7    ! half saturation constant for mortality
+   ferat3     =  10.E-6   ! Fe/C in zooplankton 
+   wsbio2     =  30.      ! Big particles sinking speed
+   niter1max  =  1        ! Maximum number of iterations for POC
+   niter2max  =  1        ! Maximum number of iterations for GOC
+/
+!'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+&nampislim     !   parameters for nutrient limitations
+!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+   concnno3   =  1.e-6    ! Nitrate half saturation of nanophytoplankton
+   concdno3   =  3.E-6    ! Nitrate half saturation for diatoms
+   concnnh4   =  1.E-7    ! NH4 half saturation for phyto
+   concdnh4   =  3.E-7    ! NH4 half saturation for diatoms
+   concnfer   =  1.E-9    ! Iron half saturation for phyto
+   concdfer   =  3.E-9    ! Iron half saturation for diatoms
+   concbfe    =  1.E-11   ! Iron half-saturation for DOC remin.
+   concbnh4   =  2.E-8    ! NH4 half saturation for DOC remin.
+   concbno3   =  2.E-7    ! Nitrate half saturation for DOC remin.
+   xsizedia   =  1.E-6    ! Minimum size criteria for diatoms
+   xsizephy   =  1.E-6    ! Minimum size criteria for phyto
+   xsizern    =  3.0      ! Size ratio for nanophytoplankton
+   xsizerd    =  3.0      ! Size ratio for diatoms
+   xksi1      =  2.E-6    ! half saturation constant for Si uptake
+   xksi2      =  20E-6    ! half saturation constant for Si/C
+   xkdoc      =  417.E-6  ! half-saturation constant of DOC remineralization
+   qnfelim    =  7.E-6    ! Optimal quota of phyto
+   qdfelim    =  7.E-6    ! Optimal quota of diatoms
+   caco3r     =  0.3      ! mean rain ratio
+   oxymin    =  1.E-6     ! Half-saturation constant for anoxia
+/
+!'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+&nampisopt     !   parameters for optics
+!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+!              !  file name       ! frequency (hours) ! variable  ! time interp. !  clim  ! 'yearly'/ ! weights  ! rotation ! land/sea mask !
+!              !                  !  (if <0  months)  !   name    !   (logical)  !  (T/F) ! 'monthly' ! filename ! pairing  ! filename      !
+   sn_par      = 'par.orca'       ,     24            , 'fr_par'  ,  .true.      , .true. , 'yearly'  , ''       , ''       , ''
+   cn_dir      = './'      !  root directory for the location of the dynamical files
+   ln_varpar   =  .true.   ! boolean for PAR variable
+   parlux      =  0.43      ! Fraction of shortwave as PAR
+/ 
+!'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+&nampisprod     !   parameters for phytoplankton growth
+!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+   pislope    =  2.       ! P-I slope
+   pislope2   =  2.       ! P-I slope  for diatoms
+   xadap      =  0.       ! Adaptation factor to low light
+   excret     =  0.05     ! excretion ratio of phytoplankton
+   excret2    =  0.05     ! excretion ratio of diatoms
+   ln_newprod =  .true.   ! Enable new parame. of production (T/F) 
+   bresp      =  0.033    ! Basal respiration rate
+   chlcnm     =  0.033    ! Maximum Chl/C in nanophytoplankton
+   chlcdm     =  0.05     ! Maximum Chl/C in diatoms
+   chlcmin    =  0.004    ! Minimum Chl/c in phytoplankton
+   fecnm      =  40E-6    ! Maximum Fe/C in nanophytoplankton
+   fecdm      =  40E-6    ! Maximum Fe/C in diatoms
+   grosip     =  0.159    ! mean Si/C ratio
+/
+!'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+&nampismort     !   parameters for phytoplankton sinks
+!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+   wchl       =  0.01    ! quadratic mortality of phytoplankton
+   wchld      =  0.01     ! maximum quadratic mortality of diatoms
+   wchldm     =  0.03     ! maximum quadratic mortality of diatoms
+   mprat      =  0.01     ! phytoplankton mortality rate
+   mprat2     =  0.01     ! Diatoms mortality rate
+/
+!'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+&nampismes     !   parameters for mesozooplankton
+!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+   part2      =  0.75     ! part of calcite not dissolved in mesozoo guts
+   grazrat2   =  0.75     ! maximal mesozoo grazing rate
+   resrat2    =  0.005    ! exsudation rate of mesozooplankton
+   mzrat2     =  0.03     ! mesozooplankton mortality rate
+   xprefc     =  1.       ! mesozoo preference for diatoms
+   xprefp     =  0.3      ! mesozoo preference for nanophyto.
+   xprefz     =  1.       ! mesozoo preference for microzoo.
+   xprefpoc   =  0.3      ! mesozoo preference for poc
+   xthresh2zoo = 1E-8     ! zoo feeding threshold for mesozooplankton 
+   xthresh2dia = 1E-8     ! diatoms feeding threshold for mesozooplankton 
+   xthresh2phy = 1E-8     ! nanophyto feeding threshold for mesozooplankton 
+   xthresh2poc = 1E-8     ! poc feeding threshold for mesozooplankton 
+   xthresh2   =  3E-7     ! Food threshold for grazing
+   xkgraz2    =  20.E-6   ! half saturation constant for meso grazing
+   epsher2    =  0.35     ! Efficicency of Mesozoo growth
+   sigma2     =  0.6      ! Fraction of mesozoo excretion as DOM
+   unass2     =  0.3      ! non assimilated fraction of P by mesozoo
+   grazflux   =  2.e3     ! flux-feeding rate
+/
+!'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+&nampiszoo     !   parameters for microzooplankton
+!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+   part       =  0.5      ! part of calcite not dissolved in microzoo gutsa
+   grazrat    =  3.0      ! maximal zoo grazing rate
+   resrat     =  0.03     ! exsudation rate of zooplankton
+   mzrat      =  0.004    ! zooplankton mortality rate
+   xpref2c    =  0.1      ! Microzoo preference for POM
+   xpref2p    =  1.       ! Microzoo preference for Nanophyto
+   xpref2d    =  0.5      ! Microzoo preference for Diatoms
+   xthreshdia =  1.E-8    ! Diatoms feeding threshold for microzooplankton 
+   xthreshphy =  1.E-8    ! Nanophyto feeding threshold for microzooplankton 
+   xthreshpoc =  1.E-8    ! POC feeding threshold for microzooplankton 
+   xthresh    =  3.E-7    ! Food threshold for feeding
+   xkgraz     =  20.E-6   ! half sturation constant for grazing
+   epsher     =  0.3      ! Efficiency of microzoo growth
+   sigma1     =  0.6      ! Fraction of microzoo excretion as DOM
+   unass      =  0.3      ! non assimilated fraction of phyto by zoo
+/
+!'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+&nampisfer     !   parameters for iron chemistry
+!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+   ln_fechem =  .false.   ! complex iron chemistry ( T/F )
+   ln_ligvar =  .false.   ! variable ligand concentration
+   xlam1     =  0.005     ! scavenging rate of Iron
+   xlamdust  =  150.0     ! Scavenging rate of dust
+   ligand    =  0.6E-9    ! Ligands concentration 
+/  
+!'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+&nampisrem     !   parameters for remineralization
+!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+   xremik    =  0.3       ! remineralization rate of DOC
+   xremip    =  0.025     ! remineralisation rate of POC
+   nitrif    =  0.05      ! NH4 nitrification rate
+   xsirem    =  0.003     ! remineralization rate of Si
+   xsiremlab =  0.03      ! fast remineralization rate of Si
+   xsilab    =  0.5       ! Fraction of labile biogenic silica
+/
+!'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+&nampiscal     !   parameters for Calcite chemistry
+!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+   kdca       =  6.       ! calcite dissolution rate constant (1/time)
+   nca        =  1.       ! order of dissolution reaction (dimensionless)
+/
+!'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+&nampissbc     !   parameters for inputs deposition
+!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+!              !  file name        ! frequency (hours) ! variable      ! time interp. !  clim  ! 'yearly'/ ! weights  ! rotation ! land/sea mask !
+!              !                   !  (if <0  months)  !   name        !   (logical)  !  (T/F) ! 'monthly' ! filename ! pairing  ! filename      !
+   sn_dust     = 'dust.orca'       ,     -1            , 'dust'        ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_solub    = 'solubility.orca' ,    -12            , 'solubility1' ,  .false.     , .true. , 'yearly'  , ''       , ''    , ''
+   sn_riverdic = 'river.orca'      ,    120            , 'riverdic'    ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_riverdoc = 'river.orca'      ,    120            , 'riverdoc'    ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_riverdin = 'river.orca'      ,    120            , 'riverdin'    ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_riverdon = 'river.orca'      ,    120            , 'riverdon'    ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_riverdip = 'river.orca'      ,    120            , 'riverdip'    ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_riverdop = 'river.orca'      ,    120            , 'riverdop'    ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_riverdsi = 'river.orca'      ,    120            , 'riverdsi'    ,  .true.      , .true. , 'yearly'  , ''       , ''    , ''
+   sn_ndepo    = 'ndeposition.orca',    -12            , 'ndep'        ,  .false.     , .true. , 'yearly'  , ''       , ''    , ''
+   sn_ironsed  = 'bathy.orca'      ,    -12            , 'bathy'       ,  .false.     , .true. , 'yearly'  , ''       , ''    , ''
+   sn_hydrofe  = 'hydrofe.orca'    ,    -12            , 'epsdb'       ,  .false.     , .true. , 'yearly'  , ''       , ''    , ''
+!
+   cn_dir      = './'      !  root directory for the location of the dynamical files
+   ln_dust     =  .true.   ! boolean for dust input from the atmosphere
+   ln_solub    =  .true.   ! boolean for variable solubility of atm. Iron
+   ln_river    =  .true.   ! boolean for river input of nutrients
+   ln_ndepo    =  .true.   ! boolean for atmospheric deposition of N
+   ln_ironsed  =  .true.   ! boolean for Fe input from sediments
+   ln_ironice  =  .true.   ! boolean for Fe input from sea ice
+   ln_hydrofe  =  .false.  ! boolean for from hydrothermal vents
+   sedfeinput  =  2.e-9    ! Coastal release of Iron
+   dustsolub   =  0.02     ! Solubility of the dusta
+   mfrac       =  0.035    ! Fe mineral fraction of dust
+   wdust       =  2.0      ! Dust sinking speed 
+   icefeinput  =  15.e-9   ! Iron concentration in sea ice
+   nitrfix     =  1.e-7    ! Nitrogen fixation rate
+   diazolight  =  50.      ! Diazotrophs sensitivity to light (W/m2)
+   concfediaz  =  1.e-10   ! Diazotrophs half-saturation Cste for Iron
+   hratio      =  1.e+7    ! Fe to 3He ratio assumed for vent iron supply 
+/
+!'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+&nampisice      !  Prescribed sea ice tracers
+!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+! constant ocean tracer concentrations are defined in trcice_pisces.F90 (Global, Arctic, Antarctic and Baltic)
+! trc_ice_ratio     * betw 0 and 1: prescribed ice/ocean tracer concentration ratio
+!                   * -1 => the ice-ocean tracer concentration ratio follows the 
+!                           ice-ocean salinity ratio
+!                   * -2 => tracer concentration in sea ice is prescribed and 
+!                           trc_ice_prescr is used
+! trc_ice_prescr    * prescribed tracer concentration. used only if 
+!                     trc_ice_ratio = -2. equals -99 if not used.
+! cn_trc_o          * 'GL' use global ocean values making the Baltic distinction only
+!                     'AA' use specific Arctic/Antarctic/Baltic values
+!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+!    sn_tri_ ! trc_ice_ratio ! trc_ice_prescr !     cn_trc_o
+   sn_tri_dic =           -1.,           -99.,          'AA'
+   sn_tri_doc =            0.,           -99.,          'AA'
+   sn_tri_tal =           -1.,           -99.,          'AA'
+   sn_tri_oxy =           -1.,           -99.,          'AA'
+   sn_tri_cal =            0.,           -99.,          'AA'
+   sn_tri_po4 =           -1.,           -99.,          'AA'
+   sn_tri_poc =            0.,           -99.,          'AA'
+   sn_tri_goc =            0.,           -99.,          'AA'
+   sn_tri_bfe =            0.,           -99.,          'AA'
+   sn_tri_num =            0.,           -99.,          'AA'
+   sn_tri_sil =           -1.,           -99.,          'AA'
+   sn_tri_dsi =            0.,           -99.,          'AA'
+   sn_tri_gsi =            0.,           -99.,          'AA'
+   sn_tri_phy =            0.,           -99.,          'AA'
+   sn_tri_dia =            0.,           -99.,          'AA'
+   sn_tri_zoo =            0.,           -99.,          'AA'
+   sn_tri_mes =            0.,           -99.,          'AA'
+   sn_tri_fer =           -2.,          15E-9,          'AA'
+   sn_tri_sfe =            0.,           -99.,          'AA'
+   sn_tri_dfe =            0.,           -99.,          'AA'
+   sn_tri_nfe =            0.,           -99.,          'AA'
+   sn_tri_nch =            0.,           -99.,          'AA'
+   sn_tri_dch =            0.,           -99.,          'AA'
+   sn_tri_no3 =           -1.,           -99.,          'AA'
+   sn_tri_nh4 =            1.,           -99.,          'AA'
+/
+!'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+&nampiskrp     !   Kriest parameterization : parameters     "key_kriest"
+!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+   xkr_eta      = 1.17    ! Sinking  exponent
+   xkr_zeta     = 2.28    ! N content exponent
+   xkr_ncontent = 5.7E-6  ! N content factor
+   xkr_mass_min = 0.0002  ! Minimum mass for Aggregates
+   xkr_mass_max = 1.      ! Maximum mass for Aggregates
+/
+!'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+&nampiskrs     !   Kriest parameterization : size classes  "key_kriest"
+!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+   xkr_sfact    = 942.    ! Sinking factor
+   xkr_stick    = 0.5     ! Stickiness
+   xkr_nnano    = 2.337   ! Nbr of cell in nano size class
+   xkr_ndiat    = 3.718   ! Nbr of cell in diatoms size class
+   xkr_nmeso    = 7.147   ! Nbr of cell in mesozoo size class
+   xkr_naggr    = 9.877   ! Nbr of cell in aggregates  size class
+/
+!'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+&nampisdia     !   additional 2D/3D tracers diagnostics 
+!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+!              !    name   !           title of the field          !     units      !
+!              !           !                                       !                !  
+   pisdia2d(1)  = 'Cflx     ' , 'DIC flux                          ',  'molC/m2/s    '
+   pisdia2d(2)  = 'Oflx     ' , 'Oxygen flux                       ',  'molC/m2/s    '
+   pisdia2d(3)  = 'Kg       ' , 'Gas transfer                      ',  'mol/m2/s/uatm'
+   pisdia2d(4)  = 'Delc     ' , 'Delta CO2                         ',  'uatm         '
+   pisdia2d(5)  = 'PMO      ' , 'POC export                        ',  'molC/m2/s    '
+   pisdia2d(6)  = 'PMO2     ' , 'GOC export                        ',  'molC/m2/s    '
+   pisdia2d(7)  = 'ExpFe1   ' , 'Nano iron export                  ',  'molFe/m2/s   '
+   pisdia2d(8)  = 'ExpFe2   ' , 'Diatoms iron export               ',  'molFe/m2/s   '
+   pisdia2d(9)  = 'ExpSi    ' , 'Silicate export                   ',  'molSi/m2/s   '
+   pisdia2d(10) = 'ExpCaCO3 ' , 'Calcite export                    ',  'molC/m2/s    '
+   pisdia2d(11) = 'heup     ' , 'euphotic layer depth              ',  'm            '
+   pisdia2d(12) = 'Fedep    ' , 'Iron dep                          ',  'molFe/m2/s   '
+   pisdia2d(13) = 'Nfix     ' , 'Nitrogen Fixation                 ',  'molN/m2/s    '
+   pisdia3d(1)  = 'PH       ' , 'PH                                ',  '-            '
+   pisdia3d(2)  = 'CO3      ' , 'Bicarbonates                      ',  'mol/l        '
+   pisdia3d(3)  = 'CO3sat   ' , 'CO3 saturation                    ',  'mol/l        '
+   pisdia3d(4)  = 'PAR      ' , 'light penetration                 ',  'W/m2         '
+   pisdia3d(5)  = 'PPPHY    ' , 'Primary production of nanophyto   ',  'molC/m3/s    '
+   pisdia3d(6)  = 'PPPHY2   ' , 'Primary production of diatoms     ',  'molC/m3/s    '
+   pisdia3d(7)  = 'PPNEWN   ' , 'New Primary production of nano    ',  'molC/m3/s    '
+   pisdia3d(8)  = 'PPNEWD   ' , 'New Primary production of diat    ',  'molC/m3/s    '
+   pisdia3d(9)  = 'PBSi     ' , 'Primary production of Si diatoms  ',  'molSi/m3/s   '
+   pisdia3d(10) = 'PFeN     ' , 'Primary production of nano iron   ',  'molFe/m3/s   '
+   pisdia3d(11) = 'PFeD     ' , 'Primary production of diatoms iron',  'molFe/m3/s   '
+/
+!'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+&nampisdmp     !  Damping 
+!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+   ln_pisdmp    =  .true.     !  Relaxation fo some tracers to a mean value
+   nn_pisdmp    =  5475       !  Frequency of Relaxation 
+/
+!'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+&nampismass     !  Mass conservation
+!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+   ln_check_mass =  .false.    !  Check mass conservation
+/
+!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+!! PISCES reduced (key_pisces_reduced, ex LOBSTER) : namelists
+!!              1  - biological parameters for phytoplankton    (namlobphy)
+!!              2  - biological parameters for nutrients        (namlobnut)
+!!              3  - biological parameters for zooplankton      (namlobzoo)    
+!!              4  - biological parameters for detritus         (namlobdet)
+!!              5  - biological parameters for DOM              (namlobdom)
+!!              6  - parameters from aphotic layers to sediment (namlobsed)
+!!              7  - general coefficients                       (namlobrat)
+!!              8  - optical parameters                         (namlobopt)
+
+!!              10 - biological diagnostics trends              (namlobdbi) 
+!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+!'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+&namlobphy     !   biological parameters for phytoplankton
+!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+   tmumax  =  1.21e-5   ! maximal phytoplankton growth rate            [s-1] 
+   rgamma  =  0.05      ! phytoplankton exudation fraction             [%]
+   fphylab =  0.75      ! NH4 fraction of phytoplankton exsudation     
+   tmminp  =  5.8e-7    ! minimal phytoplancton mortality rate         [0.05/86400 s-1=20 days] 
+   aki     =  33.       ! light photosynthesis half saturation constant[W/m2]
+/
+!'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+&namlobnut     !   biological parameters for nutrients
+!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+   akno3   =  0.7       ! nitrate limitation half-saturation value     [mmol/m3]
+   aknh4   =  0.001     ! ammonium limitation half-saturation value    [mmol/m3]
+   taunn   =  5.80e-7   ! nitrification rate                           [s-1]  
+   psinut  =  3.        ! inhibition of nitrate uptake by ammonium
+/
+!'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+&namlobzoo     !   biological parameters for zooplankton
+!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+   rppz    = 0.8        ! zooplankton nominal preference for phytoplancton food  [%]
+   taus    = 9.26E-6    ! specific zooplankton maximal grazing rate              [s-1] 
+!                       ! 0.75/86400 s-1=8.680555E-6    1/86400 = 1.15e-5
+   aks     = 1.         ! half-saturation constant for total zooplankton grazing [mmolN.m-3]
+   rpnaz   = 0.3        ! non-assimilated phytoplankton by zooplancton           [%]
+   rdnaz   = 0.3        ! non-assimilated detritus by zooplankton                [%] 
+   tauzn   = 8.1e-7     ! zooplancton specific excretion rate                    [0.1/86400 s-1=10 days] 
+   fzoolab = 0.5        ! NH4 fraction of zooplankton excretion
+   fdbod   = 0.5        ! zooplankton mortality fraction that goes to detritus
+   tmminz  = 2.31e-6    ! minimal zooplankton mortality rate                     [(mmolN/m3)-1 d-1]
+/
+!'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+&namlobdet     !   biological parameters for detritus
+!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+   taudn   = 5.80e-7    ! detritus breakdown rate                        [0.1/86400 s-1=10 days]
+   fdetlab = 0.         ! NH4 fraction of detritus dissolution           
+/
+!'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+&namlobdom     !   biological parameters for DOM
+!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+   taudomn = 6.43e-8    ! DOM breakdown rate                             [s-1] 
+!                       ! slow remineralization rate of semi-labile dom to nh4 (1 month)
+/
+!'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+&namlobsed     !   parameters from aphotic layers to sediment
+!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+   sedlam     = 3.86e-7    ! time coefficient of POC remineralization in sediments [s-1]
+   sedlostpoc = 0.         ! mass of POC lost in sediments
+   vsed       = 3.47e-5    ! detritus sedimentation speed                   [m/s]
+   xhr        = -0.858     ! coeff for martin''s remineralisation profile
+/
+!'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+&namlobrat     !   general coefficients
+!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+   rcchl   = 60.       ! Carbone/Chlorophyl ratio                     [mgC.mgChla-1]
+   redf    = 6.56       ! redfield ratio (C:N) for phyto
+   reddom  = 6.56       ! redfield ratio (C:N) for DOM
+/
+!'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+&namlobopt     !   optical parameters
+!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+   xkg0   = 0.0232     ! green absorption coefficient of water
+   xkr0   = 0.225      ! red absorption coefficent of water
+   xkgp   = 0.074      ! green absorption coefficient of chl
+   xkrp   = 0.037      ! red absorption coefficient of chl
+   xlg    = 0.674      ! green chl exposant for absorption
+   xlr    = 0.629      ! red chl exposant for absorption
+   rpig   = 0.7        ! chla/chla+pheo ratio
+/
+!'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+&nampisdbi     !   biological diagnostics trends     
+!,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+!                !  2D bio diagnostics   units : mmole/m2/s   ("key_trdmld_trc")
+!                !  name    !       title of the field      !     units      !
+   pisdiabio(1)  = 'NO3PHY' , 'Flux from NO3 to PHY          ',  'mmole/m3/s'
+   pisdiabio(2)  = 'NH4PHY' , 'Flux from NH4 to PHY          ',  'mmole/m3/s'
+   pisdiabio(3)  = 'PHYNH4' , 'Flux from PHY to NH4          ',  'mmole/m3/s'
+   pisdiabio(4)  = 'PHYDOM' , 'Flux from PHY to DOM          ',  'mmole/m3/s'
+   pisdiabio(5)  = 'PHYZOO' , 'Flux from PHY to ZOO          ',  'mmole/m3/s'
+   pisdiabio(6)  = 'PHYDET' , 'Flux from PHY to DET          ',  'mmole/m3/s'
+   pisdiabio(7)  = 'DETZOO' , 'Flux from DET to ZOO          ',  'mmole/m3/s'
+   pisdiabio(8)  = 'DETSED' , 'Flux from DET to SED          ',  'mmole/m3/s'
+   pisdiabio(9)  = 'ZOODET' , 'Flux from ZOO to DET          ',  'mmole/m3/s'
+   pisdiabio(10)  = 'ZOOBOD' , 'Zooplankton closure          ',  'mmole/m3/s'
+   pisdiabio(11)  = 'ZOONH4' , 'Flux from ZOO to NH4         ',  'mmole/m3/s'
+   pisdiabio(12)  = 'ZOODOM' , 'Flux from ZOO to DOM         ',  'mmole/m3/s'
+   pisdiabio(13)  = 'NH4NO3' , 'Flux from NH4 to NO3         ',  'mmole/m3/s'
+   pisdiabio(14)  = 'DOMNH4' , 'Flux from DOM to NH4         ',  'mmole/m3/s'
+   pisdiabio(15)  = 'DETNH4' , 'Flux from DET to NH4         ',  'mmole/m3/s'
+   pisdiabio(16)  = 'DETDOM' , 'Flux from DET to DOM         ',  'mmole/m3/s'
+   pisdiabio(17)  = 'SEDNO3' , 'NO3 remineralization from SED',  'mmole/m3/s'
+/

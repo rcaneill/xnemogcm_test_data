@@ -1,0 +1,95 @@
+#/bin/bash 
+#!
+#PBS -N nemo_sette
+#PBS -l walltime=00:30:00
+#PBS -j oe
+#PBS -q QUEUE
+#PBS -l SELECT
+
+  export PBS_O_WORKDIR=$(readlink -f $PBS_O_WORKDIR)
+  export OMP_NUM_THREADS=1
+  cd $PBS_O_WORKDIR
+  export XIO_HOME=/projects/ocean/nemo/xios/xios_1.0_r618_20150619/XIOS
+#
+  echo " ";
+  export OMP_NUM_THREADS=1
+  O_PER_NODE=32
+  X_PER_NODE=4
+  OCORES=NPROCS
+  XCORES=NXIOPROCS
+  if [ $OCORES -le 32 ] ; then O_PER_NODE=$OCORES; fi
+  export SETTE_DIR=DEF_SETTE_DIR
+
+###############################################################
+#
+#
+# load sette functions (only post_test_tidyup needed)
+#
+  . ${SETTE_DIR}/all_functions.sh
+###############################################################
+#
+# Don't remove neither change the following line
+# BODY
+#
+# Test specific settings. Do not hand edit these lines; the fcm_job.sh script will set these
+# (via sed operating on this template job file). Note that the number of compute nodes required
+# is also set by the fcm_job.sh on the PBS select header line above.
+#
+# These variables are needed by post_test_tidyup function in all_functions.sh
+#
+  export INPUT_DIR=DEF_INPUT_DIR
+  export CONFIG_DIR=DEF_CONFIG_DIR
+  export NEMO_VALIDATION_DIR=DEF_NEMO_VALIDATION
+  export NEW_CONF=DEF_NEW_CONF
+  export CMP_NAM=DEF_CMP_NAM
+  export TEST_NAME=DEF_TEST_NAME
+  export EXE_DIR=DEF_EXE_DIR
+  ulimit -c unlimited
+  ulimit -s unlimited
+  export FORT_FMT_RECL=132
+#
+# end of set up
+###############################################################
+#
+# change to the working directory 
+#
+  cd $EXE_DIR
+  echo Directory is `pwd`
+  
+  if [ $XCORES -gt 0 ]; then
+#
+#  Run MPMD case
+#
+     #XIOS will run on a separate node so will run in parallel queue
+     if [ ! -f ./xios_server.exe ] && [ -f ${XIO_HOME}/bin/xios_server.exe ]; then
+        cp ${XIO_HOME}/bin/xios_server.exe .
+     fi
+     if [ ! -f ./xios_server.exe ]; then
+        echo "./xios_server.exe not found"
+        echo "run aborted"
+        exit
+     fi
+       echo time aprun -b -n $XCORES -N $X_PER_NODE ./xios_server.exe : -n $OCORES -N $O_PER_NODE ./opa
+            time aprun -b -n $XCORES -N $X_PER_NODE ./xios_server.exe : -n $OCORES -N $O_PER_NODE ./opa
+#
+  else
+#
+# Run SPMD case
+#
+    if [ $OCORES -gt 32 ] ; then
+        #Still more than one node so run in parallel queue
+        echo time aprun -b  -n $OCORES -N $O_PER_NODE ./opa
+             time aprun -b  -n $OCORES -N $O_PER_NODE ./opa
+    else
+       echo time mpiexec -n $OCORES ./opa
+            time mpiexec -n $OCORES ./opa
+    fi
+  fi
+#
+
+#
+  post_test_tidyup
+# END_BODY
+# Don't remove neither change the previous line
+  exit
+

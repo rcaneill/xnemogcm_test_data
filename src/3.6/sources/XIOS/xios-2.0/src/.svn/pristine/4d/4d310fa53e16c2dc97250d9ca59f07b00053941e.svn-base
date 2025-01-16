@@ -1,0 +1,9 @@
+/* GLOBAL */
+DECLARE_ATTRIBUTE(int, order)
+DECLARE_ATTRIBUTE(bool, renormalize)
+DECLARE_ATTRIBUTE(bool, quantity)
+
+/* Write interpolation weights into file */
+DECLARE_ENUM3(mode,compute,read,read_or_compute)
+DECLARE_ATTRIBUTE(StdString, weight_filename)
+DECLARE_ATTRIBUTE(bool, write_weight)

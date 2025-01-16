@@ -1,0 +1,3 @@
+DECLARE_ATTRIBUTE_PRIVATE(int, global_zoom_begin)
+DECLARE_ATTRIBUTE_PRIVATE(int, global_zoom_n)
+DECLARE_ARRAY_PRIVATE(int,  1, global_zoom_index)

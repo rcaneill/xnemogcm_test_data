@@ -1,0 +1,44 @@
+
+!----------------------------------------------------------------------
+!       namooo Offline obs_oper namelist
+!----------------------------------------------------------------------
+!   ooo_files     specifies the files containing the model counterpart
+!   nn_ooo_idx    specifies the index within the model file
+!   nn_ooo_freq   specifies the number of timesteps between file reads
+&namooo
+   ooo_files = 'fcst.0.nc'
+   nn_ooo_idx = 1
+/
+!----------------------------------------------------------------------
+!       namcl4 Class 4 obs_oper namelist
+!----------------------------------------------------------------------
+!   cl4_date      the verfication date of the class 4 file
+!   cl4_vars      the name of the variable in the class 4 file
+!   cl4_sys       the forecast system being used e.g. FOAM
+!   cl4_cfg       the model configuration being used e.g. amm7
+!   cl4_vn        the version number e.g. 12.0
+!   cl4_prefix    prefix which denotes the output file
+!   cl4_contact   email address of file creator
+!   cl4_inst      institution related to the data within the file
+!   cl4_leadtime  lead time axis of class 4 file
+!   cl4_fcst_idx  output file forecast index
+!   cl4_fcst_len  output file forecast dimension length
+!   cl4_match_len number of match types
+!
+&namcl4
+   cl4_leadtime = 12
+   cl4_fcst_idx = 1
+   cl4_fcst_len = 1
+   cl4_match_len = 1
+   cl4_date = '20130101'
+   cl4_vars = 'forecast'
+   cl4_sys = 'FOAM'
+   cl4_cfg = 'amm7'
+   cl4_vn = '12.0'
+   cl4_prefix = 'class4'
+   cl4_contact = ''
+   cl4_inst = 'UK Met Office'
+/
+
+
+

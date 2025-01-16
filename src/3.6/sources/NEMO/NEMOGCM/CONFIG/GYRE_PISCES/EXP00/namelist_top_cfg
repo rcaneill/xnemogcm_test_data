@@ -1,0 +1,51 @@
+!!>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>>
+!! NEMO-TOP Configuration namelist for GYRE_PISCES configuration used to overwrite SHARED/namelist_top_ref
+!-----------------------------------------------------------------------
+&namtrc_run     !   run information
+!-----------------------------------------------------------------------
+   nn_writetrc   =  60     !  time step frequency for sn_tracer outputs
+/
+!-----------------------------------------------------------------------
+&namtrc     !   tracers definition
+!-----------------------------------------------------------------------
+   ln_trcdta     =   .false.    !  Initialisation from data input file (T) or not (F)
+!
+!                ! name  !     title of the field          !   units       ! initial data ! save   !
+!                !       !                                 !               ! from file    ! or not !
+!                !       !                                 !               ! or not       !        !
+   sn_tracer(1)   = 'DET'   , 'Detritus                   ',  'mmole-N/m3' ,  .false.     ,  .false.
+   sn_tracer(2)   = 'ZOO'   , 'Zooplankton concentration  ',  'mmole-N/m3' ,  .false.     ,  .false.
+   sn_tracer(3)   = 'PHY'   , 'Phytoplankton concentration',  'mmole-N/m3' ,  .false.     ,  .false.
+   sn_tracer(4)   = 'NO3'   , 'Nitrate concentration      ',  'mmole-N/m3' ,  .false.     ,  .true.
+   sn_tracer(5)   = 'NH4'   , 'Ammonium concentration     ',  'mmole-N/m3' ,  .false.     ,  .false.
+   sn_tracer(6)   = 'DOM'   , 'Dissolved organic matter   ',  'mmole-N/m3' ,  .false.     ,  .false.
+/
+!-----------------------------------------------------------------------
+&namtrc_adv    !   advection scheme for passive tracer 
+!-----------------------------------------------------------------------   
+   ln_trcadv_tvd     =  .true.   !  TVD scheme
+   ln_trcadv_muscl   =  .false.  !  MUSCL scheme
+/
+!-----------------------------------------------------------------------
+&namtrc_ldf    !   lateral diffusion scheme for passive tracer 
+!-----------------------------------------------------------------------
+   rn_ahtrc_0       =  1000.    !  horizontal eddy diffusivity for tracers [m2/s]
+/
+!-----------------------------------------------------------------------
+&namtrc_zdf        !   vertical physics
+!-----------------------------------------------------------------------
+/
+!-----------------------------------------------------------------------
+&namtrc_rad        !  treatment of negative concentrations 
+!-----------------------------------------------------------------------
+   ln_trcrad   =  .false.  !  artificially correct negative concentrations (T) or not (F)
+/
+!-----------------------------------------------------------------------
+&namtrc_dia       !   parameters for passive tracer additional diagnostics
+!----------------------------------------------------------------------
+   nn_writedia   =  60     !  time step frequency for diagnostics
+/
+!----------------------------------------------------------------------
+&namtrc_bc        !   data for boundary conditions
+!-----------------------------------------------------------------------
+/

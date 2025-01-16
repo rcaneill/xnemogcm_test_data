@@ -1,0 +1,28 @@
+include = $HERE/inc/common.cfg
+
+$netcdf_path{?}     = /home/cr/ocean/hadcv/netcdf/4.1.3_seq
+$netcdf_inc_path{?} = $netcdf_path/include
+$netcdf_lib_path{?} = $netcdf_path/lib
+$netcdf_lib{?}      = netcdff netcdf hdf5 hdf5_hl hdf5_fortran z
+
+$xios_path{?}     = /data/nwp/ofrd/share/NEMO/xios_lib/seq/xios_r445
+$xios_inc_path{?} = $xios_path/inc
+$xios_lib_path{?} = $xios_path/lib
+$xios_lib{?}      = xios
+
+preprocess.prop{fpp.flags}         = -E -P -traditional
+preprocess.prop{fpp.include-paths} = /opt/ibmhpc/pecurrent/ppe.poe/include /usr/lpp/ppe.poe/include/thread64
+
+build.prop{class,fc}               = mpxlf90_r
+build.prop{class,fc.flags}         = -qrealsize=8 -qextname -qsuffix=f=f90 -qarch=pwr7 -qtune=pwr7 -NS32768 -g -O3 -qnostrict
+build.prop{class,fc.flags-ld}      = -O3
+build.prop{class,fc.include-paths} = $netcdf_inc_path $xios_inc_path
+build.prop{class,fc.libs}          = xlf90 sig $netcdf_lib $xios_lib
+build.prop{class,fc.lib-paths}     = /projects/um1/lib $netcdf_lib_path $xios_lib_path
+build.prop{class,ld}               = mpCC_r
+
+# WEIGHTS needs a different NetCDF library at the moment
+build.prop{fc.include-paths}[nemo/TOOLS/WEIGHTS] = /home/nwp/ofrd/share/netcdf-3.6.0-p1_ec/include
+build.prop{fc.libs}[nemo/TOOLS/WEIGHTS]          = netcdf
+build.prop{fc.lib-paths}[nemo/TOOLS/WEIGHTS]     = /home/nwp/ofrd/share/netcdf-3.6.0-p1_ec/lib
+build.prop{ld}[nemo/TOOLS/WEIGHTS]               = mpxlf90_r

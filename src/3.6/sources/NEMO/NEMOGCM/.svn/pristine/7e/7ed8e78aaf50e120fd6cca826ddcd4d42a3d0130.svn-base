@@ -1,0 +1,94 @@
+#!/bin/bash 
+#!
+#PBS -N nemo_sette
+#PBS -l walltime=00:59:00
+#PBS -l select=NODES
+#PBS -j oe
+#PBS -A n01-Global
+
+
+  export PBS_O_WORKDIR=$(readlink -f $PBS_O_WORKDIR)               
+  export OMP_NUM_THREADS=1
+  cd $PBS_O_WORKDIR
+#
+  echo " ";
+  export OMP_NUM_THREADS=1
+  O_PER_NODE=24
+  X_PER_NODE=4
+  OCORES=NPROCS
+  if [ $OCORES -le 23 ] ; then O_PER_NODE=$OCORES; fi
+  XCORES=NXIOPROCS
+  if [ $XCORES -le 3 ] ; then X_PER_NODE=$XCORES; fi
+  export SETTE_DIR=DEF_SETTE_DIR
+  export XIO_HOME=/home/acc/XIOS
+###############################################################
+#
+#
+# load sette functions (only post_test_tidyup needed)
+#
+  . ${SETTE_DIR}/all_functions.sh
+###############################################################
+#
+# set up mpp computing environment
+#
+#
+# Local settings. These settings are for a particular machine (the MOBILIS ClusterVision 
+# system at NOCS) at a particular stage of that machine's evolution. This template file
+# is provided for illustration purposes only and will not work on any other machine. There
+# should, however, be sufficient similarity with other MPP platforms and batch systems
+# for this example to provide a useful guide for experienced users
+#
+# Don't remove neither change the following line
+# BODY
+#
+# Test specific settings. Do not hand edit these lines; the fcm_job.sh script will set these
+# (via sed operating on this template job file). Note that the number of compute nodes required
+# is also set by the fcm_job.sh on the PBS select header line above.
+#
+# These variables are needed by post_test_tidyup function in all_functions.sh
+#
+  export INPUT_DIR=DEF_INPUT_DIR
+  export CONFIG_DIR=DEF_CONFIG_DIR
+  export NEMO_VALIDATION_DIR=DEF_NEMO_VALIDATION
+  export NEW_CONF=DEF_NEW_CONF
+  export CMP_NAM=DEF_CMP_NAM
+  export TEST_NAME=DEF_TEST_NAME
+  export EXE_DIR=DEF_EXE_DIR
+  ulimit -c unlimited
+  ulimit -s unlimited
+  export FORT_FMT_RECL=132
+#
+# end of set up
+###############################################################
+#
+# change to the working directory 
+#
+  cd $EXE_DIR
+  echo Directory is `pwd`
+  if [ $XCORES -eq 0 ]; then
+#
+# Run SPMD case
+#
+       echo time aprun -b  -n $OCORES -N $O_PER_NODE ./opa
+            time aprun -b  -n $OCORES -N $O_PER_NODE ./opa
+  else
+       if [ ! -f ./xios_server.exe ] && [ -f ${XIO_HOME}/bin/xios_server.exe ]; then
+          cp ${XIO_HOME}/bin/xios_server.exe .
+       fi
+       if [ ! -f ./xios_server.exe ]; then
+          echo "./xios_server.exe not found"
+          echo "run aborted"
+          exit
+       fi
+#
+#  Run MPMD case
+#
+       echo time aprun -b -n $XCORES -N $X_PER_NODE ./xios_server.exe : -n $OCORES -N $O_PER_NODE ./opa
+            time aprun -b -n $XCORES -N $X_PER_NODE ./xios_server.exe : -n $OCORES -N $O_PER_NODE ./opa
+#
+  fi
+#
+  post_test_tidyup
+# END_BODY
+# Don't remove neither change the previous line
+  exit

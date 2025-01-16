@@ -1,0 +1,531 @@
+#!/bin/csh -f
+#
+# simple SETTE report generator.
+#
+# This version should be run in the SETTE directory. 
+# The machine name will be picked up from the sette.sh script but the location of the
+# validation directory needs to be set here (currently assumed to reside in the ../CONFIG directory)
+#
+  set mach = `grep "COMPILER=" ./sette.sh | sed -e 's/COMPILER=//'`
+  set NEMO_VALID = `grep "NEMO_VALIDATION_DIR=" ./param.cfg | sed -e 's/NEMO_VALIDATION_DIR=//'`
+#
+  if ( ! -d $NEMO_VALID ) then
+    echo "$NEMO_VALID validation directory not found"
+  endif
+#
+  set basedir = `pwd`
+  cd $NEMO_VALID
+#
+# The script also needs the date or revision tag. Currently this is taken from the latest sub-directory found in each directory
+#
+#
+# Now loop through all the test directories. On the second pass the user can optionally examine any mismatched
+# outputs
+#
+# This is crude but readable and easily extended for new test configurations
+#  
+foreach pass (0 1 )
+  if ( -d ./WGYRE_LONG ) then
+    set dorv = `ls -1rtd ./WGYRE_LONG/{$mach}/* | tail -1l `
+    set dorv = $dorv:t
+    set f1o = ./WGYRE_LONG/{$mach}/{$dorv}/LONG/ocean.output
+    set f1s = ./WGYRE_LONG/{$mach}/{$dorv}/LONG/solver.stat
+    set f2o = ./WGYRE_LONG/{$mach}/{$dorv}/SHORT/ocean.output
+    set f2s = ./WGYRE_LONG/{$mach}/{$dorv}/SHORT/solver.stat
+  
+    set nl = `wc -l $f2s`
+    tail -$nl[1] $f1s > f1.tmp$$
+    cmp -s f1.tmp$$ $f2s
+    if ( $status == 0 ) then
+      echo "GYRE        restartability  passed"
+    else
+      echo "GYRE        restartability  FAILED"
+      if ( $pass == 1 ) then
+        echo "<return> to view solver.stat differences"
+        set y = $<
+        sdiff f1.tmp$$ $f2s
+        echo "<return> to view ocean.output differences"
+        set y = $<
+        sdiff $f1o $f2o | grep "|"
+        echo "<return> to continue"
+        set y = $<
+      endif
+    endif
+    rm f1.tmp$$
+  endif
+
+  if ( -d ./WISOMIP_LONG ) then
+    set dorv = `ls -1rtd ./WISOMIP_LONG/{$mach}/* | tail -1l `
+    set dorv = $dorv:t
+    set f1o = ./WISOMIP_LONG/{$mach}/{$dorv}/LONG/ocean.output
+    set f1s = ./WISOMIP_LONG/{$mach}/{$dorv}/LONG/solver.stat
+    set f2o = ./WISOMIP_LONG/{$mach}/{$dorv}/SHORT/ocean.output
+    set f2s = ./WISOMIP_LONG/{$mach}/{$dorv}/SHORT/solver.stat
+
+    set nl = `wc -l $f2s`
+    tail -$nl[1] $f1s > f1.tmp$$
+    cmp -s f1.tmp$$ $f2s
+    if ( $status == 0 ) then
+      echo "ISOMIP      restartability  passed"
+    else
+      echo "ISOMIP      restartability  FAILED"
+      if ( $pass == 1 ) then
+        echo "<return> to view solver.stat differences"
+        set y = $<
+        sdiff f1.tmp$$ $f2s
+        echo "<return> to view ocean.output differences"
+        set y = $<
+        sdiff $f1o $f2o | grep "|"
+        echo "<return> to continue"
+        set y = $<
+      endif
+    endif
+    rm f1.tmp$$
+  endif
+
+  
+  if ( -d ./WORCA2LIMPIS_LONG ) then
+    set dorv = `ls -1rtd ./WORCA2LIMPIS_LONG/{$mach}/* | tail -1l `
+    set dorv = $dorv:t
+    set f1o = ./WORCA2LIMPIS_LONG/{$mach}/{$dorv}/LONG/ocean.output
+    set f1s = ./WORCA2LIMPIS_LONG/{$mach}/{$dorv}/LONG/solver.stat
+    set f2o = ./WORCA2LIMPIS_LONG/{$mach}/{$dorv}/SHORT/ocean.output
+    set f2s = ./WORCA2LIMPIS_LONG/{$mach}/{$dorv}/SHORT/solver.stat
+  
+    set nl = `wc -l $f2s`
+    tail -$nl[1] $f1s > f1.tmp$$
+    cmp -s f1.tmp$$ $f2s
+    if ( $status == 0 ) then
+      echo "ORCA2LIMPIS restartability  passed"
+    else
+      echo "ORCA2LIMPIS restartability  FAILED"
+      if ( $pass == 1 ) then
+        echo "<return> to view solver.stat differences"
+        set y = $<
+        sdiff f1.tmp$$ $f2s
+        echo "<return> to view ocean.output differences"
+        set y = $<
+        sdiff $f1o $f2o | grep "|"
+        echo "<return> to continue"
+        set y = $<
+      endif
+    endif
+    rm f1.tmp$$
+  endif
+
+  if ( -d ./WORCA2OFFPIS_LONG ) then
+    set dorv = `ls -1rtd ./WORCA2OFFPIS_LONG/{$mach}/* | tail -1l `
+    set dorv = $dorv:t
+    set f1o = ./WORCA2OFFPIS_LONG/{$mach}/{$dorv}/LONG/ocean.output
+    set f1s = ./WORCA2OFFPIS_LONG/{$mach}/{$dorv}/LONG/tracer.stat
+    set f2o = ./WORCA2OFFPIS_LONG/{$mach}/{$dorv}/SHORT/ocean.output
+    set f2s = ./WORCA2OFFPIS_LONG/{$mach}/{$dorv}/SHORT/tracer.stat
+
+    set nl = `wc -l $f2s`
+    tail -$nl[1] $f1s > f1.tmp$$
+    cmp -s f1.tmp$$ $f2s
+    if ( $status == 0 ) then
+      echo "ORCA2OFFPIS restartability  passed"
+    else
+      echo "ORCA2OFFPIS restartability  FAILED"
+      if ( $pass == 1 ) then
+        echo "<return> to view tracer.stat differences"
+        set y = $<
+        sdiff f1.tmp$$ $f2s
+        echo "<return> to view ocean.output differences"
+        set y = $<
+        sdiff $f1o $f2o | grep "|"
+        echo "<return> to continue"
+        set y = $<
+      endif
+    endif
+    rm f1.tmp$$
+  endif
+  
+  if ( -d ./WAMM12_LONG ) then
+    set dorv = `ls -1rtd ./WAMM12_LONG/{$mach}/* | tail -1l `
+    set dorv = $dorv:t
+    set f1o = ./WAMM12_LONG/{$mach}/{$dorv}/LONG/ocean.output
+    set f1s = ./WAMM12_LONG/{$mach}/{$dorv}/LONG/solver.stat
+    set f2o = ./WAMM12_LONG/{$mach}/{$dorv}/SHORT/ocean.output
+    set f2s = ./WAMM12_LONG/{$mach}/{$dorv}/SHORT/solver.stat
+
+    set nl = `wc -l $f2s`
+    tail -$nl[1] $f1s > f1.tmp$$
+    cmp -s f1.tmp$$ $f2s
+    if ( $status == 0 ) then
+      echo "AMM12       restartability  passed"
+    else
+      echo "AMM12       restartability  FAILED"
+      if ( $pass == 1 ) then
+        echo "<return> to view solver.stat differences"
+        set y = $<
+        sdiff f1.tmp$$ $f2s
+        echo "<return> to view ocean.output differences"
+        set y = $<
+        sdiff $f1o $f2o | grep "|"
+        echo "<return> to continue"
+        set y = $<
+      endif
+    endif
+    rm f1.tmp$$
+  endif
+  if ( -d ./WORCA2LIM3_LONG ) then
+    set dorv = `ls -1rtd ./WORCA2LIM3_LONG/{$mach}/* | tail -1l `
+    set dorv = $dorv:t
+    set f1o = ./WORCA2LIM3_LONG/{$mach}/{$dorv}/LONG/ocean.output
+    set f1s = ./WORCA2LIM3_LONG/{$mach}/{$dorv}/LONG/solver.stat
+    set f2o = ./WORCA2LIM3_LONG/{$mach}/{$dorv}/SHORT/ocean.output
+    set f2s = ./WORCA2LIM3_LONG/{$mach}/{$dorv}/SHORT/solver.stat
+    set nl = `wc -l $f2s`
+    tail -$nl[1] $f1s > f1.tmp$$
+    cmp -s f1.tmp$$ $f2s
+    if ( $status == 0 ) then
+      echo "ORCA2LIM3   restartability  passed"
+    else
+      echo "ORCA2LIM3   restartability  FAILED"
+      if ( $pass == 1 ) then
+        echo "<return> to view solver.stat differences"
+        set y = $<
+        sdiff f1.tmp$$ $f2s
+        echo "<return> to view ocean.output differences"
+        set y = $<
+        sdiff $f1o $f2o | grep "|"
+        echo "<return> to continue"
+        set y = $<
+      endif
+    endif
+    rm f1.tmp$$
+  endif
+
+  if ( -d ./WSAS_LONG ) then
+    set dorv = `ls -1rtd ./WSAS_LONG/{$mach}/* | tail -1l `
+    set dorv = $dorv:t
+    set f1o = ./WSAS_LONG/{$mach}/{$dorv}/LONG/ocean.output
+    set f1s = ./WSAS_LONG/{$mach}/{$dorv}/LONG/solver.stat
+    set f2o = ./WSAS_LONG/{$mach}/{$dorv}/SHORT/ocean.output
+    set f2s = ./WSAS_LONG/{$mach}/{$dorv}/SHORT/solver.stat
+    foreach f ( $f1o $f1s $f2o $f2s )
+     if ( ! -f $f ) then
+      echo 'SAS         restartability  inconclusive ( ' $f:t ' not found )'
+      goto NEXT1
+     endif
+    end
+
+    set nl = `wc -l $f2s`
+    tail -$nl[1] $f1s > f1.tmp$$
+    cmp -s f1.tmp$$ $f2s
+    if ( $status == 0 ) then
+      echo "SAS         restartability  passed"
+    else
+      echo "SAS         restartability  FAILED"
+      if ( $pass == 1 ) then
+        echo "<return> to view solver.stat differences"
+        set y = $<
+        sdiff f1.tmp$$ $f2s
+        echo "<return> to view ocean.output differences"
+        set y = $<
+        sdiff $f1o $f2o | grep "|"
+        echo "<return> to continue"
+        set y = $<
+      endif
+    endif
+    rm f1.tmp$$
+  endif
+
+NEXT1:
+  
+  if ( -d ./WGYRE_4 ) then
+    set dorv = `ls -1rtd ./WGYRE_4/{$mach}/* | tail -1l `
+    set dorv = $dorv:t
+    set f1o = ./WGYRE_4/{$mach}/{$dorv}/REPRO_1_4/ocean.output
+    set f1s = ./WGYRE_4/{$mach}/{$dorv}/REPRO_1_4/solver.stat
+    set f2o = ./WGYRE_4/{$mach}/{$dorv}/REPRO_2_2/ocean.output
+    set f2s = ./WGYRE_4/{$mach}/{$dorv}/REPRO_2_2/solver.stat
+  
+    cmp -s $f1s $f2s
+    if ( $status == 0 ) then
+      echo "GYRE        reproducibility passed"
+    else
+      echo "GYRE        reproducibility FAILED"
+      if ( $pass == 1 ) then
+        echo "<return> to view solver.stat differences"
+        set y = $<
+        sdiff $f1s $f2s
+        echo "<return> to view ocean.output differences"
+        set y = $<
+        sdiff $f1o $f2o | grep "|"
+        echo "<return> to continue"
+        set y = $<
+      endif
+    endif
+  endif
+
+  if ( -d ./WISOMIP_4 ) then
+    set dorv = `ls -1rtd ./WISOMIP_4/{$mach}/* | tail -1l `
+    set dorv = $dorv:t
+    set f1o = ./WISOMIP_4/{$mach}/{$dorv}/REPRO_1_4/ocean.output
+    set f1s = ./WISOMIP_4/{$mach}/{$dorv}/REPRO_1_4/solver.stat
+    set f2o = ./WISOMIP_4/{$mach}/{$dorv}/REPRO_2_2/ocean.output
+    set f2s = ./WISOMIP_4/{$mach}/{$dorv}/REPRO_2_2/solver.stat
+
+    cmp -s $f1s $f2s
+    if ( $status == 0 ) then
+      echo "ISOMIP      reproducibility passed"
+    else
+      echo "ISOMIP      reproducibility FAILED"
+      if ( $pass == 1 ) then
+        echo "<return> to view solver.stat differences"
+        set y = $<
+        sdiff $f1s $f2s
+        echo "<return> to view ocean.output differences"
+        set y = $<
+        sdiff $f1o $f2o | grep "|"
+        echo "<return> to continue"
+        set y = $<
+      endif
+    endif
+  endif
+ 
+  if ( -d ./WORCA2LIMPIS_16 ) then
+    set dorv = `ls -1rtd ./WORCA2LIMPIS_16/{$mach}/* | tail -1l `
+    set dorv = $dorv:t
+    set f1o = ./WORCA2LIMPIS_16/{$mach}/{$dorv}/REPRO_2_8/ocean.output
+    set f1s = ./WORCA2LIMPIS_16/{$mach}/{$dorv}/REPRO_2_8/solver.stat
+    set f2o = ./WORCA2LIMPIS_16/{$mach}/{$dorv}/REPRO_4_4/ocean.output
+    set f2s = ./WORCA2LIMPIS_16/{$mach}/{$dorv}/REPRO_4_4/solver.stat
+  
+    cmp -s $f1s $f2s
+    if ( $status == 0 ) then
+      echo "ORCA2LIMPIS reproducibility passed"
+    else
+      echo "ORCA2LIMPIS reproducibility FAILED"
+      if ( $pass == 1 ) then
+        echo "<return> to view solver.stat differences"
+        set y = $<
+        sdiff $f1s $f2s
+        echo "<return> to view ocean.output differences"
+        set y = $<
+        sdiff $f1o $f2o | grep "|"
+        echo "<return> to continue"
+        set y = $<
+      endif
+    endif
+  endif
+
+  if ( -d ./WORCA2OFFPIS_16 ) then
+    set dorv = `ls -1rtd ./WORCA2OFFPIS_16/{$mach}/* | tail -1l `
+    set dorv = $dorv:t
+    set f1o = ./WORCA2OFFPIS_16/{$mach}/{$dorv}/REPRO_2_8/ocean.output
+    set f1s = ./WORCA2OFFPIS_16/{$mach}/{$dorv}/REPRO_2_8/tracer.stat
+    set f2o = ./WORCA2OFFPIS_16/{$mach}/{$dorv}/REPRO_4_4/ocean.output
+    set f2s = ./WORCA2OFFPIS_16/{$mach}/{$dorv}/REPRO_4_4/tracer.stat
+
+    cmp -s $f1s $f2s
+    if ( $status == 0 ) then
+      echo "ORCA2OFFPIS reproducibility passed"
+    else
+      echo "ORCA2OFFPIS reproducibility FAILED"
+      if ( $pass == 1 ) then
+        echo "<return> to view tracer.stat differences"
+        set y = $<
+        sdiff $f1s $f2s
+        echo "<return> to view ocean.output differences"
+        set y = $<
+        sdiff $f1o $f2o | grep "|"
+        echo "<return> to continue"
+        set y = $<
+      endif
+    endif
+  endif
+  
+  if ( -d ./WAMM12_32 ) then
+    set dorv = `ls -1rtd ./WAMM12_32/{$mach}/* | tail -1l `
+    set dorv = $dorv:t
+    set f1o = ./WAMM12_32/{$mach}/{$dorv}/REPRO_4_8/ocean.output
+    set f1s = ./WAMM12_32/{$mach}/{$dorv}/REPRO_4_8/solver.stat
+    set f2o = ./WAMM12_32/{$mach}/{$dorv}/REPRO_8_4/ocean.output
+    set f2s = ./WAMM12_32/{$mach}/{$dorv}/REPRO_8_4/solver.stat
+
+    cmp -s $f1s $f2s
+    if ( $status == 0 ) then
+      echo "AMM12       reproducibility passed"
+    else
+      echo "AMM12       reproducibility FAILED"
+      if ( $pass == 1 ) then
+        echo "<return> to view solver.stat differences"
+        set y = $<
+        sdiff $f1s $f2s
+        echo "<return> to view ocean.output differences"
+        set y = $<
+        sdiff $f1o $f2o | grep "|"
+        echo "<return> to continue"
+        set y = $<
+      endif
+    endif
+  endif
+
+  if ( -d ./WORCA2LIM3_16 ) then
+    set dorv = `ls -1rtd ./WORCA2LIM3_16/{$mach}/* | tail -1l `
+    set dorv = $dorv:t
+    set f1o = ./WORCA2LIM3_16/{$mach}/{$dorv}/REPRO_2_8/ocean.output
+    set f1s = ./WORCA2LIM3_16/{$mach}/{$dorv}/REPRO_2_8/solver.stat
+    set f2o = ./WORCA2LIM3_16/{$mach}/{$dorv}/REPRO_4_4/ocean.output
+    set f2s = ./WORCA2LIM3_16/{$mach}/{$dorv}/REPRO_4_4/solver.stat
+
+    cmp -s $f1s $f2s
+    if ( $status == 0 ) then
+      echo "ORCA2LIM3   reproducibility passed"
+    else
+      echo "ORCA2LIM3   reproducibility FAILED"
+      if ( $pass == 1 ) then
+        echo "<return> to view solver.stat differences"
+        set y = $<
+        sdiff $f1s $f2s
+        echo "<return> to view ocean.output differences"
+        set y = $<
+        sdiff $f1o $f2o | grep "|"
+        echo "<return> to continue"
+        set y = $<
+      endif
+    endif
+  endif
+
+
+  if ( -d ./WSAS_32 ) then
+    set dorv = `ls -1rtd ./WSAS_32/{$mach}/* | tail -1l `
+    set dorv = $dorv:t
+    set f1o = ./WSAS_32/{$mach}/{$dorv}/REPRO_4_8/ocean.output
+    set f1s = ./WSAS_32/{$mach}/{$dorv}/REPRO_4_8/solver.stat
+    set f2o = ./WSAS_32/{$mach}/{$dorv}/REPRO_8_4/ocean.output
+    set f2s = ./WSAS_32/{$mach}/{$dorv}/REPRO_8_4/solver.stat
+
+    foreach f ( $f1o $f1s $f2o $f2s )
+     if ( ! -f $f ) then
+      echo 'SAS         reproducibility inconclusive ( ' $f:t ' not found )'
+      goto NEXT2
+     endif
+    end
+
+    cmp -s $f1s $f2s
+    if ( $status == 0 ) then
+      echo "SAS reproducibility passed"
+    else
+      echo "SAS reproducibility FAILED"
+      if ( $pass == 1 ) then
+        echo "<return> to view solver.stat differences"
+        set y = $<
+        sdiff $f1s $f2s
+        echo "<return> to view ocean.output differences"
+        set y = $<
+        sdiff $f1o $f2o | grep "|"
+        echo "<return> to continue"
+        set y = $<
+      endif
+    endif
+  endif
+NEXT2:
+
+  if ( -d ./WORCA2AGUL_1_2 ) then
+    set dorv = `ls -1rtd ./WORCA2AGUL_1_2/{$mach}/* | tail -1l `
+    set dorv = $dorv:t
+    set f1o = ./WORCA2AGUL_1_2/{$mach}/{$dorv}/SHORT/ocean.output
+    set f1s = ./WORCA2AGUL_1_2/{$mach}/{$dorv}/SHORT/solver.stat
+
+    if ( -f $f1o && -f  $f1s ) then
+      echo "ORCA2_LIM_AGRIF runability passed"
+    else
+      echo "ORCA2_LIM_AGRIF runability FAILED"
+    endif
+  endif
+
+
+  if ( -d ./WORCA2AGUL_LONG ) then
+    set dorv = `ls -1rtd ./WORCA2AGUL_LONG/{$mach}/* | tail -1l `
+    set dorv = $dorv:t
+    set f1o = ./WORCA2AGUL_LONG/{$mach}/{$dorv}/LONG/ocean.output
+    set f1s = ./WORCA2AGUL_LONG/{$mach}/{$dorv}/LONG/solver.stat
+    set f2o = ./WORCA2AGUL_LONG/{$mach}/{$dorv}/SHORT/ocean.output
+    set f2s = ./WORCA2AGUL_LONG/{$mach}/{$dorv}/SHORT/solver.stat
+  
+    set nl = `wc -l $f2s`
+    tail -$nl[1] $f1s > f1.tmp$$
+    cmp -s f1.tmp$$ $f2s
+    if ( $status == 0 ) then
+      echo "ORCA2_LIM_AGRIF restartability  passed"
+    else
+      echo "ORCA2_LIM_AGRIF restartability  FAILED"
+      if ( $pass == 1 ) then
+        echo "<return> to view solver.stat differences"
+        set y = $<
+        sdiff f1.tmp$$ $f2s
+        echo "<return> to view ocean.output differences"
+        set y = $<
+        sdiff $f1o $f2o | grep "|"
+        echo "<return> to continue"
+        set y = $<
+      endif
+    endif
+    rm f1.tmp$$
+  endif
+
+  if ( -d ./WORCA2AGUL_16 ) then
+    set dorv = `ls -1rtd ./WORCA2AGUL_16/{$mach}/* | tail -1l `
+    set dorv = $dorv:t
+    set f1o = ./WORCA2AGUL_16/{$mach}/{$dorv}/REPRO_2_8/ocean.output
+    set f1s = ./WORCA2AGUL_16/{$mach}/{$dorv}/REPRO_2_8/solver.stat
+    set f2o = ./WORCA2AGUL_16/{$mach}/{$dorv}/REPRO_4_4/ocean.output
+    set f2s = ./WORCA2AGUL_16/{$mach}/{$dorv}/REPRO_4_4/solver.stat
+  
+    cmp -s $f1s $f2s
+    if ( $status == 0 ) then
+      echo "ORCA2_LIM_AGRIF reproducibility passed"
+    else
+      echo "ORCA2_LIM_AGRIF reproducibility FAILED"
+      if ( $pass == 1 ) then
+        echo "<return> to view solver.stat differences"
+        set y = $<
+        sdiff $f1s $f2s
+        echo "<return> to view ocean.output differences"
+        set y = $<
+        sdiff $f1o $f2o | grep "|"
+        echo "<return> to continue"
+        set y = $<
+      endif
+    endif
+  endif
+
+  if ( -d ./WORCA2AGUL_2_2_NAG ) then
+    set dorv = `ls -1rtd ./WORCA2AGUL_2_2_NAG/{$mach}/* | tail -1l `
+    set dorv = $dorv:t
+    set f1o = ./WORCA2AGUL_2_2_NAG/{$mach}/{$dorv}/SHORT_NOAGRIF/ocean.output
+    set f1s = ./WORCA2AGUL_2_2_NAG/{$mach}/{$dorv}/SHORT_NOAGRIF/solver.stat
+    set dorv = `ls -1rtd ./WORCA2AGUL_2_2/{$mach}/* | tail -1l `
+    set dorv = $dorv:t
+    set f2o = ./WORCA2AGUL_2_2/{$mach}/{$dorv}/SHORT_NOZOOM/ocean.output
+    set f2s = ./WORCA2AGUL_2_2/{$mach}/{$dorv}/SHORT_NOZOOM/solver.stat
+  
+    cmp -s $f1s $f2s
+    if ( $status == 0 ) then
+      echo "ORCA2_LIM_AGRIF code corruption test passed"
+    else
+      echo "ORCA2_LIM_AGRIF code corruption test FAILED"
+      if ( $pass == 1 ) then
+        echo "<return> to view solver.stat differences"
+        set y = $<
+        sdiff $f1s $f2s
+        echo "<return> to view ocean.output differences"
+        set y = $<
+        sdiff $f1o $f2o | grep "|"
+        echo "<return> to continue"
+        set y = $<
+      endif
+    endif
+  endif
+
+  echo "<return> for second (more detailed) pass (y/n)"
+  set y = $<
+  if ( $y != "y" ) exit
+end
+cd $basedir
+exit

@@ -1,0 +1,171 @@
+<field_definition  prec="8">
+
+  <field id="tsl" field_ref="field_atm_3D"/>
+
+  <field id="orog" field_ref="field_atm_2D"/>
+  <field id="sftlf" field_ref="field_atm_2D"/>
+  <field id="sftsf" field_ref="field_atm_2D"/>
+  <field id="sftlaf" field_ref="field_atm_2D"/>
+  <field id="ts" field_ref="field_atm_2D"/>
+  <field id="rlds" field_ref="field_atm_2D"/>
+  <field id="rlus" field_ref="field_atm_2D"/>
+  <field id="rsus" field_ref="field_atm_2D"/>
+  <field id="rsds" field_ref="field_atm_2D"/>
+  <field id="albsrfc" field_ref="field_atm_2D"/>
+  <field id="evspsbl" field_ref="field_atm_2D"/>
+  <field id="hfls" field_ref="field_atm_2D"/>
+  <field id="hfss" field_ref="field_atm_2D"/>
+  <field id="tas" field_ref="field_atm_2D"/>
+  <field id="uas" field_ref="field_atm_2D"/>
+  <field id="vas" field_ref="field_atm_2D"/>
+  <field id="sfcWind" field_ref="field_atm_2D"/>
+  <field id="hurs" field_ref="field_atm_2D"/>
+  <field id="huss" field_ref="field_atm_2D"/>
+  <field id="tauu" field_ref="field_atm_2D"/>
+  <field id="tauv" field_ref="field_atm_2D"/>
+  <field id="et" field_ref="field_atm_2D"/>
+  <field id="mrros" field_ref="field_atm_2D"/>
+  <field id="mrro" field_ref="field_atm_2D"/>
+  <field id="iceberg" field_ref="field_atm_2D"/>
+  <field id="snmsl" field_ref="field_atm_2D"/>
+  <field id="mrsos" field_ref="field_atm_2D"/>
+  <field id="rzwc" field_ref="field_atm_2D"/>
+  <field id="mrso" field_ref="field_atm_2D"/>
+  <field id="mrfso" field_ref="field_atm_2D"/>
+  <field id="tws" field_ref="field_atm_2D"/>
+  <field id="mrsow" field_ref="field_atm_2D"/>
+  <field id="vegstress" field_ref="field_atm_2D"/>
+  <field id="fldplainfrac" field_ref="field_atm_2D"/>
+  <field id="wtd_isba" field_ref="field_atm_2D"/>
+  <field id="wtdf_isba" field_ref="field_atm_2D"/>
+  <field id="dmlt" field_ref="field_atm_2D"/>
+  <field id="dfr" field_ref="field_atm_2D"/>
+  <field id="snd" field_ref="field_atm_2D"/>
+  <field id="snc" field_ref="field_atm_2D"/>
+  <field id="snct" field_ref="field_atm_2D"/>
+  <field id="agesno" field_ref="field_atm_2D"/>
+  <field id="ts_land" field_ref="field_atm_2D"/>
+  <field id="albsrfc_land" field_ref="field_atm_2D"/>
+  <field id="tsns" field_ref="field_atm_2D"/>
+  <field id="tsn" field_ref="field_atm_2D"/>
+  <field id="gpp" field_ref="field_atm_2D"/>
+  <field id="npp" field_ref="field_atm_2D"/>
+  <field id="watbud_isba" field_ref="field_atm_2D"/>
+  <field id="nrjbuds_isba" field_ref="field_atm_2D"/>
+  <field id="nrjbud_isba" field_ref="field_atm_2D"/>
+  <field id="ts_sea" field_ref="field_atm_2D"/>
+  <field id="albsrfc_sea" field_ref="field_atm_2D"/>
+  <field id="evspsbl_sea" field_ref="field_atm_2D"/>
+  <field id="sitemptop" field_ref="field_atm_2D"/>
+  <field id="sialb" field_ref="field_atm_2D"/>
+  <field id="sic" field_ref="field_atm_2D"/>
+  <field id="sithick" field_ref="field_atm_2D"/>
+  <field id="tsLa" field_ref="field_atm_2D"/>
+  <field id="albsrfcLa" field_ref="field_atm_2D"/>
+  <field id="evspsblLa" field_ref="field_atm_2D"/>
+
+
+  
+
+
+  <field id="tas_min"     field_ref="tas"     operation="minimum"/>
+  <field id="tas_max"     field_ref="tas"     operation="maximum"/> 
+  <field id="sfcWind_max" field_ref="sfcWind" operation="maximum"/>
+
+  <field_group detect_missing_value="true" >
+    <field id="tsnl"/>
+    <field id="lwsnl"/>
+    <field id="snct"/>
+    <field id="agesno"/>
+    <field id="albsrfc_land"/>
+    <field id="albsrfc_sea"/>
+    <field id="sialb"/>
+    <field id="albsrfc"/>
+    <field id="albsn"/>
+    <field id="wtd_isba"/>
+    <field id="sisnthick"/>
+    <field id="sithick"/>
+    <field id="sialb"/>
+    <field id="sitemptop"/>
+  </field_group>
+
+  <field_group id="sfx_fix" >
+      <field field_ref="orog"/>
+      <field field_ref="sftlf"/>
+      <field field_ref="sftsf"/>
+      <field field_ref="sftlaf"/>
+  </field_group>
+  <field_group id="sfx_global" >
+      <field field_ref="ts"/>
+      <field field_ref="rlds"/>
+      <field field_ref="rlus"/>
+      <field field_ref="rsus"/>
+      <field field_ref="rsds"/>
+      <field field_ref="albsrfc"/>
+      <field field_ref="evspsbl"/>
+      <field field_ref="hfls"/>
+      <field field_ref="hfss"/>
+      <field field_ref="tas"/>
+      <field field_ref="tas" name="tasmin" freq_op="1d" operation="average"> @tas_min </field>
+      <field field_ref="tas" name="tasmax" freq_op="1d" operation="average"> @tas_max </field>
+      <field field_ref="uas"/>
+      <field field_ref="vas"/>
+      <field field_ref="sfcWind"/>
+      <field field_ref="sfcWind" name="sfcWindmax" freq_op="1d" operation="average"> @sfcWind_max </field>
+      <field field_ref="hurs"/>
+      <field field_ref="huss"/>
+      <field field_ref="tauu"/>
+      <field field_ref="tauv"/>
+  </field_group>
+  <field_group id="sfx_land_3d" >
+      <field field_ref="tsl"/>
+  </field_group>
+  <field_group id="sfx_land" >
+      <field field_ref="et"/>
+      <field field_ref="mrros"/>
+      <field field_ref="mrro"/>
+      <field field_ref="iceberg"/>
+      <field field_ref="snmsl"/>
+      <field field_ref="mrsos"/>
+      <field field_ref="rzwc"/>
+      <field field_ref="mrso"/>
+      <field field_ref="mrfso"/>
+      <field field_ref="tws"/>
+      <field field_ref="mrsow"/>
+      <field field_ref="vegstress"/>
+      <field field_ref="fldplainfrac"/>
+      <field field_ref="wtd_isba"/>
+      <field field_ref="wtdf_isba"/>
+      <field field_ref="dmlt"/>
+      <field field_ref="dfr"/>
+      <field field_ref="snd"/>
+      <field field_ref="snc"/>
+      <field field_ref="snct"/>
+      <field field_ref="agesno"/>
+      <field field_ref="ts_land"/>
+      <field field_ref="albsrfc_land"/>
+      <field field_ref="tsns"/>
+      <field field_ref="tsn"/>
+      <field field_ref="gpp"/>
+      <field field_ref="npp"/>
+      <field field_ref="watbud_isba"/>
+      <field field_ref="nrjbuds_isba"/>
+      <field field_ref="nrjbud_isba"/>
+  </field_group>
+  <field_group id="sfx_sea" >
+      <field field_ref="ts_sea"/>
+      <field field_ref="albsrfc_sea"/>
+      <field field_ref="evspsbl_sea"/>
+  </field_group>
+  <field_group id="sfx_seaice" >
+      <field field_ref="sitemptop"/>
+      <field field_ref="sialb"/>
+      <field field_ref="sic"/>
+      <field field_ref="sithick"/>
+  </field_group>
+  <field_group id="sfx_lake" >
+      <field field_ref="tsLa"/>
+      <field field_ref="albsrfcLa"/>
+      <field field_ref="evspsblLa"/>
+  </field_group>
+</field_definition>
