@@ -1,2 +1,0 @@
-/* Position of extracted slice */
-DECLARE_ATTRIBUTE(int,           position)

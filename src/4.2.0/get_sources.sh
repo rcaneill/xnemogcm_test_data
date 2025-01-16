@@ -50,7 +50,7 @@ cd ..
 mkdir -p XIOS
 cd XIOS
 svn co -r 2481 http://forge.ipsl.jussieu.fr/ioserver/svn/XIOS/trunk xios-trunk
-rm -rf xios-trunk/.svn
+rm -rf $(find . -iname .svn)
 cd ..
 
 mkdir -p NEMO

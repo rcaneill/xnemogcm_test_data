@@ -1,5 +1,0 @@
-/* LOCAL */
-DECLARE_ATTRIBUTE_PRIVATE(int             , zoom_ni_loc)
-DECLARE_ATTRIBUTE_PRIVATE(int             , zoom_nj_loc)
-DECLARE_ATTRIBUTE_PRIVATE(int             , zoom_ibegin_loc)
-DECLARE_ATTRIBUTE_PRIVATE(int             , zoom_jbegin_loc)
